@@ -1,9 +1,10 @@
 # Space · Agendamento para barbearias
 
-App web (celular, tablet e computador) para o cliente marcar horário e o barbeiro gerenciar a agenda.
+App web para celular, tablet e computador. O cliente marca o horário e o barbeiro cuida da agenda, dos clientes e do faturamento.
 
-- `/space` abre a barbearia Space. Cada barbearia ganha seu endereço: `/nome-da-barbearia`.
-- `#hoje`, `#agenda`, `#clientes`, `#resultados`, `#ajustes`: painel do barbeiro.
+- Cada barbearia tem seu endereço: `/space`, `/barbearia-do-joao`.
+- Painel do barbeiro: `#hoje`, `#agenda`, `#clientes`, `#resultados`, `#ajustes`.
 - `#balcao`: modo para o tablet da recepção.
+- Ajustes: nome, cor da marca, logo, foto da fachada, fundo claro ou escuro, clube de assinatura e lembrete de retorno.
 
-Versão atual: demonstração, os dados ficam no navegador de cada aparelho. Próximo passo: banco Supabase com contas.
+Versão atual: demonstração, com os dados guardados no navegador de cada aparelho. Próximo passo: banco Supabase com contas.
