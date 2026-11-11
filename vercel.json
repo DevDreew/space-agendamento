@@ -1,0 +1,27 @@
+{
+ "cleanUrls": true,
+ "redirects": [
+  {
+   "source": "/",
+   "destination": "/space",
+   "permanent": false
+  }
+ ],
+ "rewrites": [
+  {
+   "source": "/:slug((?!index\\.html$)[a-z0-9-]+)",
+   "destination": "/index.html"
+  }
+ ],
+ "headers": [
+  {
+   "source": "/manifest.webmanifest",
+   "headers": [
+    {
+     "key": "Content-Type",
+     "value": "application/manifest+json"
+    }
+   ]
+  }
+ ]
+}
