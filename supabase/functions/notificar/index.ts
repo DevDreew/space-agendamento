@@ -70,6 +70,17 @@ async function mudanca(tipo: string, r: any, old: any) {
   return res;
 }
 
+async function assinatura(b: any) {
+  const shop = await loja(b.shop_id);
+  const url = `/${shop.slug}/painel#ajustes`;
+  let msg;
+  if (b.status === "suspenso") msg = { title: "Conta do app suspensa", body: b.aviso || "Sua mensalidade está em aberto. Toque para pagar e liberar a agenda.", url };
+  else if (b.status === "ativo" && b.antes !== "ativo") msg = { title: "Conta liberada", body: "Pagamento confirmado. Sua agenda já está recebendo clientes.", url: `/${shop.slug}/painel#hoje` };
+  else if (b.aviso) msg = { title: "Mensalidade do app", body: b.aviso, url };
+  if (!msg) return {};
+  return { barbeiro: await enviar(await subsBarbeiro(shop.id), msg) };
+}
+
 async function lembretes() {
   const amanha = new Date(Date.parse(hojeBR() + "T12:00:00Z") + 864e5).toISOString().slice(0, 10);
   const { data: rows } = await sb.from("bookings").select("*").eq("day", amanha).eq("status", "confirmado").eq("lembrete_enviado", false).eq("is_example", false);
@@ -95,7 +106,7 @@ Deno.serve(async (req) => {
     const s = await segredos();
     if (req.headers.get("x-space-secret") !== s.webhook) return new Response("nao autorizado", { status: 401 });
     const body = await req.json();
-    const out = body.type === "LEMBRETES" ? await lembretes() : await mudanca(body.type, body.record, body.old);
+    const out = body.type === "LEMBRETES" ? await lembretes() : body.type === "ASSINATURA" ? await assinatura(body) : await mudanca(body.type, body.record, body.old);
     return Response.json({ ok: true, ...out });
   } catch (e) {
     console.error(e);

@@ -1,0 +1,8 @@
+-- Área do dono do app (/admin). Já aplicado no projeto space-agendamento.
+-- platform_admins: quem é dono do app (vê e altera todas as barbearias).
+-- platform_config: link de pagamento padrão, mensalidade padrão e WhatsApp de suporte.
+-- shops ganhou: status (ativo, aviso, suspenso), vence, mensalidade, aviso, link_pagamento.
+--   Clientes e outros barbeiros só enxergam id, slug, name, config, status e owner.
+-- Funções: eh_admin, minha_assinatura (barbeiro), admin_lojas, admin_atualizar_loja, admin_config, admin_salvar_config.
+-- Barbearia suspensa: o banco recusa novos pedidos (gatilho bookings_bloqueia_suspensa).
+-- Mudou status ou aviso: o barbeiro recebe notificação no celular (gatilho shops_avisar_assinatura).
