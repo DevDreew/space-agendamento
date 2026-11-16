@@ -1,0 +1,7 @@
+-- Cobrança automática da mensalidade pelo Mercado Pago (já aplicada no projeto).
+-- pagamentos: registro de cada pagamento aprovado (id do Mercado Pago, barbearia, valor, método).
+-- admin_salvar_chave_mp(token): o dono do app salva o Access Token (guardado em private.segredos, nunca volta para o navegador).
+-- admin_status_mp(): mostra se está conectado e os 4 últimos dígitos.
+-- admin_adicionar_admin(email): adiciona outro dono do app.
+-- minha_assinatura() devolve mp_ativo; admin_lojas() devolve ultimo_pagamento e ultimo_valor.
+-- Função de borda: supabase/functions/cobranca (link de pagamento, teste da chave e aviso do Mercado Pago).
