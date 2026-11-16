@@ -55,7 +55,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .cli{min-height:100vh;display:grid;grid-template-columns:1fr;padding-bottom:calc(76px + var(--base))}
 .marca{padding:22px 18px 18px;border-bottom:1px solid var(--linha)}
 .marca small{display:flex;align-items:center;gap:8px;color:var(--cinza);font-size:14px}
-.marca h1{font-size:clamp(42px,14vw,84px);overflow-wrap:anywhere;font-weight:900;text-transform:uppercase;color:var(--branco);margin:6px 0 10px}
+.marca h1{font-size:clamp(42px,14vw,84px);overflow-wrap:break-word;font-weight:900;text-transform:uppercase;color:var(--branco);margin:6px 0 10px}
 .marca h1 span{color:var(--ouro)}
 .marca .info{display:grid;gap:4px;color:var(--cinza);font-size:14px}
 .marca .info div{display:flex;gap:8px;align-items:center}.marca svg.i{width:16px;height:16px}
@@ -237,7 +237,7 @@ dialog .dl dt{color:var(--cinza)}dialog .dl dd{margin:0;text-align:right;font-we
 @media(min-width:900px){
   .cli{grid-template-columns:400px 1fr;padding-bottom:0}
   .marca{position:sticky;top:0;height:100vh;border-bottom:0;border-right:1px solid var(--linha);padding:40px 32px;display:flex;flex-direction:column}
-  .marca h1{font-size:92px}
+  .marca h1{font-size:clamp(52px,5vw,76px)}
   .marca .esp{flex:1}
   .fluxo{padding:40px 32px;max-width:680px;margin:0}
   .tabbar.c{position:static;grid-column:1;background:none;border:0;flex-direction:column;gap:2px;padding:0}
