@@ -1,12 +1,13 @@
 // Cobrança da mensalidade do app pelo Mercado Pago (Checkout Pro: crédito, débito e Pix).
 // acao "link": o barbeiro logado recebe o link de pagamento da mensalidade.
 // acao "testar": o dono do app confere se a chave do Mercado Pago funciona.
+// acao "senha": o dono do app cria uma senha nova para o dono de uma barbearia.
 // ?src=mp: aviso do Mercado Pago. O pagamento é sempre conferido na API do Mercado Pago antes de liberar a conta.
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 
 const URL_SB = Deno.env.get("SUPABASE_URL")!;
 const adm = createClient(URL_SB, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
-const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS" };
+const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info", "Access-Control-Allow-Methods": "POST, OPTIONS" };
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 
 async function chaveMP(): Promise<string | null> {
@@ -68,6 +69,18 @@ Deno.serve(async (req) => {
       if (!token) return json({ erro: "sem_chave" }, 400);
       const me = await mp("/users/me", token);
       return json({ ok: true, conta: me.nickname || me.email || me.id, email: me.email || "" });
+    }
+    if (body.acao === "senha") {
+      const { data: ok } = await adm.from("platform_admins").select("user_id").eq("user_id", user.id).maybeSingle();
+      if (!ok) return json({ erro: "sem_permissao" }, 403);
+      const { data: shop } = await adm.from("shops").select("owner").eq("id", body.shop).maybeSingle();
+      if (!shop || !shop.owner) return json({ erro: "sem_barbearia" }, 404);
+      const letras = "abcdefghjkmnpqrstuvwxyz23456789";
+      const rnd = crypto.getRandomValues(new Uint8Array(10));
+      const senha = Array.from(rnd, (n) => letras[n % letras.length]).join("");
+      const { error } = await adm.auth.admin.updateUserById(shop.owner, { password: senha });
+      if (error) throw error;
+      return json({ ok: true, senha });
     }
     if (body.acao === "link") {
       if (!token) return json({ erro: "sem_chave" }, 400);
