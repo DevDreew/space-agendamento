@@ -1,0 +1,4 @@
+-- Débito automático da mensalidade (assinatura do Mercado Pago) — já aplicado no projeto.
+-- shops: mp_assinatura_id, mp_assinatura_status (pending/authorized/paused/cancelled), mp_proxima.
+-- minha_assinatura() devolve debito_auto, proxima_cobranca e ultimo_pagamento; admin_lojas() devolve debito_auto.
+-- admin_assinaturas(), admin_resumo() e admin_registrar_pagamento() alimentam o painel do dono.
