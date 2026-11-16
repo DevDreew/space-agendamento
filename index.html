@@ -293,8 +293,18 @@ dialog .dl dt{color:var(--cinza)}dialog .dl dd{margin:0;text-align:right;font-we
 .img-prev img{width:100%;height:100%;object-fit:cover}.img-prev.logo-p{aspect-ratio:1;width:96px;border-radius:50%}
 @media(min-width:600px) and (max-width:899px){.marca .fachada{grid-column:1/-1;aspect-ratio:21/9}}
 @media(max-width:520px){.cli-l{grid-template-columns:1fr}.cli-l .acoes{justify-content:flex-start!important}}
+
+.acesso{max-width:440px;margin:0 auto;padding:48px 20px 40px;min-height:80vh}
+.acesso h1{font-size:56px;text-transform:uppercase;margin:6px 0 6px}
+.acesso .eyebrow{display:flex;gap:8px;align-items:center;color:var(--ouro-claro);font-weight:600;font-size:14px}
+.acesso .err,.acesso .okmsg{font-size:14px;margin:0 0 12px}.acesso .err{color:var(--ruim)}.acesso .okmsg{color:var(--ok)}
+.acesso .acoes{margin-top:14px}
+.slug-l{display:flex;align-items:center;background:var(--carvao);border:1px solid var(--linha);border-radius:8px;overflow:hidden}
+.slug-l span{padding:0 0 0 12px;color:var(--cinza);font-size:14px;white-space:nowrap}
+.slug-l input{border:0!important;background:none!important;min-width:0;padding-left:2px!important}
 </style></head>
 <body><div id="app"></div><dialog id="dlg"></dialog><div id="toast" role="status" aria-live="polite"></div><div id="tip" role="tooltip"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>const ICONS={"scissors": "<circle cx=\"6\" cy=\"6\" r=\"3\" /> <path d=\"M8.12 8.12 12 12\" /> <path d=\"M20 4 8.12 15.88\" /> <circle cx=\"6\" cy=\"18\" r=\"3\" /> <path d=\"M14.8 14.8 20 20\" />", "calendar-days": "<path d=\"M8 2v4\" /> <path d=\"M16 2v4\" /> <rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" /> <path d=\"M3 10h18\" /> <path d=\"M8 14h.01\" /> <path d=\"M12 14h.01\" /> <path d=\"M16 14h.01\" /> <path d=\"M8 18h.01\" /> <path d=\"M12 18h.01\" /> <path d=\"M16 18h.01\" />", "clock": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <polyline points=\"12 6 12 12 16 14\" />", "users": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" /> <path d=\"M22 21v-2a4 4 0 0 0-3-3.87\" /> <path d=\"M16 3.13a4 4 0 0 1 0 7.75\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "x": "<path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" />", "message-circle": "<path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\" />", "chevron-left": "<path d=\"m15 18-6-6 6-6\" />", "chevron-right": "<path d=\"m9 18 6-6-6-6\" />", "plus": "<path d=\"M5 12h14\" /> <path d=\"M12 5v14\" />", "trending-up": "<polyline points=\"22 7 13.5 15.5 8.5 10.5 2 17\" /> <polyline points=\"16 7 22 7 22 13\" />", "trending-down": "<polyline points=\"22 17 13.5 8.5 8.5 13.5 2 7\" /> <polyline points=\"16 17 22 17 22 11\" />", "settings": "<path d=\"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" />", "chart-column": "<path d=\"M3 3v16a2 2 0 0 0 2 2h16\" /> <path d=\"M18 17V9\" /> <path d=\"M13 17V5\" /> <path d=\"M8 17v-3\" />", "ban": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"m4.9 4.9 14.2 14.2\" />", "map-pin": "<path d=\"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0\" /> <circle cx=\"12\" cy=\"10\" r=\"3\" />", "search": "<circle cx=\"11\" cy=\"11\" r=\"8\" /> <path d=\"m21 21-4.3-4.3\" />", "trash-2": "<path d=\"M3 6h18\" /> <path d=\"M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6\" /> <path d=\"M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2\" /> <line x1=\"10\" x2=\"10\" y1=\"11\" y2=\"17\" /> <line x1=\"14\" x2=\"14\" y1=\"11\" y2=\"17\" />", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /> <path d=\"m15 5 4 4\" />", "lock": "<rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\" /> <path d=\"M7 11V7a5 5 0 0 1 10 0v4\" />", "hourglass": "<path d=\"M5 22h14\" /> <path d=\"M5 2h14\" /> <path d=\"M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22\" /> <path d=\"M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2\" />", "user-x": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" /> <line x1=\"17\" x2=\"22\" y1=\"8\" y2=\"13\" /> <line x1=\"22\" x2=\"17\" y1=\"8\" y2=\"13\" />", "arrow-right": "<path d=\"M5 12h14\" /> <path d=\"m12 5 7 7-7 7\" />", "repeat": "<path d=\"m17 2 4 4-4 4\" /> <path d=\"M3 11v-1a4 4 0 0 1 4-4h14\" /> <path d=\"m7 22-4-4 4-4\" /> <path d=\"M21 13v1a4 4 0 0 1-4 4H3\" />", "store": "<path d=\"m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7\" /> <path d=\"M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8\" /> <path d=\"M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4\" /> <path d=\"M2 7h20\" /> <path d=\"M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7\" />"};
 'use strict';
 /* ---------- utilidades ---------- */
@@ -320,7 +330,11 @@ const wa=(tel,txt)=>`https://wa.me/55${dig(tel)}?text=${encodeURIComponent(txt)}
 const novoId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 
 /* ---------- barbearia pelo endereço ---------- */
-const SLUG=(()=>{const p=location.pathname.split('/').filter(Boolean)[0]||'';const v=decodeURIComponent(p).toLowerCase();return/^[a-z0-9-]{2,40}$/.test(v)&&v!='index.html'?v:'space'})();
+const SB_URL='https://yxfhlmgxgyystthnfhfd.supabase.co',SB_KEY='sb_publishable_BrrNsjOH5oRuGHHVCEG1mA_aJeX5mbL';
+const PARTES=location.pathname.split('/').filter(Boolean).map(x=>{try{return decodeURIComponent(x).toLowerCase()}catch(e){return''}});
+const PAINEL=PARTES.includes('painel');
+let SLUG=(()=>{const v=PARTES[0]||'';return/^[a-z0-9-]{2,40}$/.test(v)&&v!='painel'&&v!='index.html'?v:(PAINEL?'':'space')})();
+const REAL=!!(window.supabase&&location.protocol.startsWith('http'));
 const nomeDoSlug=s=>s.split('-').filter(Boolean).map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
 /* ---------- configuração padrão ---------- */
 const PADRAO={cor:'#d4ab5f',tema:'escuro',logo:'',fachada:'',retorno:21,assinantes:{},planos:[{id:'clube-corte',name:'Clube Corte',price:99,svcs:['corte'],desc:'Corte à vontade no mês'},{id:'clube-completo',name:'Clube Corte e Barba',price:149,svcs:['corte','barba','combo'],desc:'Corte e barba à vontade no mês'}],name:nomeDoSlug(SLUG),address:'Rua Exemplo, 120 · Centro',whatsapp:'11900000000',step:40,lunch:[740,800],
@@ -351,7 +365,7 @@ function makeExamples(c,opt){opt=opt||{};const a=opt.desde||-62,z=opt.ate||6,f=o
  return{slots,cli}}
 
 /* ---------- camada de dados ---------- */
-const Store={mode:'carregando',db:null,user:null,uid:null,admin:false,podeEscrever:true,ready:false,erro:'',cfg:PADRAO,slots:{},cli:{},
+const StoreDemo={mode:'carregando',db:null,user:null,uid:null,admin:false,podeEscrever:true,ready:false,erro:'',cfg:PADRAO,slots:{},cli:{},
  _salvaLocal(){try{localStorage.setItem('barbearia-'+SLUG,JSON.stringify({cfg:this.cfg,slots:this.slots,cli:this.cli}))}catch(e){}},
  local(){this.mode='local';this.uid='cliente-demo';this.admin=true;this.ready=true;let d=null;try{d=JSON.parse(localStorage.getItem('barbearia-'+SLUG)||'null')}catch(e){}
   if(d&&d.cfg){this.cfg=d.cfg;this.slots=d.slots;this.cli=d.cli}else{const x=makeExamples(this.cfg);this.slots=x.slots;this.cli=x.cli}atualiza();},
@@ -392,6 +406,77 @@ const Store={mode:'carregando',db:null,user:null,uid:null,admin:false,podeEscrev
   for(const k of Object.keys(this.cli))if(k.startsWith('ex-'))await this.db.doc('clientes/'+k).delete();
  }
 };
+const ERROS={horario_ocupado:'Esse horário acabou de ser pedido. Escolha outro.',fora_do_horario:'Esse horário passa do fechamento. Escolha outro.',almoco:'Esse horário cai no almoço. Escolha outro.',fechado:'A barbearia não abre nesse dia.',horario_passou:'Esse horário já passou. Escolha outro.',dia_invalido:'Escolha um dia dentro dos próximos 30.',muitos_pedidos:'Você já tem 3 pedidos aguardando resposta. Espere o barbeiro responder.',telefone_invalido:'Confira o WhatsApp com DDD.',nome_invalido:'Confira seu nome.',servico_invalido:'Esse serviço mudou. Atualize a página.',barbeiro_invalido:'Esse barbeiro não está atendendo agora.',nao_pode_cancelar:'Esse horário não pode mais ser cancelado.',endereco_em_uso:'Esse endereço já é de outra barbearia. Escolha outro.',conflito:'Esse horário já está ocupado.'};
+const erroAmigo=e=>{const m=String((e&&e.message)||e||'');for(const k in ERROS)if(m.includes(k))return ERROS[k];if(/exclusion|sem_conflito|conflicting/.test(m))return ERROS.conflito;if(/fetch|network|Failed/i.test(m))return'Sem conexão. Verifique a internet e tente de novo.';return''};
+const StoreSB={mode:'carregando',sb:null,admin:false,ready:false,erro:'',cfg:PADRAO,slots:{},cli:{},uid:'me',shop:null,user:null,tokens:[],podeEscrever:true,
+ rowToSlot(r){return{b:r.barber_id,d:r.day,s:r.start_min,dur:r.dur,svc:r.svc,n:r.svc_name,p:+r.price,pl:r.plan_name||'',st:r.status,at:Date.parse(r.created_at)||0,ex:!!r.is_example,tk:r.manage_token}},
+ chave(){return'space-pedidos-'+SLUG},
+ async conectar(){this.sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return PAINEL?this.iniciaPainel():this.iniciaCliente()},
+ aplicaLoja(d){this.shop=d;const a=this.cfg.assinantes;this.cfg=Object.assign({},PADRAO,d.config||{},{name:d.name});if(a)this.cfg.assinantes=a},
+ async iniciaCliente(){
+  const{data,error}=await this.sb.from('shops').select('id,slug,name,config').eq('slug',SLUG).maybeSingle();
+  if(error){this.erro='Não consegui abrir a agenda. Verifique a internet e recarregue.';this.ready=true;return R(true)}
+  if(!data){this.mode='sem-loja';this.ready=true;return R(true)}
+  this.aplicaLoja(data);this.mode='cliente';
+  try{this.tokens=JSON.parse(localStorage.getItem(this.chave())||'[]')}catch(e){this.tokens=[]}
+  await this.recarregaCliente();this.ready=true;atualiza();
+  setInterval(()=>{if(!document.hidden&&!editando())this.recarregaCliente().then(atualiza)},30000);
+ },
+ async recarregaCliente(){
+  const de=hoje(),ate=soma(de,31);
+  const[o,m]=await Promise.all([this.sb.rpc('horarios_ocupados',{p_slug:SLUG,p_de:de,p_ate:ate}),this.tokens.length?this.sb.rpc('meus_pedidos',{p_tokens:this.tokens}):Promise.resolve({data:[]})]);
+  if(o.error){this.erro='Não consegui atualizar os horários. Verifique a internet.';return}
+  this.erro='';const sl={busy:{items:{}},me:{items:{}}},cli={me:{items:{}}};
+  (o.data||[]).forEach((r,i)=>sl.busy.items['o'+i]={b:r.barber_id,d:r.day,s:r.start_min,dur:r.dur,st:'confirmado',n:'',p:0});
+  const meus=(m.data||[]).filter(r=>r.shop_slug==SLUG).sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)));
+  meus.forEach(r=>{sl.me.items[r.id]=this.rowToSlot(r);cli.me.items[r.id]={name:r.client_name,phone:r.client_phone}});
+  if(meus[0])cli.me.me={name:meus[0].client_name,phone:meus[0].client_phone};
+  this.slots=sl;this.cli=cli;
+ },
+ async pedirCliente(cands,o){
+  for(const b of cands){const{data,error}=await this.sb.rpc('pedir_horario',{p_slug:SLUG,p_barber:b,p_day:o.d,p_start:o.s,p_svc:o.svc,p_name:o.name,p_phone:o.phone,p_note:o.note||''});
+   if(!error){const r=(data||[])[0];this.tokens=[r.manage_token,...this.tokens.filter(t=>t!=r.manage_token)].slice(0,50);if(!U.balcao){try{localStorage.setItem(this.chave(),JSON.stringify(this.tokens))}catch(e){}}await this.recarregaCliente();return r}
+   if(!String(error.message).includes('horario_ocupado'))throw new Error(error.message)}
+  throw new Error('horario_ocupado')},
+ async iniciaPainel(){
+  this.mode='login';
+  this.sb.auth.onAuthStateChange((ev)=>{if(ev=='PASSWORD_RECOVERY'){U.recuperar=true;this.mode='login';R(true)}});
+  const{data}=await this.sb.auth.getSession();const s=data&&data.session;
+  this.ready=true;if(!s||U.recuperar)return R(true);return this.entrouPainel(s.user)},
+ async entrouPainel(user){
+  this.user=user;
+  const{data,error}=await this.sb.from('shops').select('id,slug,name,config').eq('owner',user.id).maybeSingle();
+  if(error){this.erro='Não consegui abrir sua barbearia. Tente de novo.';return R(true)}
+  if(!data){this.mode='criar';return R(true)}
+  if(SLUG!==data.slug){SLUG=data.slug;try{history.replaceState(null,'','/'+data.slug+'/painel'+location.hash)}catch(e){}}
+  this.aplicaLoja(data);this.admin=true;this.mode='painel';
+  await Promise.all([this.recarregaPainel(),this.carregaAssinantes()]);
+  if(!this.canal){this.canal=this.sb.channel('b-'+data.id).on('postgres_changes',{event:'*',schema:'public',table:'bookings',filter:'shop_id=eq.'+data.id},()=>{clearTimeout(this.tRt);this.tRt=setTimeout(()=>this.recarregaPainel().then(atualiza),500)}).subscribe();
+   setInterval(()=>{if(!document.hidden)this.recarregaPainel().then(atualiza)},60000)}
+  if(!PRO.includes(location.hash.slice(1)))location.hash='hoje';rota();atualiza()},
+ async recarregaPainel(){
+  const{data,error}=await this.sb.from('bookings').select('*').eq('shop_id',this.shop.id).gte('day',soma(hoje(),-180)).order('day').limit(5000);
+  if(error){this.erro='Não consegui atualizar a agenda. Verifique a internet.';return}
+  this.erro='';const sl={},cli={};(data||[]).forEach(r=>{sl[r.id]={items:{[r.id]:this.rowToSlot(r)}};cli[r.id]={me:{name:r.client_name,phone:r.client_phone},items:{[r.id]:{name:r.client_name,phone:r.client_phone,note:r.note}}}});this.slots=sl;this.cli=cli},
+ async carregaAssinantes(){const{data}=await this.sb.from('subscribers').select('phone,plan_id,since').eq('shop_id',this.shop.id);const a={};(data||[]).forEach(r=>a[r.phone]={plano:r.plan_id,desde:r.since});this.cfg.assinantes=a},
+ falha(e){const er=new Error(erroAmigo(e)||(e&&e.message)||'erro');er.amigo=erroAmigo(e);return er},
+ async guardar(owner,id,slot,pii){
+  const row={shop_id:this.shop.id,barber_id:slot.b,day:slot.d,start_min:slot.s,dur:slot.dur,svc:slot.svc||'',svc_name:slot.n||'',price:slot.p||0,plan_name:slot.pl||null,status:slot.st,client_name:(pii&&pii.name)||'',client_phone:(pii&&pii.phone)||'',note:(pii&&pii.note)||''};
+  const{error}=await this.sb.from('bookings').insert(row);if(error)throw this.falha(error);await this.recarregaPainel();atualiza()},
+ async mudar(owner,id,patch){
+  if(this.mode=='cliente'){const x=((this.slots.me||{}).items||{})[id];if(!x)return;const{error}=await this.sb.rpc('cancelar_pedido',{p_token:x.tk});if(error)throw this.falha(error);await this.recarregaCliente();return atualiza()}
+  const{error}=await this.sb.from('bookings').update({status:patch.st}).eq('id',id);if(error)throw this.falha(error);await this.recarregaPainel();atualiza()},
+ async salvaCfg(c){const cfg=Object.assign({},c);delete cfg.assinantes;delete cfg.name;const{error}=await this.sb.from('shops').update({name:c.name,config:cfg}).eq('id',this.shop.id);if(error)throw this.falha(error);const a=this.cfg.assinantes;this.cfg=Object.assign({},c,{assinantes:a});atualiza()},
+ async salvaAssinante(tel,plano){const q=plano?this.sb.from('subscribers').upsert({shop_id:this.shop.id,phone:tel,plan_id:plano}):this.sb.from('subscribers').delete().eq('shop_id',this.shop.id).eq('phone',tel);const{error}=await q;if(error)throw this.falha(error);await this.carregaAssinantes();atualiza()},
+ async travar(){return true},
+ async fresco(){if(this.mode=='cliente')await this.recarregaCliente()},
+ async carregarExemplos(){const x=makeExamples(this.cfg,{desde:-45,ate:6,f:.7,pessoas:24,seed:Date.now()%99999}),rows=[];
+  for(const o in x.slots){const me=(x.cli[o]||{}).me||{};for(const id in x.slots[o].items){const t=x.slots[o].items[id];rows.push({shop_id:this.shop.id,barber_id:t.b,day:t.d,start_min:t.s,dur:t.dur,svc:t.svc,svc_name:t.n,price:t.p,status:t.st,client_name:me.name||'Cliente (exemplo)',client_phone:me.phone||'',is_example:true})}}
+  for(let i=0;i<rows.length;i+=100){const lote=rows.slice(i,i+100);const{error}=await this.sb.from('bookings').insert(lote);if(error)for(const r of lote)await this.sb.from('bookings').insert(r)}
+  await this.recarregaPainel();atualiza()},
+ async apagarExemplos(){const{error}=await this.sb.from('bookings').delete().eq('shop_id',this.shop.id).eq('is_example',true);if(error)throw this.falha(error);await this.recarregaPainel();atualiza()}
+};
+const Store=REAL?StoreSB:StoreDemo;
 const C=()=>Store.cfg;
 const todos=()=>{const r=[];for(const o in Store.slots){const it=(Store.slots[o]||{}).items||{};for(const id in it)r.push(Object.assign({id,o},it[id]))}return r};
 const pii=x=>{const c=Store.cli[x.o]||{};return Object.assign({},c.me||{},(c.items||{})[x.id]||{})};
@@ -484,7 +569,7 @@ function cliente(){return`<div class="cli">${marca()}${U.rota=='meus'?meus():age
 const pendentes=()=>todos().filter(x=>x.st=='pendente'&&(x.d>hoje()||(x.d==hoje()&&x.s+x.dur>agoraMin()))).sort((a,b)=>a.at-b.at);
 const NAV=[['hoje','Hoje','clock'],['agenda','Agenda','calendar-days'],['clientes','Clientes','users'],['resultados','Resultados','chart-column'],['ajustes','Ajustes','settings']];
 function shellPro(miolo){const p=pendentes().length;const link=([r,n,ic])=>`<a href="#${r}" class="${U.rota==r?'on':''}">${I(ic)}${n}${r=='hoje'&&p?`<span class="badge">${p}</span>`:''}</a>`;
- return`<div class="pro"><aside class="lado"><h1>${esc(C().name)}</h1>${NAV.map(link).join('')}<div class="esp"></div><a href="#agendar">${I('scissors')}Ver como cliente</a></aside><main id="conteudo">${miolo}</main><nav class="tabbar" aria-label="Painel">${NAV.map(link).join('')}</nav></div>`}
+ return`<div class="pro"><aside class="lado"><h1>${esc(C().name)}</h1>${NAV.map(link).join('')}<div class="esp"></div><a href="${REAL?'/'+esc(SLUG):'#agendar'}" target="${REAL?'_blank':'_self'}" rel="noopener">${I('scissors')}Ver como cliente</a>${REAL?`<a href="#" data-a="sair">${I('x')}Sair</a>`:''}</aside><main id="conteudo">${miolo}</main><nav class="tabbar" aria-label="Painel">${NAV.map(link).join('')}</nav></div>`}
 const filtroB=x=>U.pb=='todos'||x.b==U.pb;
 const chipsB=()=>`<div class="filtros" role="group" aria-label="Filtrar por barbeiro">${[{id:'todos',name:'Todos'},...C().barbers].map(b=>`<button class="chip ${U.pb==b.id?'on':''}" data-a="pb" data-v="${esc(b.id)}" aria-pressed="${U.pb==b.id}">${esc(b.name)}</button>`).join('')}</div>`;
 const nomeCli=x=>x.st=='bloqueado'?(x.n||'Bloqueado'):(pii(x).name||'Cliente');
@@ -543,7 +628,7 @@ function viewResultados(){const p=U.per,fim=hoje(),ini=soma(fim,-(p-1)),i0=soma(
  <section class="kpis"><div class="kpi"><span>Faturado</span><b>${brl(fat)}</b>${delta(fat,fat0)}</div><div class="kpi"><span>Atendimentos</span><b>${cur.length}</b>${delta(cur.length,old.length)}</div><div class="kpi"><span>Ticket médio</span><b>${brl(tk)}</b>${delta(tk,tk0)}</div><div class="kpi"><span>Clube por mês</span><b>${brl(Object.values(C().assinantes||{}).reduce((t,a)=>t+(((C().planos||[]).find(p=>p.id==a.plano)||{}).price||0),0))}</b><em>${Object.keys(C().assinantes||{}).length} assinantes, dinheiro garantido</em></div><div class="kpi"><span>Faltas</span><b>${Math.round(fl)}%</b>${delta(fl,fl0||0,true,true)}</div></section>
  ${cur.length?`<div class="graf-grid"><section class="painel wide"><h3>Faturamento por dia da semana, em R$</h3><p class="q">Em quais dias vale ter mais barbeiros na casa?</p><div class="colunas">${porDia.map((v,i)=>`<div class="c ${i==iTop?'top':''}" tabindex="0" data-tip="${nomeD[dias[i]]}: ${brl(v)}"><span class="v">${Math.round(v).toLocaleString('pt-BR')}</span><div class="b" style="height:${v/mx*82}%"></div></div>`).join('')}</div><div class="eixo">${dias.map(d=>`<span>${d}</span>`).join('')}</div></section>
  <section class="painel"><h3>Serviços</h3><p class="q">O que mais traz dinheiro?</p>${barras(grupo(x=>x.n))}</section><section class="painel"><h3>Barbeiros</h3><p class="q">Quem faturou mais no período?</p>${barras(grupo(x=>barbeiro(x.b).name))}</section></div>`:`<div class="vazio"><h3>Sem atendimentos no período</h3><p>Marque atendimentos como atendidos para ver o faturamento.</p></div>`}`)}
-function viewAjustes(){const c=C(),ds=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'],ordem=[1,2,3,4,5,6,0];const tem=Object.keys(Store.slots).some(k=>k.startsWith('ex-'));
+function viewAjustes(){const c=C(),ds=['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'],ordem=[1,2,3,4,5,6,0];const tem=todos().some(x=>x.ex||String(x.o).startsWith('ex-'));
  const cor=U.corPrevia||c.cor||'#d4ab5f',tema=U.temaPrevia||c.tema||'escuro',nm=s=>s.map(i=>(servico(i)||{}).name).filter(Boolean).join(', ');
  return shellPro(`<header class="topo-pro"><div><small>Só você vê esta área</small><h1>Ajustes</h1></div></header><div class="aj">
  <section class="painel"><h3>Aparência</h3><p class="q">A cara da sua barbearia em todas as telas do cliente.</p>
@@ -559,7 +644,7 @@ function viewAjustes(){const c=C(),ds=['Domingo','Segunda','Terça','Quarta','Qu
  <section class="painel"><h3>Horário da casa</h3><p class="q">Os horários andam de ${c.step} em ${c.step} minutos.</p><form data-f="horas">${ordem.map(d=>{const h=c.hours[d];return`<div class="hr-l"><label class="ck"><input type="checkbox" name="on${d}" ${h?'checked':''}>${ds[d].slice(0,3)}</label><input type="time" name="o${d}" aria-label="Abre ${ds[d]}" value="${h?hm(h[0]):'09:00'}"><input type="time" name="c${d}" aria-label="Fecha ${ds[d]}" value="${h?hm(h[1]):'20:00'}"></div>`}).join('')}
  <div class="hr-l"><label class="ck"><input type="checkbox" name="alm" ${c.lunch?'checked':''}>Almoço</label><input type="time" name="alo" aria-label="Início do almoço" value="${c.lunch?hm(c.lunch[0]):'12:20'}"><input type="time" name="alc" aria-label="Fim do almoço" value="${c.lunch?hm(c.lunch[1]):'13:20'}"></div>
  <div class="campo" style="margin-top:10px"><label for="a-step">Intervalo entre horários (min)</label><input id="a-step" type="number" name="step" min="10" max="120" step="5" value="${c.step}"></div><button class="btn peq" type="submit">Salvar horários</button></form></section>
- <section class="painel"><h3>Link para os clientes</h3><p class="q">Mande este endereço no WhatsApp, coloque na bio do Instagram e no QR code do balcão.</p><p class="num" style="font-weight:600;word-break:break-all;margin-bottom:10px">${esc(location.origin+'/'+SLUG)}</p><button class="btn sec peq" data-a="copiar">Copiar link</button></section><section class="painel"><h3>Tablet no balcão</h3><p class="q">Abra este endereço no tablet da recepção. Cada cliente marca e a tela limpa sozinha para o próximo, sem guardar nomes.</p><a class="btn sec peq" href="#balcao">${I('store')}Abrir modo balcão aqui</a></section><section class="painel"><h3>Barbearia</h3><p class="q">Nome e contato que o cliente vê.</p><form data-f="casa"><div class="campo"><label for="a-nome">Nome</label><input id="a-nome" name="name" value="${esc(c.name)}" required></div><div class="campo"><label for="a-end">Endereço</label><input id="a-end" name="address" value="${esc(c.address)}"></div><div class="campo"><label for="a-wa">WhatsApp da barbearia</label><input id="a-wa" name="whatsapp" inputmode="tel" value="${esc(fone(c.whatsapp))}"></div><button class="btn peq" type="submit">Salvar</button></form>
+ <section class="painel"><h3>Link para os clientes</h3><p class="q">Mande este endereço no WhatsApp, coloque na bio do Instagram e no QR code do balcão.</p><p class="num" style="font-weight:600;word-break:break-all;margin-bottom:10px">${esc(location.origin+'/'+SLUG)}</p><button class="btn sec peq" data-a="copiar">Copiar link</button></section>${REAL?`<section class="painel"><h3>Seu acesso</h3><p class="q">O painel abre só com o seu email e senha. Clientes nunca veem esta área.</p><p class="num" style="font-weight:600;word-break:break-all;margin-bottom:10px">${esc(location.origin+'/'+SLUG+'/painel')}</p><button class="btn sec peq" data-a="sair">${I('x')}Sair da conta</button></section>`:''}<section class="painel"><h3>Tablet no balcão</h3><p class="q">Abra este endereço no tablet da recepção. Cada cliente marca e a tela limpa sozinha para o próximo, sem guardar nomes.</p><a class="btn sec peq" href="${REAL?'/'+esc(SLUG)+'#balcao':'#balcao'}" ${REAL?'target="_blank" rel="noopener"':''}>${I('store')}Abrir modo balcão aqui</a></section><section class="painel"><h3>Barbearia</h3><p class="q">Nome e contato que o cliente vê.</p><form data-f="casa"><div class="campo"><label for="a-nome">Nome</label><input id="a-nome" name="name" value="${esc(c.name)}" required></div><div class="campo"><label for="a-end">Endereço</label><input id="a-end" name="address" value="${esc(c.address)}"></div><div class="campo"><label for="a-wa">WhatsApp da barbearia</label><input id="a-wa" name="whatsapp" inputmode="tel" value="${esc(fone(c.whatsapp))}"></div><button class="btn peq" type="submit">Salvar</button></form>
  ${tem?`<hr style="border:0;border-top:1px solid var(--linha);margin:16px 0"><p class="q">Os clientes marcados como exemplo são fictícios. Apague antes de usar de verdade.</p><div class="acoes"><button class="btn sec peq" data-a="carregar">Carregar histórico de exemplo</button><button class="btn perigo peq" data-a="limpar">${I('trash-2')}Apagar dados de exemplo</button></div>`:`<hr style="border:0;border-top:1px solid var(--linha);margin:16px 0"><p class="q">Quer ver o painel cheio antes de usar? Os exemplos podem ser apagados depois.</p><button class="btn sec peq" data-a="carregar">Carregar histórico de exemplo</button>`}</section></div>`)}
 
 /* ---------- diálogos ---------- */
@@ -583,23 +668,38 @@ function dlgPlano(id){const p=id?(C().planos||[]).find(x=>x.id==id):{id:'',name:
 function dlgAssin(v){const[tel,nome]=v.split('|'),a=(C().assinantes||{})[tel],pl=C().planos||[];if(!pl.length){toast('Crie um plano em Ajustes primeiro.');return}
  abre(`<h2>Clube</h2><p class="dica" style="margin:0 0 14px">${esc(nome)} · ${esc(fone(tel))}</p><form data-f="assin"><input type="hidden" name="tel" value="${esc(tel)}"><div class="campo"><label for="as-p">Plano</label><select id="as-p" name="plano"><option value="">Não é assinante</option>${pl.map(p=>`<option value="${esc(p.id)}" ${a&&a.plano==p.id?'selected':''}>${esc(p.name)} · ${brl(p.price)}/mês</option>`).join('')}</select></div>${a?`<p class="dica" style="margin:0 0 12px">Assinante desde ${esc(D(a.desde).toLocaleDateString('pt-BR'))}.</p>`:''}<div class="fim"><button class="btn" type="submit">Salvar</button><button class="btn sec" type="button" data-a="fecha">Cancelar</button></div></form>`)}
 async function lerImagem(file,max,q){if(!file||!file.type.startsWith('image/'))throw new Error('tipo');const url=URL.createObjectURL(file);try{const im=await new Promise((ok,er)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=er;i.src=url});const k=Math.min(1,max/Math.max(im.width,im.height)),cv=document.createElement('canvas');cv.width=Math.round(im.width*k);cv.height=Math.round(im.height*k);cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);return cv.toDataURL(q?'image/jpeg':'image/png',q||undefined)}finally{URL.revokeObjectURL(url)}}
+/* ---------- acesso do barbeiro ---------- */
+const slugify=t=>String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40);
+function telaAcesso(){const m=Store.mode,e=U.erroAcesso?`<p class="err" role="alert">${esc(U.erroAcesso)}</p>`:'',ok=U.okAcesso?`<p class="okmsg" role="status">${esc(U.okAcesso)}</p>`:'';
+ const topo=`<p class="eyebrow">${I('scissors')} Space · painel do barbeiro</p>`;
+ if(!Store.ready)return`<main class="acesso">${topo}<p class="sub">Carregando…</p></main>`;
+ if(U.recuperar)return`<main class="acesso">${topo}<h1>Nova senha</h1><form data-f="novasenha" novalidate><div class="campo"><label for="l-ns">Nova senha</label><input id="l-ns" name="senha" type="password" autocomplete="new-password" minlength="8" required><span class="ajuda">Pelo menos 8 caracteres.</span></div>${e}<button class="btn larga" type="submit">Salvar senha</button></form></main>`;
+ if(m=='criar')return`<main class="acesso">${topo}<h1>Sua barbearia</h1><p class="sub">Falta um passo: o nome e o endereço que você vai mandar para os clientes.</p><form data-f="criar" novalidate><div class="campo"><label for="c-n">Nome da barbearia</label><input id="c-n" name="nome" required maxlength="60" value="${esc(U.cNome||'')}"></div><div class="campo"><label for="c-s">Endereço do link</label><div class="slug-l"><span>${esc(location.host)}/</span><input id="c-s" name="slug" required maxlength="40" value="${esc(U.cSlug||'')}" autocapitalize="off" spellcheck="false"></div><span class="ajuda">Só letras minúsculas, números e hífen.</span></div><div class="campo"><label for="c-w">WhatsApp da barbearia</label><input id="c-w" name="wa" inputmode="tel" placeholder="(11) 90000-0000"></div>${e}<button class="btn larga" type="submit">Criar minha barbearia</button></form><button class="link" data-a="sair">Sair desta conta</button></main>`;
+ const cad=U.modoAcesso=='cadastro',esq=U.modoAcesso=='esqueci';
+ return`<main class="acesso">${topo}<h1>${esq?'Recuperar senha':cad?'Criar conta':'Entrar'}</h1><p class="sub">${esq?'Mandamos um link para você criar uma senha nova.':cad?'Crie o acesso do dono da barbearia. Só você entra no painel.':'Acesso exclusivo do barbeiro.'}</p>
+ <form data-f="${esq?'esqueci':cad?'cadastro':'login'}" novalidate><div class="campo"><label for="l-e">Email</label><input id="l-e" name="email" type="email" autocomplete="email" required value="${esc(U.lEmail||'')}"></div>${esq?'':`<div class="campo"><label for="l-s">Senha</label><input id="l-s" name="senha" type="password" autocomplete="${cad?'new-password':'current-password'}" required minlength="${cad?8:1}">${cad?'<span class="ajuda">Pelo menos 8 caracteres.</span>':''}</div>`}${e}${ok}<button class="btn larga" type="submit">${esq?'Enviar link':cad?'Criar conta':'Entrar'}</button></form>
+ <div class="acoes" style="justify-content:space-between">${cad||esq?`<button class="link" data-a="acesso" data-v="login">Já tenho conta</button>`:`<button class="link" data-a="acesso" data-v="cadastro">Criar conta de barbearia</button><button class="link" data-a="acesso" data-v="esqueci">Esqueci a senha</button>`}</div></main>`}
 /* ---------- render ---------- */
 let adiado=false;
 function editando(){const a=document.activeElement;return a&&$('#app').contains(a)&&a.matches('input,textarea,select')}
 function R(forca){if(!forca&&(editando()||(U.rota=='ajustes'&&U.sujo))){adiado=true;return}adiado=false;
+ if(REAL&&PAINEL&&Store.mode!='painel'){document.title='Painel do barbeiro · Space';aplicaCor(C().cor);$('#app').className='';$('#app').innerHTML=`<div class="pole"></div>${Store.erro?`<p class="aviso erro">${esc(Store.erro)}</p>`:''}${telaAcesso()}`;return}
+ if(REAL&&Store.mode=='sem-loja'){document.title='Barbearia não encontrada';$('#app').innerHTML=`<div class="pole"></div><main class="acesso"><h1>Barbearia não encontrada</h1><p class="sub">Confira o link que a barbearia te mandou.</p></main>`;return}
  const av=Store.mode=='local'?'<p class="aviso">Modo demonstração: os dados ficam só neste navegador.</p>':Store.erro?`<p class="aviso erro">${esc(Store.erro)}</p>`:'';
  const v=PRO.includes(U.rota)&&Store.admin?{hoje:viewHoje,agenda:viewAgenda,clientes:viewClientes,resultados:viewResultados,ajustes:viewAjustes}[U.rota]():cliente();
  document.title=C().name+' · Agendamento';aplicaCor(U.corPrevia||C().cor);$('#app').className=U.balcao?'balcao':'';$('#app').innerHTML=`<div class="pole"></div>${av}${v}`;}
 function atualiza(){if(!U.date){const n=proximoLivre();U.date=n?n.k:hoje()}const c=Store.cli[Store.uid];if(!U.balcao&&c&&c.me&&!U.nome&&!U.tel&&U.step<4){U.nome=c.me.name||'';U.tel=c.me.phone||''}R()}
-function rota(){const h=location.hash.slice(1);if(h=='balcao'){U.balcao=true;reinicia();U.nome='';U.tel='';try{sessionStorage.setItem('balcao','1')}catch(e){}}let r=['agendar','meus',...PRO].includes(h)?h:'agendar';if(h=='balcao')r='agendar';if(PRO.includes(r)&&!Store.admin&&Store.mode!='carregando')r='agendar';if(r=='agendar'&&U.rota!='agendar'&&U.step==4)reinicia();if(r!='ajustes')Object.assign(U,{corPrevia:null,temaPrevia:null,logoPrevia:null,fachPrevia:null});U.rota=r;U.sujo=false;R(true);scrollTo(0,0)}
+function rota(){const h=location.hash.slice(1);if(h=='balcao'){U.balcao=true;reinicia();U.nome='';U.tel='';try{sessionStorage.setItem('balcao','1')}catch(e){}}let r=['agendar','meus',...PRO].includes(h)?h:'agendar';if(REAL&&PAINEL&&!PRO.includes(r))r='hoje';if(h=='balcao')r='agendar';if(PRO.includes(r)&&!Store.admin&&Store.mode!='carregando')r='agendar';if(r=='agendar'&&U.rota!='agendar'&&U.step==4)reinicia();if(r!='ajustes')Object.assign(U,{corPrevia:null,temaPrevia:null,logoPrevia:null,fachPrevia:null});U.rota=r;U.sujo=false;R(true);scrollTo(0,0)}
 function vaPara(s){U.step=s;R(true);scrollTo(0,0)}
 
 /* ---------- ações ---------- */
 const reinicia=()=>Object.assign(U,{step:1,svc:null,barber:'any',time:null,rapido:null,obs:'',enviado:null,erros:{}});
-async function protege(f,msg){try{return await f()}catch(e){console.error(e);toast(e&&e.code=='invalid_argument'?'Sua conta não pode alterar esta agenda.':(msg||'Não consegui salvar. Tente de novo.'));return false}}
+async function protege(f,msg){try{return await f()}catch(e){console.error(e);toast(e&&e.code=='invalid_argument'?'Sua conta não pode alterar esta agenda.':(e&&e.amigo)||erroAmigo(e)||msg||'Não consegui salvar. Tente de novo.');return false}}
 async function mudaStatus(o,id,st){return protege(()=>Store.mudar(o,id,{st}))}
 const ACOES={
  ir(v){vaPara(+v)},
+ acesso(v){U.modoAcesso=v;U.erroAcesso='';U.okAcesso='';R(true)},
+ async sair(){try{await Store.sb.auth.signOut()}catch(e){}location.href='/'+(SLUG?SLUG+'/':'')+'painel'},
  novo(){clearTimeout(U.tBalcao);reinicia();if(U.balcao){U.nome='';U.tel=''}vaPara(1)},
  rapido(){const n=proximoLivre();if(!n)return;U.rapido=n;U.date=n.k;U.time=n.s;U.barber=n.b.id;toast('Agora escolha o serviço para '+dataCurta(n.k)+', '+hm(n.s));vaPara(1)},
  svc(v){U.svc=v;const s=servico(v);if(U.rapido&&livresEm(U.date,U.time,s.dur,U.barber).length){U.rapido=null;return vaPara(3)}U.rapido=null;if(U.time!=null&&!livresEm(U.date,U.time,s.dur,U.barber).length)U.time=null;vaPara(2)},
@@ -638,7 +738,7 @@ const FORMS={
  async pedir(f){const nome=f.nome.value.trim(),tel=dig(f.tel.value),obs=f.obs.value.trim(),e={};U.nome=nome;U.tel=tel;U.obs=obs;if(nome.length<2)e.nome='Escreva seu nome para o barbeiro saber quem chega.';if(tel.length<10||tel.length>11)e.tel='Use DDD e número, por exemplo (11) 91234-5678.';U.erros=e;if(e.nome||e.tel){R(true);return}
   const s=servico(U.svc),b=$('#b-pedir');if(b){b.disabled=true;b.textContent='Enviando…'}
   const volta=m=>{toast(m);U.time=null;vaPara(2)};
-  const ok=await protege(async()=>{let cand=livresEm(U.date,U.time,s.dur,U.barber).sort((a,c)=>carga(a.id,U.date)-carga(c.id,U.date));if(!cand.length){volta('Esse horário acabou de ser pedido. Escolha outro.');return false}
+  const ok=REAL?await (async()=>{const cand=livresEm(U.date,U.time,s.dur,U.barber).sort((a,c)=>carga(a.id,U.date)-carga(c.id,U.date)).map(x=>x.id);if(!cand.length){volta(ERROS.horario_ocupado);return false}try{const r=await Store.pedirCliente(cand,{d:U.date,s:U.time,svc:s.id,name:nome,phone:tel,note:obs});U.enviado=r.id;return true}catch(e){const m=erroAmigo(e);if(/ocupado|almoço|fechamento|passou|abre/.test(m)){volta(m);return false}toast(m||'Não consegui enviar seu pedido. Tente de novo.');return null}})():await protege(async()=>{let cand=livresEm(U.date,U.time,s.dur,U.barber).sort((a,c)=>carga(a.id,U.date)-carga(c.id,U.date));if(!cand.length){volta('Esse horário acabou de ser pedido. Escolha outro.');return false}
    const alvo=cand[0];if(!(await Store.travar(alvo.id,U.date))){volta('Alguém está marcando esse barbeiro agora. Tente em instantes.');return false}
    await Store.fresco();if(!cabe(alvo.id,U.date,U.time,s.dur)){volta('Esse horário acabou de ser pedido. Escolha outro.');return false}
    const id=novoId();await Store.guardar(Store.uid,id,Object.assign({b:alvo.id,d:U.date,s:U.time,dur:s.dur,svc:s.id,n:s.name,p:s.price,st:'pendente',at:Date.now()},cobre(tel,s.id)?{p:0,pl:cobre(tel,s.id).name}:{}),{name:nome,phone:tel,note:obs},U.balcao?null:{name:nome,phone:tel});U.enviado=id;return true},'Não consegui enviar seu pedido. Tente de novo.');
@@ -650,13 +750,20 @@ const FORMS={
  async bar(f){const n=f.name.value.trim();if(!n)return toast('Informe o nome.');const c=Object.assign({},C(),{barbers:C().barbers.slice()}),o={id:f.id.value||'b'+novoId(),name:n,spec:f.spec.value.trim(),active:f.active.checked},i=c.barbers.findIndex(x=>x.id==o.id);if(i>=0)c.barbers[i]=o;else c.barbers.push(o);await protege(()=>Store.salvaCfg(c));fecha();toast('Barbeiro salvo.')},
  async horas(f){const hours={};for(const d of [0,1,2,3,4,5,6]){if(f['on'+d].checked){const o=toMin(f['o'+d].value),c=toMin(f['c'+d].value);if(!(o<c))return toast('O horário de abrir precisa ser antes do de fechar.');hours[d]=[o,c]}else hours[d]=null}let lunch=null;if(f.alm.checked){lunch=[toMin(f.alo.value),toMin(f.alc.value)];if(!(lunch[0]<lunch[1]))return toast('Confira o horário de almoço.')}const step=Math.max(10,+f.step.value||40);const c=Object.assign({},C(),{hours,lunch,step});U.sujo=false;await protege(()=>Store.salvaCfg(c));toast('Horários salvos.');R(true)},
  async plano(f){const n=f.name.value.trim(),pr=+f.price.value,svcs=[...f.querySelectorAll('input[name=svc]:checked')].map(x=>x.value);if(!n||!(pr>0))return toast('Informe nome e preço do plano.');if(!svcs.length)return toast('Marque pelo menos um serviço incluso.');const c=Object.assign({},C(),{planos:(C().planos||[]).slice()}),o={id:f.id.value||'p'+novoId(),name:n,price:pr,svcs,desc:f.desc.value.trim()},i=c.planos.findIndex(x=>x.id==o.id);if(i>=0)c.planos[i]=o;else c.planos.push(o);await protege(()=>Store.salvaCfg(c));fecha();toast('Plano salvo.')},
- async assin(f){const tel=f.tel.value,pl=f.plano.value,as=Object.assign({},C().assinantes||{});if(pl)as[tel]={plano:pl,desde:(as[tel]&&as[tel].plano==pl)?as[tel].desde:hoje()};else delete as[tel];await protege(()=>Store.salvaCfg(Object.assign({},C(),{assinantes:as})));fecha();toast(pl?'Assinatura registrada.':'Cliente saiu do clube.');R(true)},
+ async assin(f){const tel=f.tel.value,pl=f.plano.value;if(Store.salvaAssinante){await protege(()=>Store.salvaAssinante(tel,pl))}else{const as=Object.assign({},C().assinantes||{});if(pl)as[tel]={plano:pl,desde:(as[tel]&&as[tel].plano==pl)?as[tel].desde:hoje()};else delete as[tel];await protege(()=>Store.salvaCfg(Object.assign({},C(),{assinantes:as})))}fecha();toast(pl?'Assinatura registrada.':'Cliente saiu do clube.');R(true)},
  async retorno(f){const d=Math.max(7,Math.min(90,+f.dias.value||21));U.sujo=false;await protege(()=>Store.salvaCfg(Object.assign({},C(),{retorno:d})));toast('Prazo de retorno salvo.');R(true)},
+ async login(f){const email=f.email.value.trim(),senha=f.senha.value;U.lEmail=email;if(!email||!senha){U.erroAcesso='Preencha email e senha.';return R(true)}const b=f.querySelector('button');b.disabled=true;b.textContent='Entrando…';const{data,error}=await Store.sb.auth.signInWithPassword({email,password:senha});if(error){U.erroAcesso=/confirm/i.test(error.message)?'Confirme seu email pelo link que enviamos antes de entrar.':/Invalid/i.test(error.message)?'Email ou senha errados.':erroAmigo(error)||'Não consegui entrar. Tente de novo.';return R(true)}U.erroAcesso='';Store.entrouPainel(data.user)},
+ async cadastro(f){const email=f.email.value.trim(),senha=f.senha.value;U.lEmail=email;if(!/^\S+@\S+\.\S+$/.test(email)){U.erroAcesso='Confira o email.';return R(true)}if(senha.length<8){U.erroAcesso='A senha precisa de pelo menos 8 caracteres.';return R(true)}const b=f.querySelector('button');b.disabled=true;b.textContent='Criando…';const{data,error}=await Store.sb.auth.signUp({email,password:senha,options:{emailRedirectTo:location.origin+'/painel'}});if(error){U.erroAcesso=/registered|exists/i.test(error.message)?'Esse email já tem conta. Use Entrar.':erroAmigo(error)||error.message;return R(true)}U.erroAcesso='';if(data.session)return Store.entrouPainel(data.user);U.modoAcesso='login';U.okAcesso='Conta criada. Abra o email que enviamos e confirme para entrar.';R(true)},
+ async esqueci(f){const email=f.email.value.trim();U.lEmail=email;if(!email){U.erroAcesso='Informe o email.';return R(true)}const{error}=await Store.sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/painel'});U.erroAcesso=error?(erroAmigo(error)||'Não consegui enviar. Tente de novo.'):'';U.okAcesso=error?'':'Se esse email tiver conta, o link chega em instantes.';R(true)},
+ async novasenha(f){const senha=f.senha.value;if(senha.length<8){U.erroAcesso='A senha precisa de pelo menos 8 caracteres.';return R(true)}const{data,error}=await Store.sb.auth.updateUser({password:senha});if(error){U.erroAcesso=erroAmigo(error)||error.message;return R(true)}U.recuperar=false;U.erroAcesso='';toast('Senha salva.');Store.entrouPainel(data.user)},
+ async criar(f){const nome=f.nome.value.trim(),slug=slugify(f.slug.value),wa=dig(f.wa.value);U.cNome=nome;U.cSlug=slug;if(nome.length<2){U.erroAcesso='Escreva o nome da barbearia.';return R(true)}if(slug.length<2||['painel','api','admin','index','assets'].includes(slug)){U.erroAcesso='Escolha outro endereço para o link.';return R(true)}
+  const cfg=Object.assign({},PADRAO,{name:undefined,address:'',whatsapp:wa,assinantes:undefined});delete cfg.name;delete cfg.assinantes;
+  const b=f.querySelector('button');b.disabled=true;b.textContent='Criando…';const{error}=await Store.sb.rpc('criar_barbearia',{p_slug:slug,p_name:nome,p_config:cfg});if(error){U.erroAcesso=erroAmigo(error)||'Não consegui criar. Tente de novo.';return R(true)}U.erroAcesso='';Store.entrouPainel(Store.user)},
  async casa(f){const name=f.name.value.trim();if(!name)return toast('Informe o nome da barbearia.');const c=Object.assign({},C(),{name,address:f.address.value.trim(),whatsapp:dig(f.whatsapp.value)});U.sujo=false;await protege(()=>Store.salvaCfg(c));toast('Dados salvos.');R(true)}
 };
 document.addEventListener('click',e=>{const t=e.target.closest('[data-a]');if(!t)return;const a=t.dataset.a;if(t.tagName=='A'&&a=='fecha'){fecha();return}if(ACOES[a]){e.preventDefault();ACOES[a](t.dataset.v)}});
 document.addEventListener('submit',e=>{const f=e.target.dataset.f;if(f&&FORMS[f]){e.preventDefault();FORMS[f](e.target)}});
-document.addEventListener('input',e=>{const t=e.target;if(t.id=='cor-livre'){U.corPrevia=t.value;U.sujo=true;aplicaCor(t.value);const h=document.querySelector('input[name=cor]');if(h)h.value=t.value;return}if(t.id=='busca'){U.q=t.value;$('#lista-cli').innerHTML=listaClientes()}else if(t.id=='f-tel'||t.id=='m-tel')t.value=fone(t.value);else if(U.rota=='ajustes'&&$('#app').contains(t))U.sujo=true;
+document.addEventListener('input',e=>{const t=e.target;if(t.id=='c-n'){const sl=$('#c-s');if(sl&&(!sl.dataset.mexido))sl.value=slugify(t.value);return}if(t.id=='c-s'){t.dataset.mexido='1';return}if(t.id=='cor-livre'){U.corPrevia=t.value;U.sujo=true;aplicaCor(t.value);const h=document.querySelector('input[name=cor]');if(h)h.value=t.value;return}if(t.id=='busca'){U.q=t.value;$('#lista-cli').innerHTML=listaClientes()}else if(t.id=='f-tel'||t.id=='m-tel')t.value=fone(t.value);else if(U.rota=='ajustes'&&$('#app').contains(t))U.sujo=true;
  if(t.id=='m-d'){const sel=$('#m-s');sel.innerHTML=grade(t.value).map(s=>`<option value="${s}">${hm(s)}</option>`).join('')}});
 document.addEventListener('change',async e=>{const t=e.target;if(t.id!='up-logo'&&t.id!='up-fach')return;try{const d=await lerImagem(t.files[0],t.id=='up-logo'?256:1100,t.id=='up-logo'?0:.72);if(d.length>200000)return toast('Imagem grande demais. Tente outra foto.');if(t.id=='up-logo')U.logoPrevia=d;else U.fachPrevia=d;U.sujo=true;R(true);toast('Confira e toque em Salvar aparência.')}catch(er){toast('Não consegui ler essa imagem. Use JPG ou PNG.')}});
 document.addEventListener('focusout',()=>setTimeout(()=>{if(adiado&&!editando())R()},0));
@@ -664,5 +771,5 @@ const tip=$('#tip');const mostra=e=>{const t=e.target.closest&&e.target.closest(
 document.addEventListener('mouseover',mostra);document.addEventListener('focusin',mostra);
 addEventListener('hashchange',rota);
 setInterval(()=>{if(!dlg().open)R()},60000);
-atualiza();rota();Store.conectar().then(rota);
+if(REAL&&PAINEL){R(true);Store.conectar()}else{atualiza();rota();Store.conectar().then(rota)}
 </script></body></html>

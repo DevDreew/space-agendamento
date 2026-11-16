@@ -3,6 +3,8 @@
     { "source": "/", "destination": "/space", "permanent": false }
   ],
   "rewrites": [
+    { "source": "/painel", "destination": "/index.html" },
+    { "source": "/:slug/painel", "destination": "/index.html" },
     { "source": "/:slug", "destination": "/index.html" }
   ]
 }
