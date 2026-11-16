@@ -342,6 +342,7 @@ const SB_URL='https://yxfhlmgxgyystthnfhfd.supabase.co',SB_KEY='sb_publishable_B
 const PARTES=location.pathname.split('/').filter(Boolean).map(x=>{try{return decodeURIComponent(x).toLowerCase()}catch(e){return''}});
 const PAINEL=PARTES.includes('painel');
 let SLUG=(()=>{const v=PARTES[0]||'';return/^[a-z0-9-]{2,40}$/.test(v)&&v!='painel'&&v!='index.html'?v:(PAINEL?'':'space')})();
+const BARB_LINK=(PARTES[1]&&PARTES[1]!='painel')?PARTES[1]:'';
 const REAL=!!(window.supabase&&location.protocol.startsWith('http'));
 const nomeDoSlug=s=>s.split('-').filter(Boolean).map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
 /* ---------- configuração padrão ---------- */
@@ -426,7 +427,7 @@ const StoreSB={mode:'carregando',sb:null,admin:false,ready:false,erro:'',cfg:PAD
   const{data,error}=await this.sb.from('shops').select('id,slug,name,config').eq('slug',SLUG).maybeSingle();
   if(error){this.erro='Não consegui abrir a agenda. Verifique a internet e recarregue.';this.ready=true;return R(true)}
   if(!data){this.mode='sem-loja';this.ready=true;return R(true)}
-  this.aplicaLoja(data);this.mode='cliente';
+  this.aplicaLoja(data);this.mode='cliente';if(BARB_LINK){const bb=this.cfg.barbers.find(b=>b.active&&(b.id==BARB_LINK||slugify(b.name)==BARB_LINK));if(bb){U.barber=bb.id;U.date=null}}
   try{this.tokens=JSON.parse(localStorage.getItem(this.chave())||'[]')}catch(e){this.tokens=[]}
   await this.recarregaCliente();this.ready=true;atualiza();
   setInterval(()=>{if(!document.hidden&&!editando())this.recarregaCliente().then(atualiza)},30000);
@@ -656,7 +657,7 @@ function viewAjustes(){const c=C(),ds=['Domingo','Segunda','Terça','Quarta','Qu
  <section class="painel"><h3>Dias fechados e folgas</h3><p class="q">Feriado, folga ou imprevisto. Quem tinha horário é avisado no celular e o dia some para os clientes.</p>${(()=>{const l=(c.fechados||[]).filter(f=>f.d>=hoje()).sort((a,b)=>a.d.localeCompare(b.d));return l.length?l.map(f=>`<div class="aj-l"><span><b>${esc(dataCurta(f.d))} · ${f.b=='todos'?'Barbearia toda':esc(barbeiro(f.b).name)}</b><small>${esc(f.motivo||'')}</small></span><button class="link" data-a="reabrir" data-v="${esc(f.d+'|'+f.b)}">Reabrir</button></div>`).join(''):'<p class="dica" style="margin:0 0 6px">Nenhum dia fechado pela frente.</p>'})()}<div class="acoes"><button class="btn sec peq" data-a="fechar" data-v="">${I('ban')}Fechar um dia</button></div></section>
  <section class="painel"><h3>Lembrete de retorno</h3><p class="q">O app aprende o ritmo de cada cliente pelas visitas. Para quem veio uma vez só, usa este prazo.</p><form data-f="retorno"><div class="campo"><label for="a-ret">Dias até lembrar</label><input id="a-ret" type="number" name="dias" min="7" max="90" value="${c.retorno||21}"></div><button class="btn peq" type="submit">Salvar</button></form></section>
  <section class="painel"><h3>Serviços e preços</h3><p class="q">O cliente vê exatamente esta lista.</p>${c.services.map(s=>`<button class="aj-l" data-a="ed-svc" data-v="${esc(s.id)}"><span><b>${esc(s.name)}</b><small>${dur(s.dur)} · ${brl(s.price)}</small></span>${I('pencil')}</button>`).join('')}<div class="acoes"><button class="btn sec peq" data-a="ed-svc" data-v="">${I('plus')}Adicionar serviço</button></div></section>
- <section class="painel"><h3>Barbeiros</h3><p class="q">Quem não está aceitando some da tela do cliente.</p>${c.barbers.map(b=>`<button class="aj-l" data-a="ed-bar" data-v="${esc(b.id)}"><span><b>${esc(b.name)}</b><small>${esc(b.spec||'')}${b.active?'':' · pausado'}${Array.isArray(b.dias)&&b.dias.length<7?' · atende '+[1,2,3,4,5,6,0].filter(d=>b.dias.includes(d)).map(d=>DSEM[d]).join(', '):''}</small></span>${I('pencil')}</button>`).join('')}<div class="acoes"><button class="btn sec peq" data-a="ed-bar" data-v="">${I('plus')}Adicionar barbeiro</button></div></section>
+ <section class="painel"><h3>Barbeiros</h3><p class="q">Quem não está aceitando some da tela do cliente.${REAL?' Cada barbeiro tem um link que já abre a agenda dele: mande no WhatsApp.':''}</p>${c.barbers.map(b=>`<button class="aj-l" data-a="ed-bar" data-v="${esc(b.id)}"><span><b>${esc(b.name)}</b><small>${REAL?esc(location.host+'/'+SLUG+'/'+slugify(b.name))+' · ':''}${esc(b.spec||'')}${b.active?'':' · pausado'}${Array.isArray(b.dias)&&b.dias.length<7?' · atende '+[1,2,3,4,5,6,0].filter(d=>b.dias.includes(d)).map(d=>DSEM[d]).join(', '):''}</small></span>${I('pencil')}</button>`).join('')}<div class="acoes"><button class="btn sec peq" data-a="ed-bar" data-v="">${I('plus')}Adicionar barbeiro</button></div></section>
  <section class="painel"><h3>Horário da casa</h3><p class="q">Os horários andam de ${c.step} em ${c.step} minutos.</p><form data-f="horas">${ordem.map(d=>{const h=c.hours[d];return`<div class="hr-l"><label class="ck"><input type="checkbox" name="on${d}" ${h?'checked':''}>${ds[d].slice(0,3)}</label><input type="time" name="o${d}" aria-label="Abre ${ds[d]}" value="${h?hm(h[0]):'09:00'}"><input type="time" name="c${d}" aria-label="Fecha ${ds[d]}" value="${h?hm(h[1]):'20:00'}"></div>`}).join('')}
  <div class="hr-l"><label class="ck"><input type="checkbox" name="alm" ${c.lunch?'checked':''}>Almoço</label><input type="time" name="alo" aria-label="Início do almoço" value="${c.lunch?hm(c.lunch[0]):'12:20'}"><input type="time" name="alc" aria-label="Fim do almoço" value="${c.lunch?hm(c.lunch[1]):'13:20'}"></div>
  <div class="campo" style="margin-top:10px"><label for="a-step">Intervalo entre horários (min)</label><input id="a-step" type="number" name="step" min="10" max="120" step="5" value="${c.step}"></div><button class="btn peq" type="submit">Salvar horários</button></form></section>
@@ -735,7 +736,7 @@ function rota(){const h=location.hash.slice(1);if(h=='balcao'){U.balcao=true;rei
 function vaPara(s){U.step=s;R(true);scrollTo(0,0)}
 
 /* ---------- ações ---------- */
-const reinicia=()=>Object.assign(U,{step:1,svc:null,barber:'any',time:null,rapido:null,obs:'',enviado:null,erros:{}});
+const reinicia=()=>Object.assign(U,{step:1,svc:null,barber:BARB_LINK&&C().barbers.some(b=>b.id==U.barber)?U.barber:'any',time:null,rapido:null,obs:'',enviado:null,erros:{}});
 async function protege(f,msg){try{return await f()}catch(e){console.error(e);toast(e&&e.code=='invalid_argument'?'Sua conta não pode alterar esta agenda.':(e&&e.amigo)||erroAmigo(e)||msg||'Não consegui salvar. Tente de novo.');return false}}
 async function mudaStatus(o,id,st){return protege(()=>Store.mudar(o,id,{st}))}
 const ACOES={
