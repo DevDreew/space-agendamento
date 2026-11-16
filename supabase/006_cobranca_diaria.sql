@@ -1,0 +1,5 @@
+-- Cobrança automática diária — já aplicada no projeto.
+-- 11h50 (Brasília): a função cobranca?src=cron confere no Mercado Pago os pagamentos e o débito automático de todas as barbearias.
+-- 12h00 (Brasília): private.cobranca_diaria() avisa quem vence em 3 dias, avisa quem atrasou e pausa a agenda
+--   depois de platform_config.dias_suspensao dias (0 = nunca pausa sozinho).
+-- Barbearia nova nasce com a mensalidade padrão (platform_config.mensalidade).

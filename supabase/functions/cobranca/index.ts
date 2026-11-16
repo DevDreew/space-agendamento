@@ -4,6 +4,7 @@
 // acao "cancelar_auto": cancela o débito automático.
 // acao "sincronizar": confere no Mercado Pago os pagamentos da barbearia (ou de todas, se for o dono do app).
 // acao "testar": o dono do app confere se a chave funciona.
+// ?src=cron: conferência diária de todas as barbearias (chamada pelo agendador do banco).
 // acao "senha": o dono do app cria uma senha nova para o dono de uma barbearia.
 // ?src=mp: avisos do Mercado Pago (pagamentos e assinaturas). Tudo é conferido na API do Mercado Pago antes de liberar.
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
@@ -15,9 +16,12 @@ const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { sta
 const SITE = "https://space-agendamento.vercel.app";
 const AVISO_MP = `${URL_SB}/functions/v1/cobranca?src=mp`;
 
-async function chaveMP(): Promise<string | null> {
+async function segredos(): Promise<any> {
   const { data } = await adm.rpc("segredos_notificacao");
-  return (data && data.mp_token) || null;
+  return data || {};
+}
+async function chaveMP(): Promise<string | null> {
+  return (await segredos()).mp_token || null;
 }
 async function mp(path: string, token: string, init: RequestInit = {}) {
   const r = await fetch("https://api.mercadopago.com" + path, { ...init, headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", ...(init.headers || {}) } });
@@ -96,7 +100,12 @@ async function sincronizar(shop: any, token: string) {
   let novos = 0;
   if (shop.mp_assinatura_id) {
     try {
-      await atualizarAssinatura(shop.mp_assinatura_id, token);
+      const s = await atualizarAssinatura(shop.mp_assinatura_id, token);
+      // Se o dono do app mudou o valor da mensalidade, o débito automático passa a cobrar o valor novo.
+      const atual = Number(s.auto_recurring && s.auto_recurring.transaction_amount);
+      if (["authorized", "pending", "paused"].includes(s.status) && shop.mensalidade != null && atual !== Number(shop.mensalidade)) {
+        await mp(`/preapproval/${encodeURIComponent(shop.mp_assinatura_id)}`, token, { method: "PUT", body: JSON.stringify({ auto_recurring: { transaction_amount: Number(shop.mensalidade), currency_id: "BRL" } }) });
+      }
       const r = await mp(`/authorized_payments/search?preapproval_id=${encodeURIComponent(shop.mp_assinatura_id)}`, token);
       for (const a of r.results || []) {
         const pg = a.payment || {};
@@ -129,6 +138,15 @@ Deno.serve(async (req) => {
       if (tipo === "subscription_authorized_payment" || tipo === "authorized_payment") return json(await confirmarCobrancaAutomatica(id, token));
       return json({ ok: true });
     }
+    if (url.searchParams.get("src") === "cron") {
+      const sg = await segredos();
+      if (!sg.webhook || req.headers.get("x-space-secret") !== sg.webhook) return json({ erro: "sem_permissao" }, 403);
+      if (!sg.mp_token) return json({ ok: true, novos: 0 });
+      const lojas = (await adm.from("shops").select("id,mp_assinatura_id,mensalidade")).data || [];
+      let novos = 0;
+      for (const s of lojas) novos += await sincronizar(s, sg.mp_token);
+      return json({ ok: true, novos });
+    }
     const body = await req.json().catch(() => ({}));
     const user = await usuario(req);
     if (!user) return json({ erro: "precisa_login" }, 401);
@@ -154,7 +172,7 @@ Deno.serve(async (req) => {
     }
     if (body.acao === "sincronizar") {
       if (!token) return json({ ok: true, novos: 0 });
-      const cols = "id,mp_assinatura_id";
+      const cols = "id,mp_assinatura_id,mensalidade";
       let lojas: any[] = [];
       if (body.todas && (await ehAdmin(user.id))) lojas = (await adm.from("shops").select(cols)).data || [];
       else lojas = (await adm.from("shops").select(cols).eq("owner", user.id)).data || [];
