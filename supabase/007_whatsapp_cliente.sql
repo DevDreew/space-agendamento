@@ -1,0 +1,3 @@
+-- WhatsApp do cliente válido — já aplicado no projeto.
+-- private.tel_zap(): tira +55 e 0 da frente, coloca DDD 11 quando falta e o 9 do celular antigo.
+-- Gatilho bookings_tel_cliente: pedido de cliente (status pendente) só entra com celular com DDD; senão 'telefone_invalido'.
