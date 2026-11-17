@@ -1,6 +1,30 @@
-// Space · notificações no celular do barbeiro e do cliente
-self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+// Space · notificações no celular e funcionamento com internet fraca
+const CACHE = 'space-v2';
+self.addEventListener('install', e => {
+  self.skipWaiting();
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/index.html', '/manifest.webmanifest', '/icon-192.png'])).catch(() => {}));
+});
+self.addEventListener('activate', e => e.waitUntil(
+  caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())
+));
+self.addEventListener('fetch', e => {
+  const r = e.request;
+  if (r.method !== 'GET') return;
+  const u = new URL(r.url);
+  // Páginas do app: tenta a internet primeiro; se cair, abre a última versão guardada.
+  if (r.mode === 'navigate' && u.origin === self.location.origin) {
+    e.respondWith(fetch(r).then(res => { const c = res.clone(); caches.open(CACHE).then(k => k.put('/index.html', c)); return res; })
+      .catch(() => caches.match('/index.html')));
+    return;
+  }
+  // Biblioteca do banco, fontes e ícones: usa o que já tem e atualiza por trás.
+  if (u.hostname === 'cdn.jsdelivr.net' || u.hostname.endsWith('gstatic.com') || u.hostname === 'fonts.googleapis.com' || (u.origin === self.location.origin && /\.(png|webmanifest)$/.test(u.pathname))) {
+    e.respondWith(caches.open(CACHE).then(k => k.match(r).then(hit => {
+      const net = fetch(r).then(res => { if (res.ok || res.type === 'opaque') k.put(r, res.clone()); return res; }).catch(() => hit);
+      return hit || net;
+    })));
+  }
+});
 self.addEventListener('push', e => {
   let d = {};
   try { d = e.data.json(); } catch (x) { d = { title: 'Space', body: e.data ? e.data.text() : '' }; }
