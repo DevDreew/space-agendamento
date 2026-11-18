@@ -396,7 +396,37 @@ const telZap = (t) => {
   return d;
 };
 const zapOk = (t) => /^[1-9][1-9]9\d{8}$/.test(telZap(t));
-const wa = (tel, txt) => `https://wa.me/55${dig(tel)}?text=${encodeURIComponent(txt)}`;
+const CEL = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || navigator.platform == "MacIntel" && navigator.maxTouchPoints > 1;
+const semEmoji = (t) => String(t).replace(/(?:[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{23E9}-\u{23FA}][\u{FE0F}\u{200D}]*)+\s?/gu, "");
+const wa = (tel, txt) => {
+  const n = "55" + telZap(tel);
+  return CEL ? `whatsapp://send?phone=${n}&text=${encodeURIComponent(txt)}` : `https://api.whatsapp.com/send?phone=${n}&text=${encodeURIComponent(semEmoji(txt))}`;
+};
+const abreZap = (link, jan) => {
+  if (link.startsWith("whatsapp:")) {
+    if (jan) try {
+      jan.close();
+    } catch (e) {
+    }
+    location.href = link;
+  } else if (jan) {
+    try {
+      jan.location.href = link;
+    } catch (e) {
+      location.href = link;
+    }
+  } else {
+    const w = window.open(link, "_blank");
+    if (!w) location.href = link;
+  }
+};
+document.addEventListener("click", (e) => {
+  const a = e.target.closest('a[href^="whatsapp:"]');
+  if (a) {
+    e.preventDefault();
+    location.href = a.getAttribute("href");
+  }
+}, true);
 const novoId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const SB_URL = "https://yxfhlmgxgyystthnfhfd.supabase.co", SB_KEY = "sb_publishable_BrrNsjOH5oRuGHHVCEG1mA_aJeX5mbL";
 const PARTES = location.pathname.split("/").filter(Boolean).map((x) => {
@@ -1498,43 +1528,56 @@ const zapDoPedido = (b) => {
   return zapOk(z) ? telZap(z) : "";
 };
 function msgPedido(x, nome, tel, obs) {
-  return `\u{1F4CC} Novo agendamento \xB7 ${C().name}
+  return `\u{1F4CC} *Novo agendamento \xB7 ${C().name}*
 
-\u{1F464} ${nome}
-\u{1F4F1} ${fone(tel)}
-\u2702\uFE0F ${x.n} \xB7 ${brl(x.p)}
-\u{1F4C5} ${dataCurta(x.d)} \xE0s ${hm(x.s)}
-\u{1F488} ${barbeiro(x.b).name}${obs ? `
-\u{1F4DD} ${obs}` : ""}`;
+\u{1F464} Cliente: ${nome}
+\u{1F4F1} WhatsApp: ${fone(tel)}
+\u{1F488} Servi\xE7o: ${x.n} \xB7 ${brl(x.p)}
+\u{1F4C5} Data: ${brData(x.d)}
+\u23F0 Hor\xE1rio: ${hm(x.s)}
+\u{1F9D4} Barbeiro: ${barbeiro(x.b).name}${obs ? `
+\u{1F4DD} Recado: ${obs}` : ""}`;
 }
 function msgCobranca(l) {
   const venc = l.vence < hoje();
-  return `Ol\xE1! Aqui \xE9 da DreewSolution, o app de agendamento da sua barbearia. \u{1F488}
+  return `\u{1F4B3} *Mensalidade \xB7 DreewSolution*
 
-${venc ? `A mensalidade da ${l.name} est\xE1 em aberto desde ${brData(l.vence)}` : `A mensalidade da ${l.name} vence em ${brData(l.vence)}`}.
-Valor: ${brl(l.mensalidade)}
+Ol\xE1! ${venc ? `A mensalidade da ${l.name} est\xE1 em aberto desde ${brData(l.vence)}.` : `A mensalidade da ${l.name} vence em ${brData(l.vence)}.`}
 
-Para pagar com Pix, d\xE9bito ou cr\xE9dito, abra seu painel e toque em Pagar agora:
+\u{1F4B0} Valor: ${brl(l.mensalidade)}
+\u{1F4C5} Vencimento: ${brData(l.vence)}
+
+Para pagar com Pix, d\xE9bito ou cr\xE9dito, abra seu painel e toque em *Pagar agora*:
 ${location.origin}/${l.slug}/painel
 
 Qualquer d\xFAvida, \xE9 s\xF3 responder aqui.`;
 }
 function msgConfirma(x, p) {
   const c = C();
-  return `Oi, ${(p.name || "").split(" ")[0]}! \u2705 Seu hor\xE1rio est\xE1 confirmado:
+  return `\u2705 *Hor\xE1rio confirmado \xB7 ${c.name}*
 
-\u2702\uFE0F ${x.n}
-\u{1F4C5} ${dataCurta(x.d)} \xE0s ${hm(x.s)}
-\u{1F488} ${barbeiro(x.b).name} \xB7 ${c.name}${c.address ? `
-\u{1F4CD} ${c.address}` : ""}
+Ol\xE1, ${(p.name || "").split(" ")[0]}! Te espero:
 
-Se n\xE3o puder vir, me avisa por aqui. Te espero!`;
+\u{1F488} Servi\xE7o: ${x.n}
+\u{1F4C5} Data: ${brData(x.d)}
+\u23F0 Hor\xE1rio: ${hm(x.s)}
+\u{1F9D4} Barbeiro: ${barbeiro(x.b).name}${c.address ? `
+\u{1F4CD} Endere\xE7o: ${c.address}` : ""}
+
+Se n\xE3o puder vir, \xE9 s\xF3 avisar por aqui.`;
 }
 function msgLembrete(x, p) {
   const c = C();
-  return `Bom dia, ${(p.name || "").split(" ")[0]}! \u{1F488} Passando para lembrar: hoje \xE0s ${hm(x.s)} tem ${x.n.toLowerCase()} aqui na ${c.name}${c.address ? ` (${c.address})` : ""}.
+  return `\u23F0 *Lembrete \xB7 ${c.name}*
 
-Confirma que vem? Se n\xE3o puder, me avisa para eu liberar o hor\xE1rio.`;
+Bom dia, ${(p.name || "").split(" ")[0]}! Seu hor\xE1rio \xE9 *hoje*:
+
+\u{1F488} Servi\xE7o: ${x.n}
+\u23F0 Hor\xE1rio: ${hm(x.s)}
+\u{1F9D4} Barbeiro: ${barbeiro(x.b).name}${c.address ? `
+\u{1F4CD} Endere\xE7o: ${c.address}` : ""}
+
+Confirma que vem? Se n\xE3o puder, me avise para eu liberar o hor\xE1rio.`;
 }
 const lembrados = () => {
   try {
@@ -2160,7 +2203,7 @@ const ACOES = {
   async "cli-cancela2"(v) {
     const x = todos().find((i) => String(i.id) == String(v)), z = REAL && x && !PAINEL ? zapDoPedido(x.b) : "";
     let jan = null;
-    if (z) {
+    if (z && !CEL) {
       try {
         jan = window.open("", "_blank");
       } catch (e) {
@@ -2174,21 +2217,16 @@ const ACOES = {
       throw e;
     }
     if (z) {
-      const p = pii(x), link = wa(z, `Ol\xE1! Precisei cancelar meu hor\xE1rio na ${C().name}:
+      const p = pii(x), link = wa(z, `\u274C *Hor\xE1rio cancelado \xB7 ${C().name}*
 
-\u2702\uFE0F ${x.n}
-\u{1F4C5} ${dataCurta(x.d)} \xE0s ${hm(x.s)}
-\u{1F488} com ${barbeiro(x.b).name}
-\u{1F464} ${p.name || ""}
+\u{1F464} Cliente: ${p.name || ""}
+\u{1F488} Servi\xE7o: ${x.n}
+\u{1F4C5} Data: ${brData(x.d)}
+\u23F0 Hor\xE1rio: ${hm(x.s)}
+\u{1F9D4} Barbeiro: ${barbeiro(x.b).name}
 
-O hor\xE1rio j\xE1 est\xE1 livre no app. Obrigado!`);
-      if (jan) {
-        try {
-          jan.location.href = link;
-        } catch (e) {
-          location.href = link;
-        }
-      } else location.href = link;
+O hor\xE1rio j\xE1 est\xE1 livre no app.`);
+      abreZap(link, jan);
       toast("Hor\xE1rio cancelado. Toque em enviar para avisar a barbearia.");
     } else toast("Hor\xE1rio cancelado.");
   },
@@ -2238,9 +2276,17 @@ O hor\xE1rio j\xE1 est\xE1 livre no app. Obrigado!`);
     const p = pii(x);
     let jan = null;
     if (REAL && p.phone) {
-      try {
-        jan = window.open(wa(p.phone, msgConfirma(x, p)), "_blank");
-      } catch (e) {
+      const lk = wa(p.phone, msgConfirma(x, p));
+      if (CEL) {
+        jan = 1;
+        setTimeout(() => {
+          location.href = lk;
+        }, 50);
+      } else {
+        try {
+          jan = window.open(lk, "_blank");
+        } catch (e) {
+        }
       }
     }
     await mudaStatus(o, id, "confirmado");
@@ -2379,7 +2425,7 @@ const FORMS = {
     }
     let jan = null;
     U.zapPedido = null;
-    if (REAL && !U.balcao && (zapOk(C().whatsapp || "") || (C().barbers || []).some((b2) => zapOk(b2.whatsapp || "")))) {
+    if (REAL && !CEL && !U.balcao && (zapOk(C().whatsapp || "") || (C().barbers || []).some((b2) => zapOk(b2.whatsapp || "")))) {
       try {
         jan = window.open("", "_blank");
         if (jan) jan.document.write('<p style="font:16px system-ui;padding:24px">Abrindo o WhatsApp da barbearia\u2026</p>');
@@ -2451,14 +2497,7 @@ const FORMS = {
       if (x && z) {
         const link = wa(z, msgPedido(x, nome, tel, obs));
         U.zapPedido = link;
-        if (jan) {
-          try {
-            jan.location.href = link;
-          } catch (err) {
-            jan.close();
-            jan = null;
-          }
-        }
+        abreZap(link, jan);
       } else if (jan) jan.close();
     }
     if (ok) {
@@ -2492,7 +2531,7 @@ const FORMS = {
     }
     const avisar2 = REAL && f.zap && f.zap.checked && zapOk(tel);
     let jan = null;
-    if (avisar2) {
+    if (avisar2 && !CEL) {
       try {
         jan = window.open("", "_blank");
       } catch (e) {
@@ -2509,13 +2548,7 @@ const FORMS = {
     U.ad = d;
     if (avisar2) {
       const link = wa(tel, msgConfirma({ n: s.name, d, s: t, b }, { name: nome }));
-      if (jan) {
-        try {
-          jan.location.href = link;
-        } catch (e) {
-          location.href = link;
-        }
-      } else location.href = link;
+      abreZap(link, jan);
       toast("Hor\xE1rio marcado. Toque em enviar no WhatsApp para o cliente receber.");
     } else toast("Hor\xE1rio marcado.");
   },
