@@ -1,4 +1,4 @@
-// Space · notificações no celular e funcionamento com internet fraca
+// DreewSolution · notificações no celular e funcionamento com internet fraca
 const CACHE = 'space-v2';
 self.addEventListener('install', e => {
   self.skipWaiting();
@@ -27,8 +27,8 @@ self.addEventListener('fetch', e => {
 });
 self.addEventListener('push', e => {
   let d = {};
-  try { d = e.data.json(); } catch (x) { d = { title: 'Space', body: e.data ? e.data.text() : '' }; }
-  e.waitUntil(self.registration.showNotification(d.title || 'Space', {
+  try { d = e.data.json(); } catch (x) { d = { title: 'DreewSolution', body: e.data ? e.data.text() : '' }; }
+  e.waitUntil(self.registration.showNotification(d.title || 'DreewSolution', {
     body: d.body || '', icon: '/icon-192.png', badge: '/icon-192.png',
     tag: d.tag, renotify: !!d.tag, vibrate: [120, 60, 120], data: { url: d.url || '/' }
   }));

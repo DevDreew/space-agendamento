@@ -2,14 +2,14 @@
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0b0c">
-<title>Space · Agendamento</title>
+<title>DreewSolution · Agendamento online</title>
 <meta name="description" content="Agende seu corte e barba pelo celular, sem cadastro.">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Space">
+<meta name="apple-mobile-web-app-title" content="DreewSolution">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>/* Direção: quadro de preços de barbearia em preto, com a comanda branca como peça central e o dourado só no que pede ação. */
@@ -1510,7 +1510,7 @@ Pode confirmar?`;
 }
 function msgCobranca(l) {
   const venc = l.vence < hoje();
-  return `Ol\xE1! Aqui \xE9 do app Space. \u{1F488}
+  return `Ol\xE1! Aqui \xE9 da DreewSolution, o app de agendamento da sua barbearia. \u{1F488}
 
 ${venc ? `A mensalidade da ${l.name} est\xE1 em aberto desde ${brData(l.vence)}` : `A mensalidade da ${l.name} vence em ${brData(l.vence)}`}.
 Valor: ${brl(l.mensalidade)}
@@ -1732,7 +1732,7 @@ if (REAL && "serviceWorker" in navigator) navigator.serviceWorker.register("/sw.
 function manifesto() {
   if (!REAL) return;
   try {
-    const nm = C().name || "Space", m = { name: PAINEL ? "Painel " + nm : nm, short_name: PAINEL ? "Painel" : nm.slice(0, 12), start_url: location.origin + "/" + (SLUG ? SLUG + "/" : "") + (PAINEL ? "painel" : ""), scope: location.origin + "/", display: "standalone", background_color: "#0b0b0c", theme_color: "#0b0b0c", icons: [{ src: location.origin + "/icon-192.png", sizes: "192x192", type: "image/png" }, { src: location.origin + "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" }] };
+    const nm = C().name || "DreewSolution", m = { name: PAINEL ? "Painel " + nm : nm, short_name: PAINEL ? "Painel" : nm.slice(0, 12), start_url: location.origin + "/" + (SLUG ? SLUG + "/" : "") + (PAINEL ? "painel" : ""), scope: location.origin + "/", display: "standalone", background_color: "#0b0b0c", theme_color: "#0b0b0c", icons: [{ src: location.origin + "/icon-192.png", sizes: "192x192", type: "image/png" }, { src: location.origin + "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any maskable" }] };
     const l = document.querySelector("link[rel=manifest]");
     if (l && l.dataset.n != m.name) {
       l.href = "data:application/manifest+json," + encodeURIComponent(JSON.stringify(m));
@@ -1761,7 +1761,7 @@ function bloqueio() {
 function painelAssin() {
   if (!REAL || Store.adminVendo || !Store.assin) return "";
   const a = Store.assin, st = { ativo: ["Em dia", "check", "confirmado"], aviso: ["Aviso de pagamento", "hourglass", "pendente"], suspenso: ["Suspensa", "ban", "cancelado"] }[a.status] || ["Em dia", "check", "confirmado"];
-  return `<section class="painel"><h3>Mensalidade do app</h3><p class="q">Plano Space para a sua barbearia.</p><dl class="dl"><dt>Situa\xE7\xE3o</dt><dd><span class="pill ${st[2]}">${I(st[1])}${st[0]}</span></dd><dt>Valor</dt><dd class="num">${brl(a.mensalidade)} por m\xEAs</dd><dt>Pr\xF3ximo vencimento</dt><dd>${esc(brData(a.vence))}</dd></dl><div class="acoes">${pagar(a)}${suporte(a)}</div></section>`;
+  return `<section class="painel"><h3>Mensalidade do app</h3><p class="q">Plano DreewSolution para a sua barbearia.</p><dl class="dl"><dt>Situa\xE7\xE3o</dt><dd><span class="pill ${st[2]}">${I(st[1])}${st[0]}</span></dd><dt>Valor</dt><dd class="num">${brl(a.mensalidade)} por m\xEAs</dd><dt>Pr\xF3ximo vencimento</dt><dd>${esc(brData(a.vence))}</dd></dl><div class="acoes">${pagar(a)}${suporte(a)}</div></section>`;
 }
 function telaAdmin() {
   var _a;
@@ -1826,7 +1826,7 @@ function dlgEditar(id) {
 }
 const slugify = (t) => String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40);
 function telaAcesso() {
-  if (Store.mode == "sem-admin") return `<main class="acesso"><p class="eyebrow">${I("lock")} Space \xB7 dono do app</p><h1>Sem acesso</h1><p class="sub">Esta \xE1rea \xE9 s\xF3 do dono do app.</p><button class="btn sec" data-a="sair">Sair desta conta</button></main>`;
+  if (Store.mode == "sem-admin") return `<main class="acesso"><p class="eyebrow">${I("lock")} DreewSolution \xB7 dono do app</p><h1>Sem acesso</h1><p class="sub">Esta \xE1rea \xE9 s\xF3 do dono do app.</p><button class="btn sec" data-a="sair">Sair desta conta</button></main>`;
   const m = Store.mode, e = U.erroAcesso ? `<p class="err" role="alert">${esc(U.erroAcesso)}</p>` : "", ok = U.okAcesso ? `<p class="okmsg" role="status">${esc(U.okAcesso)}</p>` : "";
   const topo = `<p class="eyebrow">${I("scissors")} Space \xB7 ${ADMIN ? "dono do app" : "painel do barbeiro"}</p>`;
   if (!Store.ready) return `<main class="acesso">${topo}<p class="sub">Carregando\u2026</p></main>`;
@@ -1835,7 +1835,7 @@ function telaAcesso() {
   const cad = U.modoAcesso == "cadastro", esq = U.modoAcesso == "esqueci";
   return `<main class="acesso">${topo}<h1>${esq ? "Recuperar senha" : cad ? "Criar conta" : "Entrar"}</h1><p class="sub">${esq ? "Mandamos um link para voc\xEA criar uma senha nova." : cad ? ADMIN ? "Crie sua conta. Depois um dono do app libera o acesso." : "Crie o acesso do dono da barbearia. S\xF3 voc\xEA entra no painel." : "Acesso exclusivo do barbeiro."}</p>
  <form data-f="${esq ? "esqueci" : cad ? "cadastro" : "login"}" novalidate><div class="campo"><label for="l-e">Email</label><input id="l-e" name="email" type="email" autocomplete="email" required value="${esc(U.lEmail || "")}"></div>${esq ? "" : `<div class="campo"><label for="l-s">Senha</label><input id="l-s" name="senha" type="password" autocomplete="${cad ? "new-password" : "current-password"}" required minlength="${cad ? 8 : 1}">${cad ? '<span class="ajuda">Pelo menos 8 caracteres.</span>' : ""}</div>`}${e}${ok}<button class="btn larga" type="submit">${esq ? "Enviar link" : cad ? "Criar conta" : "Entrar"}</button></form>
- <div class="acoes" style="justify-content:space-between">${cad || esq ? `<button class="link" data-a="acesso" data-v="login">J\xE1 tenho conta</button>${esq && U.suporte ? `<a class="btn sec" style="width:100%;margin-top:10px" href="https://wa.me/55${U.suporte.replace(/\D/g, "").replace(/^55/, "")}?text=${encodeURIComponent("Oi! Esqueci a senha do Space. Meu email: " + (U.lEmail || ""))}" target="_blank" rel="noopener">Pedir senha nova no WhatsApp</a>` : ""}` : `${ADMIN ? "" : '<button class="link" data-a="acesso" data-v="cadastro">Criar conta de barbearia</button>'}<button class="link" data-a="acesso" data-v="esqueci">Esqueci a senha</button>`}</div></main>`;
+ <div class="acoes" style="justify-content:space-between">${cad || esq ? `<button class="link" data-a="acesso" data-v="login">J\xE1 tenho conta</button>${esq && U.suporte ? `<a class="btn sec" style="width:100%;margin-top:10px" href="https://wa.me/55${U.suporte.replace(/\D/g, "").replace(/^55/, "")}?text=${encodeURIComponent("Oi! Esqueci a senha do app DreewSolution. Meu email: " + (U.lEmail || ""))}" target="_blank" rel="noopener">Pedir senha nova no WhatsApp</a>` : ""}` : `${ADMIN ? "" : '<button class="link" data-a="acesso" data-v="cadastro">Criar conta de barbearia</button>'}<button class="link" data-a="acesso" data-v="esqueci">Esqueci a senha</button>`}</div></main>`;
 }
 let adiado = false;
 function editando() {
@@ -1870,7 +1870,7 @@ function R(forca) {
   }
   adiado = false;
   if (REAL && ADMIN && Store.mode == "admin") {
-    document.title = "Dono do app \xB7 Space";
+    document.title = "Dono do app \xB7 DreewSolution";
     aplicaCor("#d4ab5f");
     $("#app").className = "";
     $("#app").innerHTML = `<div class="pole"></div>${Store.erro ? `<p class="aviso erro">${esc(Store.erro)}</p>` : ""}${telaAdmin()}`;
@@ -1883,7 +1883,7 @@ function R(forca) {
     return;
   }
   if (REAL && PAINEL && Store.mode != "painel") {
-    document.title = "Painel do barbeiro \xB7 Space";
+    document.title = "Painel do barbeiro \xB7 DreewSolution";
     aplicaCor(C().cor);
     $("#app").className = "";
     $("#app").innerHTML = `<div class="pole"></div>${Store.erro ? `<p class="aviso erro">${esc(Store.erro)}</p>` : ""}${telaAcesso()}`;
@@ -1981,7 +1981,7 @@ const ACOES = {
     toast("Criando\u2026");
     const { data, error } = await Store.sb.functions.invoke("cobranca", { body: { acao: "senha", shop: id } });
     if (error || !data || !data.senha) return toast("N\xE3o consegui criar a senha agora.");
-    prompt("Senha nova criada. Copie e mande para o barbeiro:", "Sua senha nova do Space: " + data.senha + " | Entre em " + location.origin + "/" + (l.slug || "") + "/painel com o email " + (l.email || ""));
+    prompt("Senha nova criada. Copie e mande para o barbeiro:", "Sua senha nova do app DreewSolution: " + data.senha + " | Entre em " + location.origin + "/" + (l.slug || "") + "/painel com o email " + (l.email || ""));
   },
   async "adm-status"(v) {
     const [id, st] = v.split("|");

@@ -13,7 +13,7 @@ const URL_SB = Deno.env.get("SUPABASE_URL")!;
 const adm = createClient(URL_SB, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info", "Access-Control-Allow-Methods": "POST, OPTIONS" };
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...CORS, "Content-Type": "application/json" } });
-const SITE = "https://space-agendamento.vercel.app";
+const SITE = "https://dreewsolution.vercel.app";
 const AVISO_MP = `${URL_SB}/functions/v1/cobranca?src=mp`;
 
 async function segredos(): Promise<any> {
@@ -190,13 +190,13 @@ Deno.serve(async (req) => {
       const pref = await mp("/checkout/preferences", token, {
         method: "POST",
         body: JSON.stringify({
-          items: [{ id: "mensalidade-space", title: `Mensalidade Space · ${shop.name}`, quantity: 1, unit_price: Number(shop.mensalidade), currency_id: "BRL" }],
+          items: [{ id: "mensalidade-dreewsolution", title: `Mensalidade DreewSolution · ${shop.name}`, quantity: 1, unit_price: Number(shop.mensalidade), currency_id: "BRL" }],
           external_reference: shop.id,
           payer: { email: user.email },
           notification_url: AVISO_MP,
           back_urls: { success: volta, pending: volta, failure: volta },
           auto_return: "approved",
-          statement_descriptor: "SPACE APP",
+          statement_descriptor: "DREEWSOLUTION",
         }),
       });
       return json({ ok: true, url: pref.init_point });
@@ -209,7 +209,7 @@ Deno.serve(async (req) => {
       const s = await mp("/preapproval", token, {
         method: "POST",
         body: JSON.stringify({
-          reason: `Mensalidade Space · ${shop.name}`,
+          reason: `Mensalidade DreewSolution · ${shop.name}`,
           external_reference: shop.id,
           payer_email: email,
           auto_recurring: { frequency: 1, frequency_type: "months", transaction_amount: Number(shop.mensalidade), currency_id: "BRL" },
