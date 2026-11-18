@@ -1,0 +1,33 @@
+ROBÔ DE WHATSAPP · DREEWSOLUTION
+================================
+
+O que ele faz
+-------------
+Fica ligado no seu computador, conectado a um WhatsApp (o número do app), e envia sozinho:
+- o pedido novo para o WhatsApp do barbeiro do link;
+- a confirmação, a recusa e o lembrete do dia para o WhatsApp do cliente;
+- o aviso de cancelamento para o barbeiro.
+
+Enquanto o robô estiver ligado, o cliente só toca em "Pedir" e não precisa abrir o WhatsApp.
+Se o computador desligar, o app percebe em até 15 minutos e volta a pedir para o cliente enviar pelo WhatsApp dele.
+Mensagens que ficarem mais de 12 horas na fila não são enviadas.
+
+Como ligar (Windows)
+--------------------
+1. Instale o Node.js LTS: https://nodejs.org
+2. No painel do dono (https://dreewsolution.vercel.app/admin), em "WhatsApp automático",
+   toque em "Ligar robô no computador" e copie a chave que aparece.
+3. Dê dois cliques em iniciar-robo.bat. Na primeira vez ele instala e abre o config.json:
+   cole a chave no lugar de COLE_AQUI..., salve e feche o Bloco de Notas.
+4. Aparece um QR code na janela. No celular com o WhatsApp do app:
+   Configurações → Aparelhos conectados → Conectar aparelho, e leia o QR code.
+5. Quando aparecer "WhatsApp conectado", está funcionando. Deixe a janela aberta.
+
+Dicas
+-----
+- Use um número só para o app, não o seu pessoal. O WhatsApp pode bloquear números que mandam
+  mensagem demais por robô; com mensagens de agendamento, que o cliente pediu, o risco é baixo.
+- Deixe o computador sem entrar em suspensão (Configurações → Energia → Nunca).
+- Para testar sem enviar nada: abra um terminal na pasta e rode "npm run teste".
+- Se trocar a chave no painel, troque também no config.json.
+- Não compartilhe a pasta sessao-whatsapp: ela é o login do WhatsApp.

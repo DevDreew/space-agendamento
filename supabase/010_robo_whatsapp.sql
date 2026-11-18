@@ -1,0 +1,4 @@
+-- Robô de WhatsApp no computador — já aplicado no projeto.
+-- zap_fila: mensagens que a função notificar coloca quando a Z-API não está ligada e o robô está.
+-- robo_pegar(chave) / robo_marcar(chave, id, ok, erro): a "API" que o robô usa. Mensagens com mais de 12 h vencem.
+-- admin_robo_ligar / admin_robo_desligar / admin_status_robo: painel do dono. zap_auto_ativo() conta o robô visto nos últimos 15 min.

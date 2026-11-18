@@ -41,7 +41,7 @@ async function loja(id: string) {
   const { data } = await sb.from("shops").select("id,slug,name,config").eq("id", id).single();
   return data!;
 }
-// WhatsApp automático (Z-API): um número do app manda a mensagem para o barbeiro e para o cliente.
+// WhatsApp automático: pela Z-API ou pelo robô do computador (fila zap_fila). Um número do app manda para o barbeiro e para o cliente.
 const brl = (v: number) => "R$ " + Number(v || 0).toFixed(2).replace(".", ",").replace(",00", "");
 const dataBR = (d: string) => d.split("-").reverse().join("/");
 const fone = (t: string) => String(t || "").replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
@@ -55,7 +55,14 @@ async function zap(tel: string, texto: string) {
   await segredos();
   const { data: s } = await sb.rpc("segredos_notificacao"); // sempre a chave mais nova
   const n = telZap(tel);
-  if (!s || !s.zapi_instancia || !s.zapi_token || !n) return 0;
+  if (!s || !n) return 0;
+  if (!s.zapi_instancia || !s.zapi_token) {
+    // Sem Z-API: se o robô do computador estiver ligado, a mensagem entra na fila e ele envia.
+    if (!s.robo_chave) return 0;
+    const { error } = await sb.from("zap_fila").insert({ phone: "55" + n, texto });
+    if (error) { console.error("fila", error); return 0; }
+    return 1;
+  }
   try {
     const r = await fetch(`https://api.z-api.io/instances/${s.zapi_instancia}/token/${s.zapi_token}/send-text`, {
       method: "POST",

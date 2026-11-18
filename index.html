@@ -1051,10 +1051,12 @@ const StoreSB = {
     const [l, c, m] = await Promise.all([this.sb.rpc("admin_lojas"), this.sb.rpc("admin_config"), this.sb.rpc("admin_status_mp")]);
     this.mp = m && m.data || {};
     try {
-      const z = await this.sb.rpc("admin_status_zap");
+      const [z, rb] = await Promise.all([this.sb.rpc("admin_status_zap"), this.sb.rpc("admin_status_robo")]);
       this.zap = z && z.data || {};
+      this.robo = rb && rb.data || {};
     } catch (e) {
       this.zap = {};
+      this.robo = {};
     }
     try {
       const [g, h] = await Promise.all([this.sb.rpc("admin_resumo"), this.sb.rpc("admin_assinaturas")]);
@@ -1789,7 +1791,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261118192909";
+const VERSAO = "20261118195205";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
@@ -1937,7 +1939,16 @@ function telaAdmin() {
  <section class="painel" style="margin-bottom:18px"><h3>Cobran\xE7a</h3><p class="q">Valem para todas as barbearias que n\xE3o tiverem um link pr\xF3prio.</p><form data-f="admconf"><div class="campo"><label for="ac-l">Seu link de pagamento (cr\xE9dito, d\xE9bito, Pix)</label><input id="ac-l" name="link" type="url" placeholder="https://link.mercadopago.com.br/..." value="${esc(c.link_pagamento || "")}"><span class="ajuda">Crie no Mercado Pago, InfinitePay, PagSeguro ou Stripe e cole aqui.</span></div><div class="campo"><label for="ac-m">Mensalidade padr\xE3o para barbearias novas (R$)</label><input id="ac-m" name="mens" type="number" min="0" value="${esc(c.mensalidade || "149")}"></div><div class="campo"><label for="ac-w">Seu WhatsApp de suporte</label><input id="ac-w" name="wa" inputmode="tel" value="${esc(fone(c.contato_suporte || ""))}"><span class="ajuda">O barbeiro toca em "J\xE1 paguei" e fala com voc\xEA.</span></div><div class="campo"><label for="ac-s">Pausar a agenda depois de quantos dias de atraso</label><input id="ac-s" name="susp" type="number" min="0" max="60" value="${esc((_a = c.dias_suspensao) != null ? _a : "5")}"><span class="ajuda">Todo dia ao meio-dia o app avisa quem vence em 3 dias e quem atrasou, e pausa a agenda depois desse prazo. Coloque 0 para nunca pausar sozinho.</span></div><button class="btn peq" type="submit">Salvar</button></form></section>
  <section class="painel" style="margin-bottom:18px"><h3>WhatsApp autom\xE1tico</h3><p class="q">Um n\xFAmero de WhatsApp do app manda as mensagens sozinho: o pedido chega no WhatsApp do barbeiro na hora em que o cliente toca em Pedir, e a confirma\xE7\xE3o, a recusa e o lembrete do dia chegam no WhatsApp do cliente. Ningu\xE9m precisa abrir o WhatsApp para enviar.</p>
  ${(Store.zap || {}).conectado ? `<p class="push-ok">${I("check")}Ligado (inst\xE2ncia terminando em ${esc(Store.zap.final)}).</p>` : `<p class="dica" style="margin:0 0 12px">Desligado. Hoje o cliente abre o WhatsApp e toca em enviar.</p>`}
- <form data-f="admzap" autocomplete="off"><div class="grade2"><div class="campo"><label for="zp-i">ID da inst\xE2ncia (Z-API)</label><input id="zp-i" name="i" autocomplete="off" placeholder="3E..."></div><div class="campo"><label for="zp-t">Token da inst\xE2ncia</label><input id="zp-t" name="t" type="password" autocomplete="off"></div></div><div class="campo"><label for="zp-c">Token de seguran\xE7a da conta (Client-Token)</label><input id="zp-c" name="c" type="password" autocomplete="off"><span class="ajuda">Na Z-API: crie a inst\xE2ncia, leia o QR code com o WhatsApp do app, copie o ID e o Token da inst\xE2ncia. O Client-Token fica em Seguran\xE7a. As chaves ficam s\xF3 no servidor.</span></div><div class="acoes"><button class="btn peq" type="submit">Salvar e ligar</button>${(Store.zap || {}).conectado ? `<button class="btn sec peq" type="button" data-a="adm-zap-teste">Mandar teste</button><button class="btn perigo peq" type="button" data-a="adm-zap-off">Desligar</button>` : ""}</div></form></section>
+ <form data-f="admzap" autocomplete="off"><div class="grade2"><div class="campo"><label for="zp-i">ID da inst\xE2ncia (Z-API)</label><input id="zp-i" name="i" autocomplete="off" placeholder="3E..."></div><div class="campo"><label for="zp-t">Token da inst\xE2ncia</label><input id="zp-t" name="t" type="password" autocomplete="off"></div></div><div class="campo"><label for="zp-c">Token de seguran\xE7a da conta (Client-Token)</label><input id="zp-c" name="c" type="password" autocomplete="off"><span class="ajuda">Na Z-API: crie a inst\xE2ncia, leia o QR code com o WhatsApp do app, copie o ID e o Token da inst\xE2ncia. O Client-Token fica em Seguran\xE7a. As chaves ficam s\xF3 no servidor.</span></div><div class="acoes"><button class="btn peq" type="submit">Salvar e ligar</button>${(Store.zap || {}).conectado || (Store.robo || {}).online ? `<button class="btn sec peq" type="button" data-a="adm-zap-teste">Mandar teste</button><button class="btn perigo peq" type="button" data-a="adm-zap-off">Desligar</button>` : ""}</div></form></section>
+ <section class="painel" style="margin-bottom:18px"><h3>Rob\xF4 de WhatsApp no seu computador</h3><p class="q">Gr\xE1tis: um programa no seu computador, conectado ao WhatsApp do app por QR code, envia as mensagens sozinho. Funciona enquanto o computador estiver ligado com o rob\xF4 aberto. Se ele desligar, em at\xE9 15 minutos o app volta a pedir para o cliente enviar pelo WhatsApp dele.${(Store.zap || {}).conectado ? " Com a Z-API ligada, ela tem prioridade." : ""}</p>
+ ${(() => {
+    const r = Store.robo || {};
+    if (!r.ligado) return `<div class="acoes"><button class="btn peq" data-a="adm-robo-ligar">${I("play")}Ligar rob\xF4 no computador</button><a class="btn sec peq" href="/robo-whatsapp.zip" download>Baixar o rob\xF4</a></div>`;
+    const visto = r.visto ? new Date(r.visto) : null;
+    return `<p class="${r.online ? "push-ok" : "dica"}" style="margin:0 0 10px">${r.online ? `${I("check")}Rob\xF4 online agora.` : visto ? `Rob\xF4 offline. Visto pela \xFAltima vez em ${esc(visto.toLocaleString("pt-BR"))}.` : "Rob\xF4 ainda n\xE3o conectou. Abra o programa no computador."} \xB7 ${r.enviadas_hoje || 0} enviadas hoje \xB7 ${r.na_fila || 0} na fila${r.falhas ? ` \xB7 ${r.falhas} falharam` : ""}</p>
+  <div class="campo"><label for="rb-k">Chave do rob\xF4 (cole no config.json)</label><input id="rb-k" readonly value="${esc(r.chave || "")}" onclick="this.select()"></div>
+  <div class="acoes"><button class="btn sec peq" data-a="adm-robo-copiar">Copiar chave</button><a class="btn sec peq" href="/robo-whatsapp.zip" download>Baixar o rob\xF4</a><button class="btn sec peq" data-a="adm-robo-ligar">Trocar chave</button><button class="btn perigo peq" data-a="adm-robo-off">Desligar rob\xF4</button></div>`;
+  })()}</section>
  <section class="painel" style="margin-bottom:18px"><h3>Recebimento autom\xE1tico</h3><p class="q">Com a sua chave do Mercado Pago, o barbeiro paga com cr\xE9dito, d\xE9bito ou Pix, e a conta \xE9 liberada sozinha por mais um m\xEAs assim que o pagamento \xE9 aprovado.</p>
  ${(Store.mp || {}).conectado ? `<p class="push-ok">${I("check")}Mercado Pago conectado (chave terminando em ${esc(Store.mp.final)}${Store.mp.teste ? ", modo de teste" : ""}).</p>` : `<p class="dica" style="margin:0 0 12px">Ainda n\xE3o conectado. Enquanto isso, o bot\xE3o de pagar usa o link de pagamento acima.</p>`}
  <form data-f="admmp" autocomplete="off"><div class="campo"><label for="mp-t">Access Token de produ\xE7\xE3o do Mercado Pago</label><input id="mp-t" name="t" type="password" placeholder="APP_USR-..." autocomplete="off"><span class="ajuda">No Mercado Pago Developers: Suas integra\xE7\xF5es, crie uma aplica\xE7\xE3o e abra Credenciais de produ\xE7\xE3o. Copie o Access Token. A chave fica guardada s\xF3 no servidor e n\xE3o aparece de novo.</span></div><div class="acoes"><button class="btn peq" type="submit">Salvar chave</button>${(Store.mp || {}).conectado ? `<button class="btn sec peq" type="button" data-a="adm-mp-testar">Testar conex\xE3o</button><button class="btn perigo peq" type="button" data-a="adm-mp-remover">Desconectar</button>` : ""}</div></form></section>
@@ -2162,6 +2173,36 @@ const ACOES = {
   },
   "adm-aviso"(id) {
     dlgAviso(id);
+  },
+  async "adm-robo-ligar"() {
+    if ((Store.robo || {}).ligado && !confirm("Trocar a chave? O rob\xF4 para at\xE9 voc\xEA colar a chave nova no config.json.")) return;
+    const { error } = await Store.sb.rpc("admin_robo_ligar");
+    if (error) return toast(erroAmigo(error) || "N\xE3o consegui.");
+    await Store.carregaAdmin();
+    R(true);
+    toast("Chave criada. Copie e cole no config.json do rob\xF4.");
+  },
+  async "adm-robo-copiar"() {
+    const k = (Store.robo || {}).chave || "";
+    try {
+      await navigator.clipboard.writeText(k);
+      toast("Chave copiada.");
+    } catch (e) {
+      const i = $("#rb-k");
+      if (i) {
+        i.select();
+        document.execCommand && document.execCommand("copy");
+      }
+      toast("Chave selecionada. Copie com Ctrl+C.");
+    }
+  },
+  async "adm-robo-off"() {
+    if (!confirm("Desligar o rob\xF4? A chave deixa de valer e o cliente volta a enviar pelo WhatsApp dele.")) return;
+    const { error } = await Store.sb.rpc("admin_robo_desligar");
+    if (error) return toast(erroAmigo(error) || "N\xE3o consegui.");
+    await Store.carregaAdmin();
+    R(true);
+    toast("Rob\xF4 desligado.");
   },
   async "adm-zap-teste"() {
     const n = prompt("Mandar a mensagem de teste para qual WhatsApp?", fone((Store.pconf || {}).contato_suporte || ""));
