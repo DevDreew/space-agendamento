@@ -1508,6 +1508,18 @@ function msgPedido(x, nome, tel, obs) {
 
 Pode confirmar?`;
 }
+function msgCobranca(l) {
+  const venc = l.vence < hoje();
+  return `Ol\xE1! Aqui \xE9 do app Space. \u{1F488}
+
+${venc ? `A mensalidade da ${l.name} est\xE1 em aberto desde ${brData(l.vence)}` : `A mensalidade da ${l.name} vence em ${brData(l.vence)}`}.
+Valor: ${brl(l.mensalidade)}
+
+Para pagar com Pix, d\xE9bito ou cr\xE9dito, abra seu painel e toque em Pagar agora:
+${location.origin}/${l.slug}/painel
+
+Qualquer d\xFAvida, \xE9 s\xF3 responder aqui.`;
+}
 function msgConfirma(x, p) {
   const c = C();
   return `Oi, ${(p.name || "").split(" ")[0]}! \u2705 Seu hor\xE1rio est\xE1 confirmado:
@@ -1757,9 +1769,9 @@ function telaAdmin() {
   const venc = (l) => l.vence < hj, dias = (l) => Math.round((D(hj) - D(l.vence)) / 864e5), mrr = L.filter((l) => l.status != "suspenso").reduce((t, l) => t + +l.mensalidade, 0);
   const pil = (l) => ({ ativo: `<span class="pill confirmado">${I("check")}Ativa</span>`, aviso: `<span class="pill pendente">${I("hourglass")}Em aviso</span>`, suspenso: `<span class="pill cancelado">${I("ban")}Suspensa</span>` })[l.status];
   const card = (l) => `<article class="loja"><div class="loja-topo"><div><h3>${esc(l.name)}</h3><small>${esc(l.email)} \xB7 /${esc(l.slug)}</small></div>${pil(l)}</div>
- <dl class="dl"><dt>Mensalidade</dt><dd class="num">${brl(l.mensalidade)}</dd><dt>Vencimento</dt><dd${venc(l) ? ' style="color:var(--ruim)"' : ""}>${esc(brData(l.vence))}${venc(l) ? ` \xB7 vencida h\xE1 ${dias(l)} dias` : ""}</dd><dt>Pedidos (30 dias)</dt><dd class="num">${l.pedidos_30d}</dd><dt>Faturou (30 dias)</dt><dd class="num">${brl(l.faturado_30d)}</dd><dt>\xDAltimo pagamento</dt><dd>${l.ultimo_pagamento ? esc(new Date(l.ultimo_pagamento).toLocaleDateString("pt-BR")) + " \xB7 " + brl(l.ultimo_valor) : "nenhum pelo app"}</dd><dt>D\xE9bito autom\xE1tico</dt><dd>${l.debito_auto == "authorized" ? "Ativo no cart\xE3o" : l.debito_auto == "pending" ? "Esperando cart\xE3o" : "N\xE3o"}</dd><dt>Avisos no celular</dt><dd>${l.avisos_ativos > 0 ? "Ativados" : "N\xE3o ativou"}</dd></dl>
+ <dl class="dl"><dt>Mensalidade</dt><dd class="num">${brl(l.mensalidade)}</dd><dt>Vencimento</dt><dd${venc(l) ? ' style="color:var(--ruim)"' : ""}>${esc(brData(l.vence))}${venc(l) ? ` \xB7 vencida h\xE1 ${dias(l)} dias` : ""}</dd><dt>Pedidos (30 dias)</dt><dd class="num">${l.pedidos_30d}</dd><dt>Faturou (30 dias)</dt><dd class="num">${brl(l.faturado_30d)}</dd><dt>WhatsApp</dt><dd>${l.whatsapp ? esc(fone(l.whatsapp)) : "n\xE3o cadastrado"}</dd><dt>\xDAltimo pagamento</dt><dd>${l.ultimo_pagamento ? esc(new Date(l.ultimo_pagamento).toLocaleDateString("pt-BR")) + " \xB7 " + brl(l.ultimo_valor) : "nenhum pelo app"}</dd><dt>D\xE9bito autom\xE1tico</dt><dd>${l.debito_auto == "authorized" ? "Ativo no cart\xE3o" : l.debito_auto == "pending" ? "Esperando cart\xE3o" : "N\xE3o"}</dd><dt>Avisos no celular</dt><dd>${l.avisos_ativos > 0 ? "Ativados" : "N\xE3o ativou"}</dd></dl>
  ${l.aviso ? `<p class="dica" style="margin:0 0 10px">Aviso atual: ${esc(l.aviso)}</p>` : ""}
- <div class="acoes"><button class="btn peq" data-a="adm-pago" data-v="${l.id}">${I("check")}Marcar como pago</button><button class="btn sec peq" data-a="adm-aviso" data-v="${l.id}">${I("bell")}Enviar aviso</button>${l.status == "suspenso" ? `<button class="btn sec peq" data-a="adm-status" data-v="${l.id}|ativo">Reativar</button>` : `<button class="btn perigo peq" data-a="adm-status" data-v="${l.id}|suspenso">Suspender</button>`}<button class="btn sec peq" data-a="adm-editar" data-v="${l.id}">${I("pencil")}Valor e vencimento</button><button class="btn sec peq" data-a="adm-senha" data-v="${l.id}">Nova senha</button><a class="btn sec peq" href="/${esc(l.slug)}/painel" target="_blank" rel="noopener">${I("store")}Abrir painel</a></div></article>`;
+ <div class="acoes"><button class="btn peq" data-a="adm-pago" data-v="${l.id}">${I("check")}Marcar como pago</button><button class="btn sec peq" data-a="adm-aviso" data-v="${l.id}">${I("bell")}Enviar aviso</button>${l.status == "suspenso" ? `<button class="btn sec peq" data-a="adm-status" data-v="${l.id}|ativo">Reativar</button>` : `<button class="btn perigo peq" data-a="adm-status" data-v="${l.id}|suspenso">Suspender</button>`}<button class="btn sec peq" data-a="adm-editar" data-v="${l.id}">${I("pencil")}Valor e vencimento</button><button class="btn sec peq" data-a="adm-senha" data-v="${l.id}">Nova senha</button>${zapOk(l.whatsapp || "") ? `<a class="btn sec peq" href="${wa(telZap(l.whatsapp), msgCobranca(l))}" target="_blank" rel="noopener">${I("message-circle")}Cobrar no WhatsApp</a>` : ""}<a class="btn sec peq" href="/${esc(l.slug)}/painel" target="_blank" rel="noopener">${I("store")}Abrir painel</a></div></article>`;
   return `<main class="admin"><header class="topo-pro"><div><small>S\xF3 voc\xEA v\xEA esta \xE1rea</small><h1>Dono do app</h1></div><button class="btn sec" data-a="sair">${I("x")}Sair</button></header>
 
  ${visaoGeral()}
@@ -2137,9 +2149,39 @@ const ACOES = {
     abre(`<h2>Cancelar hor\xE1rio?</h2><p class="dica" style="margin:0 0 14px">${esc(x.n)}, ${esc(dataCurta(x.d))} \xE0s ${hm(x.s)}. O hor\xE1rio volta a ficar livre.</p><div class="fim"><button class="btn perigo" data-a="cli-cancela2" data-v="${esc(v)}">Cancelar hor\xE1rio</button><button class="btn sec" data-a="fecha">Manter</button></div>`);
   },
   async "cli-cancela2"(v) {
+    const x = todos().find((i) => String(i.id) == String(v)), z = REAL && x && !PAINEL ? zapDoPedido(x.b) : "";
+    let jan = null;
+    if (z) {
+      try {
+        jan = window.open("", "_blank");
+      } catch (e) {
+      }
+    }
     fecha();
-    await mudaStatus(Store.uid, v, "cancelado");
-    toast("Hor\xE1rio cancelado.");
+    try {
+      await mudaStatus(Store.uid, v, "cancelado");
+    } catch (e) {
+      if (jan) jan.close();
+      throw e;
+    }
+    if (z) {
+      const p = pii(x), link = wa(z, `Ol\xE1! Precisei cancelar meu hor\xE1rio na ${C().name}:
+
+\u2702\uFE0F ${x.n}
+\u{1F4C5} ${dataCurta(x.d)} \xE0s ${hm(x.s)}
+\u{1F488} com ${barbeiro(x.b).name}
+\u{1F464} ${p.name || ""}
+
+O hor\xE1rio j\xE1 est\xE1 livre no app. Obrigado!`);
+      if (jan) {
+        try {
+          jan.location.href = link;
+        } catch (e) {
+          location.href = link;
+        }
+      } else location.href = link;
+      toast("Hor\xE1rio cancelado. Toque em enviar para avisar a barbearia.");
+    } else toast("Hor\xE1rio cancelado.");
   },
   pb(v) {
     U.pb = v;
