@@ -1,0 +1,4 @@
+-- Conta do cliente por barbearia — já aplicada no projeto.
+-- clientes (WhatsApp + senha com bcrypt, bloqueio de 15 min após 5 erros) e clientes_sessoes (token guardado só como hash).
+-- cliente_criar_conta(slug, token_do_pedido, senha): só cria quem acabou de agendar com aquele WhatsApp.
+-- cliente_entrar(slug, whatsapp, senha), cliente_meus(sessao), cliente_sair(sessao), clientes_com_conta() para o barbeiro.

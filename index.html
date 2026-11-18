@@ -347,6 +347,13 @@ dialog .dl dt{color:var(--cinza)}dialog .dl dd{margin:0;text-align:right;font-we
 .banner-pag .acoes.peq .btn{min-height:40px;padding:8px 14px;font-size:14px}
 .ck-aviso{display:flex;gap:10px;align-items:flex-start;margin:4px 0 14px;font-size:15px;cursor:pointer}.ck-aviso input{width:20px;height:20px;margin-top:1px;accent-color:var(--ouro);flex:none}
 #sem-rede{position:fixed;left:0;right:0;top:0;z-index:99;background:#7a2e2e;color:#fff;font:600 14px/1.35 var(--corpo,system-ui);padding:calc(8px + env(safe-area-inset-top)) 16px 8px;text-align:center}
+
+.conta-card{background:var(--carvao,#1c1a17);border:1px solid var(--ouro);border-radius:16px;padding:18px;margin:14px 0}
+.conta-card h3{margin:0 0 6px;font-size:18px}.conta-card p{margin:0 0 12px;color:var(--cinza);font-size:15px;line-height:1.45}
+.conta-form{display:flex;flex-direction:column;gap:12px}.conta-tel{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.conta-ok{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--linha);border-radius:12px;padding:10px 14px;margin:0 0 14px;font-size:15px}
+.conta-ok span{display:flex;align-items:center;gap:6px}.conta-ok svg{width:16px;height:16px;color:var(--ok)}
+.cli-l .tel-cli{display:block;color:var(--cinza);font-size:13px;margin-top:2px}
 </style></head>
 <body><div id="app"></div><dialog id="dlg"></dialog><div id="toast" role="status" aria-live="polite"></div><div id="tip" role="tooltip"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -776,6 +783,37 @@ const StoreSB = {
     this.cfg = Object.assign({}, PADRAO, d.config || {}, { name: d.name });
     if (a) this.cfg.assinantes = a;
   },
+  guardaConta(c) {
+    this.conta = c;
+    try {
+      c ? localStorage.setItem("space-conta-" + SLUG, JSON.stringify(c)) : localStorage.removeItem("space-conta-" + SLUG);
+    } catch (e) {
+    }
+  },
+  async criarConta(tk, senha) {
+    const { data, error } = await this.sb.rpc("cliente_criar_conta", { p_slug: SLUG, p_token: tk, p_senha: senha });
+    if (error) throw error;
+    this.guardaConta(data);
+    await this.recarregaCliente();
+    return data;
+  },
+  async entrarConta(tel, senha) {
+    const { data, error } = await this.sb.rpc("cliente_entrar", { p_slug: SLUG, p_phone: tel, p_senha: senha });
+    if (error) throw error;
+    if (data && data.erro) throw new Error(data.erro);
+    this.guardaConta(data);
+    await this.recarregaCliente();
+    return data;
+  },
+  async sairConta() {
+    const c = this.conta;
+    this.guardaConta(null);
+    if (c) try {
+      await this.sb.rpc("cliente_sair", { p_sessao: c.sessao });
+    } catch (e) {
+    }
+    await this.recarregaCliente();
+  },
   async iniciaCliente() {
     const { data, error } = await this.sb.from("shops").select("id,slug,name,config,status").eq("slug", SLUG).maybeSingle();
     if (error) {
@@ -817,7 +855,25 @@ const StoreSB = {
   },
   async recarregaCliente() {
     const de = hoje(), ate = soma(de, 31);
-    const [o, m] = await Promise.all([this.sb.rpc("horarios_ocupados", { p_slug: SLUG, p_de: de, p_ate: ate }), this.tokens.length ? this.sb.rpc("meus_pedidos", { p_tokens: this.tokens }) : Promise.resolve({ data: [] })]);
+    if (this.conta === void 0) {
+      try {
+        this.conta = JSON.parse(localStorage.getItem("space-conta-" + SLUG) || "null");
+      } catch (e) {
+        this.conta = null;
+      }
+    }
+    const [o, m, cm] = await Promise.all([this.sb.rpc("horarios_ocupados", { p_slug: SLUG, p_de: de, p_ate: ate }), this.tokens.length ? this.sb.rpc("meus_pedidos", { p_tokens: this.tokens.slice(-50) }) : Promise.resolve({ data: [] }), this.conta ? this.sb.rpc("cliente_meus", { p_sessao: this.conta.sessao }) : Promise.resolve({ data: [] })]);
+    if (cm && cm.error && /sessao_invalida/.test(cm.error.message || "")) {
+      this.conta = null;
+      try {
+        localStorage.removeItem("space-conta-" + SLUG);
+      } catch (e) {
+      }
+    }
+    if (m && !m.error) {
+      const vistos = new Set((m.data || []).map((r) => r.id));
+      m.data = (m.data || []).concat((cm && cm.data || []).filter((r) => !vistos.has(r.id)));
+    }
     if (o.error) {
       this.erro = "N\xE3o consegui atualizar os hor\xE1rios. Verifique a internet.";
       return;
@@ -933,6 +989,15 @@ const StoreSB = {
   },
   async recarregaPainel() {
     const antes = this._pend;
+    if (REAL && this.sb) this.sb.rpc("clientes_com_conta").then((r) => {
+      if (r && r.data) {
+        const n = new Set(r.data.map((x) => x.phone));
+        const mudou = !this.contas || n.size != this.contas.size;
+        this.contas = n;
+        if (mudou) atualiza();
+      }
+    }).catch(() => {
+    });
     const { data, error } = await this.sb.from("bookings").select("*").eq("shop_id", this.shop.id).gte("day", soma(hoje(), -180)).order("day").limit(5e3);
     if (error) {
       this.erro = "N\xE3o consegui atualizar a agenda. Verifique a internet.";
@@ -1285,8 +1350,8 @@ function passo3() {
   return `${trilho()}<h2 class="h-etapa">Sua comanda</h2><p class="sub">Confira e pe\xE7a o hor\xE1rio.</p>
  ${comanda({ n: s.name, b: bn, d: U.date, s: U.time, dur: s.dur, p: s.price })}
  <form data-f="pedir" novalidate>
- <div class="campo"><label for="f-nome">Seu nome</label><input id="f-nome" name="nome" autocomplete="name" value="${esc(U.nome)}" required>${e.nome ? `<span class="err">${e.nome}</span>` : ""}</div>
- <div class="campo"><label for="f-tel">WhatsApp</label><input id="f-tel" name="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000" value="${esc(fone(U.tel))}" required>${e.tel ? `<span class="err">${e.tel}</span>` : ""}<span class="ajuda">N\xFAmero com WhatsApp. Se n\xE3o colocar DDD, usamos o 11.</span>${cobre(U.tel, U.svc) ? `<span class="ajuda" style="color:var(--ok)">${I("check")} Este servi\xE7o est\xE1 incluso no seu ${esc(cobre(U.tel, U.svc).name)}.</span>` : ""}</div>
+ <div class="campo"><label for="f-nome">Seu nome</label><input id="f-nome" name="nome" autocomplete="name" value="${esc(U.nome || Store.conta && Store.conta.nome || "")}" required>${e.nome ? `<span class="err">${e.nome}</span>` : ""}</div>
+ <div class="campo"><label for="f-tel">WhatsApp</label><input id="f-tel" name="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000" value="${esc(fone(U.tel || Store.conta && Store.conta.phone || ""))}" required>${e.tel ? `<span class="err">${e.tel}</span>` : ""}<span class="ajuda">N\xFAmero com WhatsApp. Se n\xE3o colocar DDD, usamos o 11.</span>${cobre(U.tel, U.svc) ? `<span class="ajuda" style="color:var(--ok)">${I("check")} Este servi\xE7o est\xE1 incluso no seu ${esc(cobre(U.tel, U.svc).name)}.</span>` : ""}</div>
  <div class="campo"><label for="f-obs">Recado para o barbeiro (opcional)</label><textarea id="f-obs" name="obs" maxlength="200">${esc(U.obs)}</textarea></div>
  ${REAL && !U.balcao && U.push != "ativo" && U.push != "negado" && temPush() ? `<label class="ck-aviso"><input type="checkbox" name="avisar" checked><span>Me avise no celular quando o barbeiro confirmar</span></label>` : ""}
  ${Store.podeEscrever ? `<button class="btn larga" type="submit" id="b-pedir">Pedir este hor\xE1rio</button>` : `<p class="dica">Sua conta s\xF3 pode ver esta agenda. Pe\xE7a acesso de participante ao dono da p\xE1gina para marcar.</p>`}
@@ -1298,7 +1363,18 @@ function passo4() {
   const txt = { pendente: `Pronto! Seu hor\xE1rio est\xE1 guardado e ${barbeiro(x.b).name} j\xE1 foi avisado. No WhatsApp que abriu, toque em enviar. Quando ele confirmar, a resposta aparece aqui${U.push == "ativo" ? " e voc\xEA recebe um aviso" : ""}.`, confirmado: "Hor\xE1rio confirmado. At\xE9 l\xE1.", recusado: `${barbeiro(x.b).name} n\xE3o consegue nesse hor\xE1rio. Escolha outro.`, cancelado: "Este hor\xE1rio foi cancelado." }[x.st] || "";
   return `<h2 class="h-etapa">${x.st == "pendente" ? "Pedido enviado" : STATUS[x.st][0]}</h2><p class="sub">${esc(txt)}</p>
  ${comanda({ n: x.n, b: barbeiro(x.b).name, d: x.d, s: x.s, dur: x.dur, p: x.p, pl: x.pl, st: x.st })}
- ${U.balcao ? `<div class="acoes"><button class="btn larga" data-a="novo">Pr\xF3ximo cliente</button></div><p class="volta-auto">A tela volta para o in\xEDcio sozinha em alguns segundos. Seu nome n\xE3o fica salvo neste aparelho.</p>` : `${U.zapPedido && x.st == "pendente" ? `<a class="btn larga" style="margin:10px 0" href="${esc(U.zapPedido)}" target="_blank" rel="noopener">${I("message-circle")}Enviar no WhatsApp da barbearia</a><p class="dica" style="margin:0 0 10px">Se o WhatsApp n\xE3o abriu sozinho, toque acima e depois em enviar.</p>` : ""}${cartaoPush("cliente")}<div class="acoes"><a class="btn" href="#meus">Ver meus hor\xE1rios</a><button class="btn sec" data-a="novo">Marcar outro</button></div>`}`;
+ ${U.balcao ? `<div class="acoes"><button class="btn larga" data-a="novo">Pr\xF3ximo cliente</button></div><p class="volta-auto">A tela volta para o in\xEDcio sozinha em alguns segundos. Seu nome n\xE3o fica salvo neste aparelho.</p>` : `${U.zapPedido && x.st == "pendente" ? `<a class="btn larga" style="margin:10px 0" href="${esc(U.zapPedido)}" target="_blank" rel="noopener">${I("message-circle")}Enviar no WhatsApp da barbearia</a><p class="dica" style="margin:0 0 10px">Se o WhatsApp n\xE3o abriu sozinho, toque acima e depois em enviar.</p>` : ""}${cartaoConta(x)}${cartaoPush("cliente")}<div class="acoes"><a class="btn" href="#meus">Ver meus hor\xE1rios</a><button class="btn sec" data-a="novo">Marcar outro</button></div>`}`;
+}
+function cartaoConta(x) {
+  if (!REAL || U.balcao || Store.conta || !x || !x.tk) return "";
+  if (U.contaFeita) return "";
+  return `<section class="conta-card"><h3>Salvar seus hor\xE1rios na ${esc(C().name)}?</h3><p>Crie uma senha e veja seus hor\xE1rios em qualquer celular. Seu nome e WhatsApp j\xE1 est\xE3o aqui.</p><form data-f="criaconta" class="conta-form" autocomplete="on"><input type="hidden" name="tk" value="${esc(x.tk)}"><input type="tel" name="username" autocomplete="username" value="${esc(fone((pii(x) || {}).phone || ""))}" readonly aria-label="WhatsApp" class="conta-tel"><div class="campo" style="margin:0"><label for="cc-s">Crie uma senha (m\xEDnimo 4 d\xEDgitos ou letras)</label><input id="cc-s" name="senha" type="password" autocomplete="new-password" minlength="4" required></div><button class="btn" type="submit">${I("check")}Criar minha conta</button></form></section>`;
+}
+function blocoConta() {
+  if (!REAL) return "";
+  const c = Store.conta;
+  if (c) return `<div class="conta-ok"><span>${I("check")}Conta de <b>${esc(c.nome)}</b> \xB7 ${esc(fone(c.phone))}</span><button class="link" data-a="sair-conta">Sair</button></div>`;
+  return U.verEntrar ? `<section class="conta-card"><h3>Entrar na sua conta</h3><form data-f="entraconta" class="conta-form" autocomplete="on"><div class="campo" style="margin:0"><label for="ec-t">WhatsApp</label><input id="ec-t" name="username" type="tel" inputmode="tel" autocomplete="username" placeholder="(11) 91234-5678" required></div><div class="campo" style="margin:0"><label for="ec-s">Senha</label><input id="ec-s" name="senha" type="password" autocomplete="current-password" required></div><button class="btn" type="submit">Entrar</button></form><p class="dica" style="margin:10px 0 0">Esqueceu a senha? Fale com a barbearia pelo WhatsApp.</p></section>` : `<p class="dica" style="margin:0 0 14px">J\xE1 tem conta nesta barbearia? <button class="link" data-a="ver-entrar">Entrar</button></p>`;
 }
 function agendar() {
   return `<main class="fluxo" id="conteudo">${U.step > 1 && U.step < 4 ? `<button class="voltar" data-a="ir" data-v="${U.step - 1}">${I("chevron-left")}Voltar</button>` : ""}${[0, passo1, passo2, passo3, passo4][U.step]()}</main>`;
@@ -1309,7 +1385,7 @@ function meus() {
   const prox = m.filter((x) => fut(x) && ["pendente", "confirmado"].includes(x.st)).reverse(), resto = m.filter((x) => !prox.includes(x));
   const lin = (x) => `<article class="etiqueta"><div class="qdo">${hm(x.s)}<small>${esc(dataCurta(x.d))}</small></div><div><h3>${esc(x.n)}</h3><p>com ${esc(barbeiro(x.b).name)} \xB7 ${brl(x.p)}</p>${pill(x.st)}
  <div class="acoes">${["pendente", "confirmado"].includes(x.st) && fut(x) ? `<button class="btn sec peq" data-a="cli-cancela" data-v="${esc(x.id)}">Cancelar hor\xE1rio</button>` : ""}${!["pendente", "confirmado"].includes(x.st) || !fut(x) ? `<button class="btn sec peq" data-a="repetir" data-v="${esc(x.svc)}">${I("repeat")}Marcar de novo</button>` : ""}</div></div></article>`;
-  return `<main class="fluxo" id="conteudo"><h2 class="h-etapa">Meus hor\xE1rios</h2><p class="sub">Acompanhe a resposta do barbeiro aqui.</p>${m.length ? cartaoPush("cliente") : ""}
+  return `<main class="fluxo" id="conteudo"><h2 class="h-etapa">Meus hor\xE1rios</h2><p class="sub">Acompanhe a resposta do barbeiro aqui.</p>${blocoConta()}${m.length ? cartaoPush("cliente") : ""}
  ${m.length ? `${prox.length ? `<h3 class="rotulo">Pr\xF3ximos</h3>${prox.map(lin).join("")}` : ""}${resto.length ? `<h3 class="rotulo">Anteriores</h3>${resto.slice(0, 12).map(lin).join("")}` : ""}` : `<div class="vazio"><h3>Nenhum hor\xE1rio ainda</h3><p>Seus pedidos aparecem aqui.</p><a class="btn" href="#agendar">Marcar hor\xE1rio</a></div>`}</main>`;
 }
 function cliente() {
@@ -1412,7 +1488,7 @@ function clientesDados() {
   }).sort((a, b) => (b.ult || "").localeCompare(a.ult || ""));
 }
 const msgRetorno = (c) => `Fala, ${c.nome.replace(" (exemplo)", "")}! J\xE1 faz ${c.dias} dias do seu \xFAltimo ${(c.ultSvc || "corte").toLowerCase()}. Bora deixar na r\xE9gua? Marca aqui em 1 minuto: ${location.origin}/${SLUG}`;
-const linhaCli = (c) => `<div class="cli-l"><div><b>${esc(c.nome)}</b>${c.plano ? `<span class="tag ok">${esc(c.plano.name)}</span>` : ""}${c.naHora ? `<span class="tag">hora de voltar</span>` : c.sumido ? `<span class="tag">sumido h\xE1 ${c.dias} dias</span>` : ""}<small>${c.vis} ${c.vis == 1 ? "visita" : "visitas"} \xB7 ${brl(c.gasto)}${c.ult ? " \xB7 \xFAltima em " + esc(D(c.ult).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })) : ""}${c.ult ? ` \xB7 volta a cada ${c.ritmo} dias${c.proprio ? "" : " (padr\xE3o)"}` : ""}</small></div><div class="acoes" style="margin:0;justify-content:flex-end">${c.naHora || c.sumido ? `<a class="btn peq" href="${wa(c.tel, msgRetorno(c))}" target="_blank" rel="noopener" aria-label="Lembrar ${esc(c.nome)} no WhatsApp">${I("message-circle")}Lembrar</a>` : `<a class="btn sec peq" href="${wa(c.tel, `Oi, ${c.nome.replace(" (exemplo)", "")}!`)}" target="_blank" rel="noopener" aria-label="Chamar ${esc(c.nome)} no WhatsApp">${I("message-circle")}Chamar</a>`}<button class="btn sec peq" data-a="assin" data-v="${esc(c.tel + "|" + c.nome)}">${c.plano ? "Plano" : "Clube"}</button></div></div>`;
+const linhaCli = (c) => `<div class="cli-l"><div><b>${esc(c.nome)}</b>${c.plano ? `<span class="tag ok">${esc(c.plano.name)}</span>` : ""}${(Store.contas || /* @__PURE__ */ new Set()).has(telZap(c.tel || "")) ? `<span class="tag ok">tem conta</span>` : ""}<small class="tel-cli">${esc(fone(c.tel || ""))}</small>${c.naHora ? `<span class="tag">hora de voltar</span>` : c.sumido ? `<span class="tag">sumido h\xE1 ${c.dias} dias</span>` : ""}<small>${c.vis} ${c.vis == 1 ? "visita" : "visitas"} \xB7 ${brl(c.gasto)}${c.ult ? " \xB7 \xFAltima em " + esc(D(c.ult).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })) : ""}${c.ult ? ` \xB7 volta a cada ${c.ritmo} dias${c.proprio ? "" : " (padr\xE3o)"}` : ""}</small></div><div class="acoes" style="margin:0;justify-content:flex-end">${c.naHora || c.sumido ? `<a class="btn peq" href="${wa(c.tel, msgRetorno(c))}" target="_blank" rel="noopener" aria-label="Lembrar ${esc(c.nome)} no WhatsApp">${I("message-circle")}Lembrar</a>` : `<a class="btn sec peq" href="${wa(c.tel, `Oi, ${c.nome.replace(" (exemplo)", "")}!`)}" target="_blank" rel="noopener" aria-label="Chamar ${esc(c.nome)} no WhatsApp">${I("message-circle")}Chamar</a>`}<button class="btn sec peq" data-a="assin" data-v="${esc(c.tel + "|" + c.nome)}">${c.plano ? "Plano" : "Clube"}</button></div></div>`;
 function listaClientes() {
   let l = clientesDados();
   if (U.filtro == "sumidos") l = l.filter((c) => c.sumido);
@@ -1700,7 +1776,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261117231824";
+const VERSAO = "20261118152907";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
@@ -2252,6 +2328,20 @@ O hor\xE1rio j\xE1 est\xE1 livre no app.`);
     U.pb = v;
     R(true);
   },
+  "ver-entrar"() {
+    U.verEntrar = true;
+    R(true);
+    setTimeout(() => {
+      const e = $("#ec-t");
+      e && e.focus();
+    }, 50);
+  },
+  async "sair-conta"() {
+    await Store.sairConta();
+    U.verEntrar = false;
+    R(true);
+    toast("Voc\xEA saiu da conta neste aparelho.");
+  },
   per(v) {
     U.per = +v;
     R(true);
@@ -2412,6 +2502,37 @@ O hor\xE1rio j\xE1 est\xE1 livre no app.`);
   }
 };
 const FORMS = {
+  async criaconta(f) {
+    const sn = f.senha.value;
+    if (sn.length < 4) return toast("A senha precisa de pelo menos 4 caracteres.");
+    const b = f.querySelector("button[type=submit]");
+    b.disabled = true;
+    try {
+      await Store.criarConta(f.tk.value, sn);
+      U.contaFeita = true;
+      R(true);
+      toast("Conta criada. Seus hor\xE1rios ficam salvos.");
+    } catch (e) {
+      b.disabled = false;
+      toast(/conta_existe/.test(e.message || "") ? "Voc\xEA j\xE1 tem conta aqui. Entre em Meus hor\xE1rios." : "N\xE3o consegui criar a conta agora. Tente de novo.");
+    }
+  },
+  async entraconta(f) {
+    const t = telZap(f.username.value), sn = f.senha.value;
+    if (!zapOk(t)) return toast("Confira o WhatsApp, com DDD.");
+    const b = f.querySelector("button[type=submit]");
+    b.disabled = true;
+    try {
+      await Store.entrarConta(t, sn);
+      U.verEntrar = false;
+      R(true);
+      toast("Pronto, voc\xEA entrou.");
+    } catch (e) {
+      b.disabled = false;
+      const m = e.message || "";
+      toast(/senha_errada/.test(m) ? "Senha errada. Confira e tente de novo." : /conta_nao_encontrada/.test(m) ? "N\xE3o achei conta com esse WhatsApp aqui. Marque um hor\xE1rio e crie sua conta." : /muitas_tentativas/.test(m) ? "Muitas tentativas. Espere 15 minutos." : "N\xE3o consegui entrar agora. Tente de novo.");
+    }
+  },
   async assinar(f) {
     const e = f.e.value.trim();
     if (!/^\S+@\S+\.\S+$/.test(e)) return toast("Confira o email.");
@@ -2430,6 +2551,12 @@ const FORMS = {
     }
   },
   async pedir(f) {
+    if (Store.conta && !f.nome.value.trim()) {
+      f.nome.value = Store.conta.nome;
+    }
+    if (Store.conta && !f.tel.value.trim()) {
+      f.tel.value = fone(Store.conta.phone);
+    }
     const nome = f.nome.value.trim(), tel = telZap(f.tel.value), obs = f.obs.value.trim(), e = {};
     U.nome = nome;
     U.tel = tel;
