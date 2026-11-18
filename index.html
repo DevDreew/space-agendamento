@@ -398,12 +398,15 @@ const telZap = (t) => {
 const zapOk = (t) => /^[1-9][1-9]9\d{8}$/.test(telZap(t));
 const CEL = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || navigator.platform == "MacIntel" && navigator.maxTouchPoints > 1;
 const semEmoji = (t) => String(t).replace(/(?:[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{23E9}-\u{23FA}][\u{FE0F}\u{200D}]*)+\s?/gu, "");
+const ANDROID = /Android/i.test(navigator.userAgent);
 const wa = (tel, txt) => {
-  const n = "55" + telZap(tel);
-  return CEL ? `whatsapp://send?phone=${n}&text=${encodeURIComponent(txt)}` : `https://api.whatsapp.com/send?phone=${n}&text=${encodeURIComponent(semEmoji(txt))}`;
+  const n = "55" + telZap(tel), web = `https://api.whatsapp.com/send?phone=${n}&text=${encodeURIComponent(semEmoji(txt))}`;
+  if (!CEL) return web;
+  const q = `send?phone=${n}&text=${encodeURIComponent(txt)}`;
+  return ANDROID ? `intent://${q}#Intent;scheme=whatsapp;package=com.whatsapp;S.browser_fallback_url=${encodeURIComponent(web)};end` : `whatsapp://${q}`;
 };
 const abreZap = (link, jan) => {
-  if (link.startsWith("whatsapp:")) {
+  if (/^(whatsapp|intent):/.test(link)) {
     if (jan) try {
       jan.close();
     } catch (e) {
@@ -421,7 +424,7 @@ const abreZap = (link, jan) => {
   }
 };
 document.addEventListener("click", (e) => {
-  const a = e.target.closest('a[href^="whatsapp:"]');
+  const a = e.target.closest('a[href^="whatsapp:"],a[href^="intent:"]');
   if (a) {
     e.preventDefault();
     location.href = a.getAttribute("href");
@@ -1697,6 +1700,21 @@ async function checaPush() {
   }
   R();
 }
+const VERSAO = "20261117231824";
+function confereVersao() {
+  if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
+  fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
+    v = (v || "").trim();
+    if (/^\d{14}$/.test(v) && v != VERSAO) location.reload();
+  }).catch(() => {
+  });
+}
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) confereVersao();
+});
+setInterval(() => {
+  if (!document.hidden) confereVersao();
+}, 3e5);
 function faixaRede() {
   let f = document.getElementById("sem-rede");
   if (navigator.onLine) {
