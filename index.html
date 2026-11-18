@@ -1791,7 +1791,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261118195205";
+const VERSAO = "20261118203457";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
@@ -2003,11 +2003,11 @@ function telaAcesso() {
   const m = Store.mode, e = U.erroAcesso ? `<p class="err" role="alert">${esc(U.erroAcesso)}</p>` : "", ok = U.okAcesso ? `<p class="okmsg" role="status">${esc(U.okAcesso)}</p>` : "";
   const topo = `<p class="eyebrow">${I("scissors")} Space \xB7 ${ADMIN ? "dono do app" : "painel do barbeiro"}</p>`;
   if (!Store.ready) return `<main class="acesso">${topo}<p class="sub">Carregando\u2026</p></main>`;
-  if (U.recuperar) return `<main class="acesso">${topo}<h1>Nova senha</h1><form data-f="novasenha" novalidate><div class="campo"><label for="l-ns">Nova senha</label><input id="l-ns" name="senha" type="password" autocomplete="new-password" minlength="8" required><span class="ajuda">Pelo menos 8 caracteres.</span></div>${e}<button class="btn larga" type="submit">Salvar senha</button></form></main>`;
+  if (U.recuperar) return `<main class="acesso">${topo}<h1>Nova senha</h1><form data-f="novasenha" novalidate><div class="campo"><label for="l-ns">Nova senha</label><input id="l-ns" name="senha" type="password" autocomplete="new-password" minlength="6" required><span class="ajuda">Pelo menos 6 caracteres.</span></div>${e}<button class="btn larga" type="submit">Salvar senha</button></form></main>`;
   if (m == "criar") return `<main class="acesso">${topo}<h1>Sua barbearia</h1><p class="sub">Falta um passo: o nome e o endere\xE7o que voc\xEA vai mandar para os clientes.</p><form data-f="criar" novalidate><div class="campo"><label for="c-n">Nome da barbearia</label><input id="c-n" name="nome" required maxlength="60" value="${esc(U.cNome || "")}"></div><div class="campo"><label for="c-s">Endere\xE7o do link</label><div class="slug-l"><span>${esc(location.host)}/</span><input id="c-s" name="slug" required maxlength="40" value="${esc(U.cSlug || "")}" autocapitalize="off" spellcheck="false"></div><span class="ajuda">S\xF3 letras min\xFAsculas, n\xFAmeros e h\xEDfen.</span></div><div class="campo"><label for="c-w">WhatsApp da barbearia</label><input id="c-w" name="wa" inputmode="tel" placeholder="(11) 90000-0000" required value="${esc(U.cWa || "")}"><span class="ajuda">Os clientes usam este n\xFAmero para falar com voc\xEA.</span></div>${e}<button class="btn larga" type="submit">Criar minha barbearia</button></form><button class="link" data-a="sair">Sair desta conta</button></main>`;
   const cad = U.modoAcesso == "cadastro", esq = U.modoAcesso == "esqueci";
   return `<main class="acesso">${topo}<h1>${esq ? "Recuperar senha" : cad ? "Criar conta" : "Entrar"}</h1><p class="sub">${esq ? "Mandamos um link para voc\xEA criar uma senha nova." : cad ? ADMIN ? "Crie sua conta. Depois um dono do app libera o acesso." : "Crie o acesso do dono da barbearia. S\xF3 voc\xEA entra no painel." : "Acesso exclusivo do barbeiro."}</p>
- <form data-f="${esq ? "esqueci" : cad ? "cadastro" : "login"}" novalidate><div class="campo"><label for="l-e">Email</label><input id="l-e" name="email" type="email" autocomplete="email" required value="${esc(U.lEmail || "")}"></div>${esq ? "" : `<div class="campo"><label for="l-s">Senha</label><input id="l-s" name="senha" type="password" autocomplete="${cad ? "new-password" : "current-password"}" required minlength="${cad ? 8 : 1}">${cad ? '<span class="ajuda">Pelo menos 8 caracteres.</span>' : ""}</div>`}${e}${ok}<button class="btn larga" type="submit">${esq ? "Enviar link" : cad ? "Criar conta" : "Entrar"}</button></form>
+ <form data-f="${esq ? "esqueci" : cad ? "cadastro" : "login"}" novalidate><div class="campo"><label for="l-e">Email</label><input id="l-e" name="email" type="email" autocomplete="email" required value="${esc(U.lEmail || "")}"></div>${esq ? "" : `<div class="campo"><label for="l-s">Senha</label><input id="l-s" name="senha" type="password" autocomplete="${cad ? "new-password" : "current-password"}" required minlength="${cad ? 6 : 1}">${cad ? '<span class="ajuda">Pelo menos 6 caracteres.</span>' : ""}</div>`}${e}${ok}<button class="btn larga" type="submit">${esq ? "Enviar link" : cad ? "Criar conta" : "Entrar"}</button></form>
  <div class="acoes" style="justify-content:space-between">${cad || esq ? `<button class="link" data-a="acesso" data-v="login">J\xE1 tenho conta</button>${esq && U.suporte ? `<a class="btn sec" style="width:100%;margin-top:10px" href="https://wa.me/55${U.suporte.replace(/\D/g, "").replace(/^55/, "")}?text=${encodeURIComponent("Oi! Esqueci a senha do app DreewSolution. Meu email: " + (U.lEmail || ""))}" target="_blank" rel="noopener">Pedir senha nova no WhatsApp</a>` : ""}` : `${ADMIN ? "" : '<button class="link" data-a="acesso" data-v="cadastro">Criar conta de barbearia</button>'}<button class="link" data-a="acesso" data-v="esqueci">Esqueci a senha</button>`}</div></main>`;
 }
 let adiado = false;
@@ -2948,8 +2948,8 @@ const FORMS = {
       U.erroAcesso = "Confira o email.";
       return R(true);
     }
-    if (senha.length < 8) {
-      U.erroAcesso = "A senha precisa de pelo menos 8 caracteres.";
+    if (senha.length < 6) {
+      U.erroAcesso = "A senha precisa de pelo menos 6 caracteres.";
       return R(true);
     }
     const b = f.querySelector("button");
@@ -2980,8 +2980,8 @@ const FORMS = {
   },
   async novasenha(f) {
     const senha = f.senha.value;
-    if (senha.length < 8) {
-      U.erroAcesso = "A senha precisa de pelo menos 8 caracteres.";
+    if (senha.length < 6) {
+      U.erroAcesso = "A senha precisa de pelo menos 6 caracteres.";
       return R(true);
     }
     const { data, error } = await Store.sb.auth.updateUser({ password: senha });
