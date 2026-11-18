@@ -354,6 +354,7 @@ dialog .dl dt{color:var(--cinza)}dialog .dl dd{margin:0;text-align:right;font-we
 .conta-ok{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid var(--linha);border-radius:12px;padding:10px 14px;margin:0 0 14px;font-size:15px}
 .conta-ok span{display:flex;align-items:center;gap:6px}.conta-ok svg{width:16px;height:16px;color:var(--ok)}
 .cli-l .tel-cli{display:block;color:var(--cinza);font-size:13px;margin-top:2px}
+.grade2{display:grid;gap:0 14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
 </style></head>
 <body><div id="app"></div><dialog id="dlg"></dialog><div id="toast" role="status" aria-live="polite"></div><div id="tip" role="tooltip"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -744,7 +745,7 @@ const StoreDemo = {
     for (const k of Object.keys(this.cli)) if (k.startsWith("ex-")) await this.db.doc("clientes/" + k).delete();
   }
 };
-const ERROS = { telefone_invalido: "Coloque seu WhatsApp com DDD, por exemplo (11) 91234-5678.", horario_ocupado: "Esse hor\xE1rio acabou de ser pedido. Escolha outro.", fora_do_horario: "Esse hor\xE1rio passa do fechamento. Escolha outro.", almoco: "Esse hor\xE1rio cai no almo\xE7o. Escolha outro.", fechado: "A barbearia n\xE3o abre nesse dia.", horario_passou: "Esse hor\xE1rio j\xE1 passou. Escolha outro.", dia_invalido: "Escolha um dia dentro dos pr\xF3ximos 30.", chave_invalida: "Essa chave n\xE3o parece do Mercado Pago. Ela come\xE7a com APP_USR-.", email_sem_conta: "Esse email ainda n\xE3o tem conta.", dono_unico: "S\xF3 o dono do app tem acesso a esta \xE1rea.", sem_chave: "A cobran\xE7a autom\xE1tica ainda n\xE3o foi configurada.", conta_suspensa: "Esta barbearia n\xE3o est\xE1 recebendo agendamentos agora. Fale com ela no WhatsApp.", sem_permissao: "S\xF3 o dono do app pode fazer isso.", link_invalido: "O link precisa come\xE7ar com https://", muitos_pedidos: "Voc\xEA j\xE1 tem 3 pedidos aguardando resposta. Espere o barbeiro responder.", telefone_invalido: "Confira o WhatsApp com DDD.", nome_invalido: "Confira seu nome.", servico_invalido: "Esse servi\xE7o mudou. Atualize a p\xE1gina.", barbeiro_invalido: "Esse barbeiro n\xE3o est\xE1 atendendo agora.", nao_pode_cancelar: "Esse hor\xE1rio n\xE3o pode mais ser cancelado.", endereco_em_uso: "Esse endere\xE7o j\xE1 \xE9 de outra barbearia. Escolha outro.", conflito: "Esse hor\xE1rio j\xE1 est\xE1 ocupado." };
+const ERROS = { chave_zap_invalida: "Confira os c\xF3digos da Z-API: s\xF3 letras e n\xFAmeros, sem espa\xE7os.", telefone_invalido: "Coloque seu WhatsApp com DDD, por exemplo (11) 91234-5678.", horario_ocupado: "Esse hor\xE1rio acabou de ser pedido. Escolha outro.", fora_do_horario: "Esse hor\xE1rio passa do fechamento. Escolha outro.", almoco: "Esse hor\xE1rio cai no almo\xE7o. Escolha outro.", fechado: "A barbearia n\xE3o abre nesse dia.", horario_passou: "Esse hor\xE1rio j\xE1 passou. Escolha outro.", dia_invalido: "Escolha um dia dentro dos pr\xF3ximos 30.", chave_invalida: "Essa chave n\xE3o parece do Mercado Pago. Ela come\xE7a com APP_USR-.", email_sem_conta: "Esse email ainda n\xE3o tem conta.", dono_unico: "S\xF3 o dono do app tem acesso a esta \xE1rea.", sem_chave: "A cobran\xE7a autom\xE1tica ainda n\xE3o foi configurada.", conta_suspensa: "Esta barbearia n\xE3o est\xE1 recebendo agendamentos agora. Fale com ela no WhatsApp.", sem_permissao: "S\xF3 o dono do app pode fazer isso.", link_invalido: "O link precisa come\xE7ar com https://", muitos_pedidos: "Voc\xEA j\xE1 tem 3 pedidos aguardando resposta. Espere o barbeiro responder.", telefone_invalido: "Confira o WhatsApp com DDD.", nome_invalido: "Confira seu nome.", servico_invalido: "Esse servi\xE7o mudou. Atualize a p\xE1gina.", barbeiro_invalido: "Esse barbeiro n\xE3o est\xE1 atendendo agora.", nao_pode_cancelar: "Esse hor\xE1rio n\xE3o pode mais ser cancelado.", endereco_em_uso: "Esse endere\xE7o j\xE1 \xE9 de outra barbearia. Escolha outro.", conflito: "Esse hor\xE1rio j\xE1 est\xE1 ocupado." };
 const erroAmigo = (e) => {
   const m = String(e && e.message || e || "");
   for (const k in ERROS) if (m.includes(k)) return ERROS[k];
@@ -774,6 +775,12 @@ const StoreSB = {
   },
   async conectar() {
     this.sb = supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+    try {
+      const z = await this.sb.rpc("zap_auto_ativo");
+      this.zapAuto = !!(z && z.data);
+    } catch (e) {
+      this.zapAuto = false;
+    }
     return PAINEL ? this.iniciaPainel() : this.iniciaCliente();
   },
   aplicaLoja(d) {
@@ -1043,6 +1050,12 @@ const StoreSB = {
     }
     const [l, c, m] = await Promise.all([this.sb.rpc("admin_lojas"), this.sb.rpc("admin_config"), this.sb.rpc("admin_status_mp")]);
     this.mp = m && m.data || {};
+    try {
+      const z = await this.sb.rpc("admin_status_zap");
+      this.zap = z && z.data || {};
+    } catch (e) {
+      this.zap = {};
+    }
     try {
       const [g, h] = await Promise.all([this.sb.rpc("admin_resumo"), this.sb.rpc("admin_assinaturas")]);
       this.resumo = g && g.data || null;
@@ -1360,7 +1373,7 @@ function passo3() {
 function passo4() {
   const x = todos().find((i) => i.id == U.enviado);
   if (!x) return '<p class="dica">Pedido enviado.</p>';
-  const txt = { pendente: `Pronto! Seu hor\xE1rio est\xE1 guardado e ${barbeiro(x.b).name} j\xE1 foi avisado. No WhatsApp que abriu, toque em enviar. Quando ele confirmar, a resposta aparece aqui${U.push == "ativo" ? " e voc\xEA recebe um aviso" : ""}.`, confirmado: "Hor\xE1rio confirmado. At\xE9 l\xE1.", recusado: `${barbeiro(x.b).name} n\xE3o consegue nesse hor\xE1rio. Escolha outro.`, cancelado: "Este hor\xE1rio foi cancelado." }[x.st] || "";
+  const txt = { pendente: Store.zapAuto ? `Pronto! Seu pedido j\xE1 chegou no WhatsApp da ${C().name}. Quando ${barbeiro(x.b).name} confirmar, voc\xEA recebe a confirma\xE7\xE3o no seu WhatsApp.` : `Pronto! Seu hor\xE1rio est\xE1 guardado e ${barbeiro(x.b).name} j\xE1 foi avisado. No WhatsApp que abriu, toque em enviar. Quando ele confirmar, a resposta aparece aqui${U.push == "ativo" ? " e voc\xEA recebe um aviso" : ""}.`, confirmado: "Hor\xE1rio confirmado. At\xE9 l\xE1.", recusado: `${barbeiro(x.b).name} n\xE3o consegue nesse hor\xE1rio. Escolha outro.`, cancelado: "Este hor\xE1rio foi cancelado." }[x.st] || "";
   return `<h2 class="h-etapa">${x.st == "pendente" ? "Pedido enviado" : STATUS[x.st][0]}</h2><p class="sub">${esc(txt)}</p>
  ${comanda({ n: x.n, b: barbeiro(x.b).name, d: x.d, s: x.s, dur: x.dur, p: x.p, pl: x.pl, st: x.st })}
  ${U.balcao ? `<div class="acoes"><button class="btn larga" data-a="novo">Pr\xF3ximo cliente</button></div><p class="volta-auto">A tela volta para o in\xEDcio sozinha em alguns segundos. Seu nome n\xE3o fica salvo neste aparelho.</p>` : `${U.zapPedido && x.st == "pendente" ? `<a class="btn larga" style="margin:10px 0" href="${esc(U.zapPedido)}" target="_blank" rel="noopener">${I("message-circle")}Enviar no WhatsApp da barbearia</a><p class="dica" style="margin:0 0 10px">Se o WhatsApp n\xE3o abriu sozinho, toque acima e depois em enviar.</p>` : ""}${cartaoConta(x)}${cartaoPush("cliente")}<div class="acoes"><a class="btn" href="#meus">Ver meus hor\xE1rios</a><button class="btn sec" data-a="novo">Marcar outro</button></div>`}`;
@@ -1682,7 +1695,7 @@ function dlgManual(b, k, s) {
   const c = C(), d = k || U.ad || hoje();
   const bb = b || (U.pb != "todos" ? U.pb : (ativos()[0] || {}).id);
   const opt = grade(d).map((t) => `<option value="${t}" ${t == s ? "selected" : ""}>${hm(t)}</option>`).join("");
-  abre(`<h2>Novo hor\xE1rio</h2><form data-f="manual"><div class="campo"><label for="m-nome">Cliente</label><input id="m-nome" name="nome" required></div><div class="campo"><label for="m-tel">WhatsApp</label><input id="m-tel" name="tel" inputmode="tel" required placeholder="(11) 90000-0000"></div><div class="campo"><label for="m-svc">Servi\xE7o</label><select id="m-svc" name="svc">${c.services.map((v) => `<option value="${esc(v.id)}">${esc(v.name)} \xB7 ${dur(v.dur)} \xB7 ${brl(v.price)}</option>`).join("")}</select></div><div class="campo"><label for="m-b">Barbeiro</label><select id="m-b" name="b">${c.barbers.map((v) => `<option value="${esc(v.id)}" ${v.id == bb ? "selected" : ""}>${esc(v.name)}</option>`).join("")}</select></div><div class="campo"><label for="m-d">Dia</label><input id="m-d" type="date" name="d" value="${d}" data-a2="mdia" required></div><div class="campo"><label for="m-s">Hor\xE1rio</label><select id="m-s" name="s">${opt}</select></div>${REAL ? `<label class="ck-aviso"><input type="checkbox" name="zap" checked><span>Mandar a confirma\xE7\xE3o no WhatsApp do cliente</span></label>` : ""}<p class="err" id="m-err" style="color:var(--ruim);font-size:14px"></p><div class="fim"><button class="btn" type="submit">Marcar</button><button class="btn sec" type="button" data-a="fecha">Cancelar</button></div></form>`);
+  abre(`<h2>Novo hor\xE1rio</h2><form data-f="manual"><div class="campo"><label for="m-nome">Cliente</label><input id="m-nome" name="nome" required></div><div class="campo"><label for="m-tel">WhatsApp</label><input id="m-tel" name="tel" inputmode="tel" required placeholder="(11) 90000-0000"></div><div class="campo"><label for="m-svc">Servi\xE7o</label><select id="m-svc" name="svc">${c.services.map((v) => `<option value="${esc(v.id)}">${esc(v.name)} \xB7 ${dur(v.dur)} \xB7 ${brl(v.price)}</option>`).join("")}</select></div><div class="campo"><label for="m-b">Barbeiro</label><select id="m-b" name="b">${c.barbers.map((v) => `<option value="${esc(v.id)}" ${v.id == bb ? "selected" : ""}>${esc(v.name)}</option>`).join("")}</select></div><div class="campo"><label for="m-d">Dia</label><input id="m-d" type="date" name="d" value="${d}" data-a2="mdia" required></div><div class="campo"><label for="m-s">Hor\xE1rio</label><select id="m-s" name="s">${opt}</select></div>${REAL && !Store.zapAuto ? `<label class="ck-aviso"><input type="checkbox" name="zap" checked><span>Mandar a confirma\xE7\xE3o no WhatsApp do cliente</span></label>` : ""}${REAL && Store.zapAuto ? `<p class="dica" style="margin:0 0 8px">O cliente recebe a confirma\xE7\xE3o no WhatsApp sozinho.</p>` : ""}<p class="err" id="m-err" style="color:var(--ruim);font-size:14px"></p><div class="fim"><button class="btn" type="submit">Marcar</button><button class="btn sec" type="button" data-a="fecha">Cancelar</button></div></form>`);
 }
 function dlgLivre(v) {
   const [b, k, s] = v.split("|");
@@ -1776,7 +1789,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261118152907";
+const VERSAO = "20261118192909";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
@@ -1922,6 +1935,9 @@ function telaAdmin() {
 
  ${visaoGeral()}
  <section class="painel" style="margin-bottom:18px"><h3>Cobran\xE7a</h3><p class="q">Valem para todas as barbearias que n\xE3o tiverem um link pr\xF3prio.</p><form data-f="admconf"><div class="campo"><label for="ac-l">Seu link de pagamento (cr\xE9dito, d\xE9bito, Pix)</label><input id="ac-l" name="link" type="url" placeholder="https://link.mercadopago.com.br/..." value="${esc(c.link_pagamento || "")}"><span class="ajuda">Crie no Mercado Pago, InfinitePay, PagSeguro ou Stripe e cole aqui.</span></div><div class="campo"><label for="ac-m">Mensalidade padr\xE3o para barbearias novas (R$)</label><input id="ac-m" name="mens" type="number" min="0" value="${esc(c.mensalidade || "149")}"></div><div class="campo"><label for="ac-w">Seu WhatsApp de suporte</label><input id="ac-w" name="wa" inputmode="tel" value="${esc(fone(c.contato_suporte || ""))}"><span class="ajuda">O barbeiro toca em "J\xE1 paguei" e fala com voc\xEA.</span></div><div class="campo"><label for="ac-s">Pausar a agenda depois de quantos dias de atraso</label><input id="ac-s" name="susp" type="number" min="0" max="60" value="${esc((_a = c.dias_suspensao) != null ? _a : "5")}"><span class="ajuda">Todo dia ao meio-dia o app avisa quem vence em 3 dias e quem atrasou, e pausa a agenda depois desse prazo. Coloque 0 para nunca pausar sozinho.</span></div><button class="btn peq" type="submit">Salvar</button></form></section>
+ <section class="painel" style="margin-bottom:18px"><h3>WhatsApp autom\xE1tico</h3><p class="q">Um n\xFAmero de WhatsApp do app manda as mensagens sozinho: o pedido chega no WhatsApp do barbeiro na hora em que o cliente toca em Pedir, e a confirma\xE7\xE3o, a recusa e o lembrete do dia chegam no WhatsApp do cliente. Ningu\xE9m precisa abrir o WhatsApp para enviar.</p>
+ ${(Store.zap || {}).conectado ? `<p class="push-ok">${I("check")}Ligado (inst\xE2ncia terminando em ${esc(Store.zap.final)}).</p>` : `<p class="dica" style="margin:0 0 12px">Desligado. Hoje o cliente abre o WhatsApp e toca em enviar.</p>`}
+ <form data-f="admzap" autocomplete="off"><div class="grade2"><div class="campo"><label for="zp-i">ID da inst\xE2ncia (Z-API)</label><input id="zp-i" name="i" autocomplete="off" placeholder="3E..."></div><div class="campo"><label for="zp-t">Token da inst\xE2ncia</label><input id="zp-t" name="t" type="password" autocomplete="off"></div></div><div class="campo"><label for="zp-c">Token de seguran\xE7a da conta (Client-Token)</label><input id="zp-c" name="c" type="password" autocomplete="off"><span class="ajuda">Na Z-API: crie a inst\xE2ncia, leia o QR code com o WhatsApp do app, copie o ID e o Token da inst\xE2ncia. O Client-Token fica em Seguran\xE7a. As chaves ficam s\xF3 no servidor.</span></div><div class="acoes"><button class="btn peq" type="submit">Salvar e ligar</button>${(Store.zap || {}).conectado ? `<button class="btn sec peq" type="button" data-a="adm-zap-teste">Mandar teste</button><button class="btn perigo peq" type="button" data-a="adm-zap-off">Desligar</button>` : ""}</div></form></section>
  <section class="painel" style="margin-bottom:18px"><h3>Recebimento autom\xE1tico</h3><p class="q">Com a sua chave do Mercado Pago, o barbeiro paga com cr\xE9dito, d\xE9bito ou Pix, e a conta \xE9 liberada sozinha por mais um m\xEAs assim que o pagamento \xE9 aprovado.</p>
  ${(Store.mp || {}).conectado ? `<p class="push-ok">${I("check")}Mercado Pago conectado (chave terminando em ${esc(Store.mp.final)}${Store.mp.teste ? ", modo de teste" : ""}).</p>` : `<p class="dica" style="margin:0 0 12px">Ainda n\xE3o conectado. Enquanto isso, o bot\xE3o de pagar usa o link de pagamento acima.</p>`}
  <form data-f="admmp" autocomplete="off"><div class="campo"><label for="mp-t">Access Token de produ\xE7\xE3o do Mercado Pago</label><input id="mp-t" name="t" type="password" placeholder="APP_USR-..." autocomplete="off"><span class="ajuda">No Mercado Pago Developers: Suas integra\xE7\xF5es, crie uma aplica\xE7\xE3o e abra Credenciais de produ\xE7\xE3o. Copie o Access Token. A chave fica guardada s\xF3 no servidor e n\xE3o aparece de novo.</span></div><div class="acoes"><button class="btn peq" type="submit">Salvar chave</button>${(Store.mp || {}).conectado ? `<button class="btn sec peq" type="button" data-a="adm-mp-testar">Testar conex\xE3o</button><button class="btn perigo peq" type="button" data-a="adm-mp-remover">Desconectar</button>` : ""}</div></form></section>
@@ -2147,6 +2163,23 @@ const ACOES = {
   "adm-aviso"(id) {
     dlgAviso(id);
   },
+  async "adm-zap-teste"() {
+    const n = prompt("Mandar a mensagem de teste para qual WhatsApp?", fone((Store.pconf || {}).contato_suporte || ""));
+    if (!n) return;
+    const t = telZap(n);
+    if (!zapOk(t)) return toast("Confira o n\xFAmero, com DDD.");
+    const { error } = await Store.sb.rpc("admin_testar_zap", { p_phone: t });
+    if (error) return toast(erroAmigo(error) || "N\xE3o consegui mandar.");
+    toast("Teste enviado para " + fone(t) + ". Confira o WhatsApp em alguns segundos.");
+  },
+  async "adm-zap-off"() {
+    if (!confirm("Desligar o WhatsApp autom\xE1tico? O cliente volta a abrir o WhatsApp para enviar.")) return;
+    const { error } = await Store.sb.rpc("admin_salvar_zap", { p_instancia: "", p_token: "", p_client: "" });
+    if (error) return toast(erroAmigo(error) || "N\xE3o consegui.");
+    await Store.carregaAdmin();
+    R(true);
+    toast("WhatsApp autom\xE1tico desligado.");
+  },
   async "adm-mp-testar"() {
     toast("Testando\u2026");
     const { data, error } = await Store.sb.functions.invoke("cobranca", { body: { acao: "testar" } });
@@ -2295,7 +2328,7 @@ const ACOES = {
     abre(`<h2>Cancelar hor\xE1rio?</h2><p class="dica" style="margin:0 0 14px">${esc(x.n)}, ${esc(dataCurta(x.d))} \xE0s ${hm(x.s)}. O hor\xE1rio volta a ficar livre.</p><div class="fim"><button class="btn perigo" data-a="cli-cancela2" data-v="${esc(v)}">Cancelar hor\xE1rio</button><button class="btn sec" data-a="fecha">Manter</button></div>`);
   },
   async "cli-cancela2"(v) {
-    const x = todos().find((i) => String(i.id) == String(v)), z = REAL && x && !PAINEL ? zapDoPedido(x.b) : "";
+    const x = todos().find((i) => String(i.id) == String(v)), z = REAL && x && !PAINEL && !Store.zapAuto ? zapDoPedido(x.b) : "";
     let jan = null;
     if (z && !CEL) {
       try {
@@ -2383,7 +2416,7 @@ O hor\xE1rio j\xE1 est\xE1 livre no app.`);
     }
     const p = pii(x);
     let jan = null;
-    if (REAL && p.phone) {
+    if (REAL && p.phone && !Store.zapAuto) {
       const lk = wa(p.phone, msgConfirma(x, p));
       if (CEL) {
         jan = 1;
@@ -2400,6 +2433,8 @@ O hor\xE1rio j\xE1 est\xE1 livre no app.`);
     await mudaStatus(o, id, "confirmado");
     if (jan) {
       toast("Aceito. No WhatsApp que abriu, toque em enviar para o cliente receber.");
+    } else if (Store.zapAuto) {
+      toast("Aceito. O cliente recebeu a confirma\xE7\xE3o no WhatsApp.");
     } else {
       toast("Aceito. O cliente v\xEA na hora.");
       avisar(x, "ok");
@@ -2409,8 +2444,11 @@ O hor\xE1rio j\xE1 est\xE1 livre no app.`);
     const [o, id] = v.split("|"), x = achar(v);
     if (!x) return;
     await mudaStatus(o, id, "recusado");
-    toast("Recusado. O hor\xE1rio voltou a ficar livre.");
-    avisar(x, "no");
+    if (Store.zapAuto) toast("Recusado. O cliente foi avisado no WhatsApp.");
+    else {
+      toast("Recusado. O hor\xE1rio voltou a ficar livre.");
+      avisar(x, "no");
+    }
   },
   async st(v) {
     const [o, id, st] = v.split("|");
@@ -2570,7 +2608,7 @@ const FORMS = {
     }
     let jan = null;
     U.zapPedido = null;
-    if (REAL && !CEL && !U.balcao && (zapOk(C().whatsapp || "") || (C().barbers || []).some((b2) => zapOk(b2.whatsapp || "")))) {
+    if (REAL && !Store.zapAuto && !CEL && !U.balcao && (zapOk(C().whatsapp || "") || (C().barbers || []).some((b2) => zapOk(b2.whatsapp || "")))) {
       try {
         jan = window.open("", "_blank");
         if (jan) jan.document.write('<p style="font:16px system-ui;padding:24px">Abrindo o WhatsApp da barbearia\u2026</p>');
@@ -2637,7 +2675,7 @@ const FORMS = {
       U.enviado = id;
       return true;
     }, "N\xE3o consegui enviar seu pedido. Tente de novo.");
-    if (REAL && !U.balcao) {
+    if (REAL && !U.balcao && !Store.zapAuto) {
       const x = ok && todos().find((i) => i.id == U.enviado), z = x && zapDoPedido(x.b);
       if (x && z) {
         const link = wa(z, msgPedido(x, nome, tel, obs));
@@ -2798,6 +2836,16 @@ const FORMS = {
     await Store.carregaAdmin();
     toast("Cobran\xE7a salva.");
     R(true);
+  },
+  async admzap(f) {
+    const i = f.i.value.trim(), t = f.t.value.trim(), c = f.c.value.trim();
+    if (!i || !t || !c) return toast("Preencha os tr\xEAs campos da Z-API.");
+    const { error } = await Store.sb.rpc("admin_salvar_zap", { p_instancia: i, p_token: t, p_client: c });
+    if (error) return toast(erroAmigo(error) || "N\xE3o consegui salvar.");
+    f.reset();
+    await Store.carregaAdmin();
+    R(true);
+    toast("WhatsApp autom\xE1tico ligado. Mande um teste.");
   },
   async admmp(f) {
     const t = f.t.value.trim();

@@ -1,0 +1,5 @@
+-- WhatsApp automático pela Z-API — já aplicado no projeto.
+-- admin_salvar_zap / admin_status_zap / admin_testar_zap (só o dono do app); zap_auto_ativo() para o app saber se está ligado.
+-- As chaves ficam em private.segredos (zapi_instancia, zapi_token, zapi_client). A função notificar manda:
+-- pedido novo -> WhatsApp do barbeiro do link (ou da barbearia); confirmação, recusa, cancelamento e lembrete do dia -> WhatsApp do cliente;
+-- cancelamento pelo cliente -> WhatsApp do barbeiro.
