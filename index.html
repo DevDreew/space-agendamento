@@ -1560,7 +1560,7 @@ function dlgManual(b, k, s) {
   const c = C(), d = k || U.ad || hoje();
   const bb = b || (U.pb != "todos" ? U.pb : (ativos()[0] || {}).id);
   const opt = grade(d).map((t) => `<option value="${t}" ${t == s ? "selected" : ""}>${hm(t)}</option>`).join("");
-  abre(`<h2>Novo hor\xE1rio</h2><form data-f="manual"><div class="campo"><label for="m-nome">Cliente</label><input id="m-nome" name="nome" required></div><div class="campo"><label for="m-tel">WhatsApp</label><input id="m-tel" name="tel" inputmode="tel" required placeholder="(11) 90000-0000"></div><div class="campo"><label for="m-svc">Servi\xE7o</label><select id="m-svc" name="svc">${c.services.map((v) => `<option value="${esc(v.id)}">${esc(v.name)} \xB7 ${dur(v.dur)} \xB7 ${brl(v.price)}</option>`).join("")}</select></div><div class="campo"><label for="m-b">Barbeiro</label><select id="m-b" name="b">${c.barbers.map((v) => `<option value="${esc(v.id)}" ${v.id == bb ? "selected" : ""}>${esc(v.name)}</option>`).join("")}</select></div><div class="campo"><label for="m-d">Dia</label><input id="m-d" type="date" name="d" value="${d}" data-a2="mdia" required></div><div class="campo"><label for="m-s">Hor\xE1rio</label><select id="m-s" name="s">${opt}</select></div><p class="err" id="m-err" style="color:var(--ruim);font-size:14px"></p><div class="fim"><button class="btn" type="submit">Marcar</button><button class="btn sec" type="button" data-a="fecha">Cancelar</button></div></form>`);
+  abre(`<h2>Novo hor\xE1rio</h2><form data-f="manual"><div class="campo"><label for="m-nome">Cliente</label><input id="m-nome" name="nome" required></div><div class="campo"><label for="m-tel">WhatsApp</label><input id="m-tel" name="tel" inputmode="tel" required placeholder="(11) 90000-0000"></div><div class="campo"><label for="m-svc">Servi\xE7o</label><select id="m-svc" name="svc">${c.services.map((v) => `<option value="${esc(v.id)}">${esc(v.name)} \xB7 ${dur(v.dur)} \xB7 ${brl(v.price)}</option>`).join("")}</select></div><div class="campo"><label for="m-b">Barbeiro</label><select id="m-b" name="b">${c.barbers.map((v) => `<option value="${esc(v.id)}" ${v.id == bb ? "selected" : ""}>${esc(v.name)}</option>`).join("")}</select></div><div class="campo"><label for="m-d">Dia</label><input id="m-d" type="date" name="d" value="${d}" data-a2="mdia" required></div><div class="campo"><label for="m-s">Hor\xE1rio</label><select id="m-s" name="s">${opt}</select></div>${REAL ? `<label class="ck-aviso"><input type="checkbox" name="zap" checked><span>Mandar a confirma\xE7\xE3o no WhatsApp do cliente</span></label>` : ""}<p class="err" id="m-err" style="color:var(--ruim);font-size:14px"></p><div class="fim"><button class="btn" type="submit">Marcar</button><button class="btn sec" type="button" data-a="fecha">Cancelar</button></div></form>`);
 }
 function dlgLivre(v) {
   const [b, k, s] = v.split("|");
@@ -2476,7 +2476,7 @@ const FORMS = {
     }
   },
   async manual(f) {
-    const nome = f.nome.value.trim(), tel = dig(f.tel.value), s = servico(f.svc.value), b = f.b.value, d = f.d.value, t = +f.s.value, err = $("#m-err");
+    const nome = f.nome.value.trim(), tel = telZap(f.tel.value), s = servico(f.svc.value), b = f.b.value, d = f.d.value, t = +f.s.value, err = $("#m-err");
     if (nome.length < 2 || tel.length < 10) {
       err.textContent = "Informe nome e WhatsApp com DDD.";
       return;
@@ -2490,11 +2490,34 @@ const FORMS = {
       err.textContent = `${barbeiro(b).name} j\xE1 tem compromisso nesse hor\xE1rio.`;
       return;
     }
+    const avisar2 = REAL && f.zap && f.zap.checked && zapOk(tel);
+    let jan = null;
+    if (avisar2) {
+      try {
+        jan = window.open("", "_blank");
+      } catch (e) {
+      }
+    }
     const key = "m-" + tel;
-    await protege(() => Store.guardar(key, novoId(), { b, d, s: t, dur: s.dur, svc: s.id, n: s.name, p: s.price, st: "confirmado", at: Date.now() }, { name: nome, phone: tel }, { name: nome, phone: tel }));
+    try {
+      await protege(() => Store.guardar(key, novoId(), { b, d, s: t, dur: s.dur, svc: s.id, n: s.name, p: s.price, st: "confirmado", at: Date.now() }, { name: nome, phone: tel }, { name: nome, phone: tel }));
+    } catch (e) {
+      if (jan) jan.close();
+      throw e;
+    }
     fecha();
     U.ad = d;
-    toast("Hor\xE1rio marcado.");
+    if (avisar2) {
+      const link = wa(tel, msgConfirma({ n: s.name, d, s: t, b }, { name: nome }));
+      if (jan) {
+        try {
+          jan.location.href = link;
+        } catch (e) {
+          location.href = link;
+        }
+      } else location.href = link;
+      toast("Hor\xE1rio marcado. Toque em enviar no WhatsApp para o cliente receber.");
+    } else toast("Hor\xE1rio marcado.");
   },
   async bloq(f) {
     const [b, k, s] = f.v.value.split("|"), m = +f.dur.value, t = +s;
@@ -2748,14 +2771,14 @@ const FORMS = {
 const mascaraTel = (d) => d.length >= 10 ? "(" + d.slice(0, 2) + ") " + d.slice(2, d.length - 4) + "-" + d.slice(-4) : d;
 document.addEventListener("input", (e) => {
   const t = e.target;
-  if (t && (t.id == "f-tel" || t.id == "c-w")) {
+  if (t && (t.id == "f-tel" || t.id == "c-w" || t.id == "m-tel")) {
     const d = dig(t.value).slice(0, 13);
     t.value = d.length >= 10 && !d.startsWith("0") && !d.startsWith("55") ? mascaraTel(d.slice(0, 11)) : d;
   }
 });
 document.addEventListener("focusout", (e) => {
   const t = e.target;
-  if (t && (t.id == "f-tel" || t.id == "c-w") && dig(t.value)) {
+  if (t && (t.id == "f-tel" || t.id == "c-w" || t.id == "m-tel") && dig(t.value)) {
     const z = telZap(t.value);
     t.value = z.length >= 10 ? mascaraTel(z) : dig(t.value);
   }
@@ -2802,8 +2825,7 @@ document.addEventListener("input", (e) => {
   if (t.id == "busca") {
     U.q = t.value;
     $("#lista-cli").innerHTML = listaClientes();
-  } else if (t.id == "m-tel") t.value = fone(t.value);
-  else if (U.rota == "ajustes" && $("#app").contains(t)) U.sujo = true;
+  } else if (U.rota == "ajustes" && $("#app").contains(t)) U.sujo = true;
   if (t.id == "m-d") {
     const sel = $("#m-s");
     sel.innerHTML = grade(t.value).map((s) => `<option value="${s}">${hm(s)}</option>`).join("");
