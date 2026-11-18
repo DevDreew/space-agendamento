@@ -1262,10 +1262,10 @@ function passo3() {
 function passo4() {
   const x = todos().find((i) => i.id == U.enviado);
   if (!x) return '<p class="dica">Pedido enviado.</p>';
-  const txt = { pendente: `Pronto! ${barbeiro(x.b).name} j\xE1 recebeu seu pedido no celular. Quando ele confirmar, a resposta aparece aqui${U.push == "ativo" ? " e voc\xEA recebe um aviso" : ""}.`, confirmado: "Hor\xE1rio confirmado. At\xE9 l\xE1.", recusado: `${barbeiro(x.b).name} n\xE3o consegue nesse hor\xE1rio. Escolha outro.`, cancelado: "Este hor\xE1rio foi cancelado." }[x.st] || "";
+  const txt = { pendente: `Pronto! Seu hor\xE1rio est\xE1 guardado e ${barbeiro(x.b).name} j\xE1 foi avisado. No WhatsApp que abriu, toque em enviar. Quando ele confirmar, a resposta aparece aqui${U.push == "ativo" ? " e voc\xEA recebe um aviso" : ""}.`, confirmado: "Hor\xE1rio confirmado. At\xE9 l\xE1.", recusado: `${barbeiro(x.b).name} n\xE3o consegue nesse hor\xE1rio. Escolha outro.`, cancelado: "Este hor\xE1rio foi cancelado." }[x.st] || "";
   return `<h2 class="h-etapa">${x.st == "pendente" ? "Pedido enviado" : STATUS[x.st][0]}</h2><p class="sub">${esc(txt)}</p>
  ${comanda({ n: x.n, b: barbeiro(x.b).name, d: x.d, s: x.s, dur: x.dur, p: x.p, pl: x.pl, st: x.st })}
- ${U.balcao ? `<div class="acoes"><button class="btn larga" data-a="novo">Pr\xF3ximo cliente</button></div><p class="volta-auto">A tela volta para o in\xEDcio sozinha em alguns segundos. Seu nome n\xE3o fica salvo neste aparelho.</p>` : `${cartaoPush("cliente")}<div class="acoes"><a class="btn" href="#meus">Ver meus hor\xE1rios</a><button class="btn sec" data-a="novo">Marcar outro</button></div>`}`;
+ ${U.balcao ? `<div class="acoes"><button class="btn larga" data-a="novo">Pr\xF3ximo cliente</button></div><p class="volta-auto">A tela volta para o in\xEDcio sozinha em alguns segundos. Seu nome n\xE3o fica salvo neste aparelho.</p>` : `${U.zapPedido && x.st == "pendente" ? `<a class="btn larga" style="margin:10px 0" href="${esc(U.zapPedido)}" target="_blank" rel="noopener">${I("message-circle")}Enviar no WhatsApp da barbearia</a><p class="dica" style="margin:0 0 10px">Se o WhatsApp n\xE3o abriu sozinho, toque acima e depois em enviar.</p>` : ""}${cartaoPush("cliente")}<div class="acoes"><a class="btn" href="#meus">Ver meus hor\xE1rios</a><button class="btn sec" data-a="novo">Marcar outro</button></div>`}`;
 }
 function agendar() {
   return `<main class="fluxo" id="conteudo">${U.step > 1 && U.step < 4 ? `<button class="voltar" data-a="ir" data-v="${U.step - 1}">${I("chevron-left")}Voltar</button>` : ""}${[0, passo1, passo2, passo3, passo4][U.step]()}</main>`;
@@ -1493,6 +1493,21 @@ function avisar(x, tipo) {
   const msg = tipo == "ok" ? msgConfirma(x, p) : `Oi, ${p.name}! Infelizmente n\xE3o consigo te atender ${dataCurta(x.d)} \xE0s ${hm(x.s)}. Pode escolher outro hor\xE1rio?`;
   abre(`<h2>${tipo == "ok" ? "Aceito" : "Recusado"}</h2><p class="dica" style="margin:0 0 14px">Avise ${esc(p.name)} no WhatsApp: ${esc(fone(p.phone))}.</p><div class="campo"><span>Mensagem pronta</span><textarea readonly aria-label="Mensagem pronta">${esc(msg)}</textarea></div><div class="fim"><a class="btn" href="${wa(p.phone, msg)}" target="_blank" rel="noopener" data-a="fecha">${I("message-circle")}Abrir WhatsApp</a><button class="btn sec" data-a="fecha">Depois</button></div>`);
 }
+const zapDoPedido = (b) => {
+  const z = (barbeiro(b) || {}).whatsapp || C().whatsapp || "";
+  return zapOk(z) ? telZap(z) : "";
+};
+function msgPedido(x, nome, tel, obs) {
+  return `Ol\xE1! Acabei de agendar pelo app da ${C().name}:
+
+\u2702\uFE0F ${x.n} \xB7 ${brl(x.p)}
+\u{1F4C5} ${dataCurta(x.d)} \xE0s ${hm(x.s)}
+\u{1F488} com ${barbeiro(x.b).name}
+\u{1F464} ${nome} \xB7 ${fone(tel)}${obs ? `
+\u{1F4DD} ${obs}` : ""}
+
+Pode confirmar?`;
+}
 function msgConfirma(x, p) {
   const c = C();
   return `Oi, ${(p.name || "").split(" ")[0]}! \u2705 Seu hor\xE1rio est\xE1 confirmado:
@@ -1549,7 +1564,7 @@ function dlgSvc(id) {
 }
 function dlgBar(id) {
   const b = id ? barbeiro(id) : { id: "", name: "", spec: "", active: true };
-  abre(`<h2>${id ? "Editar barbeiro" : "Novo barbeiro"}</h2><form data-f="bar"><input type="hidden" name="id" value="${esc(b.id)}"><div class="campo"><label for="t-n">Nome</label><input id="t-n" name="name" value="${esc(b.name)}" required></div><div class="campo"><label for="t-e">Especialidade</label><input id="t-e" name="spec" value="${esc(b.spec)}"></div><fieldset class="campo" style="border:0;padding:0"><legend style="margin-bottom:6px">Dias que atende</legend><div class="filtros">${[1, 2, 3, 4, 5, 6, 0].map((d) => `<label class="chip ck-dia"><input type="checkbox" name="dia" value="${d}" ${!Array.isArray(b.dias) || b.dias.includes(d) ? "checked" : ""}>${DSEM[d]}</label>`).join("")}</div><span class="ajuda">Nos outros dias ele aparece de folga para o cliente.</span></fieldset><label class="ck" style="display:flex;gap:8px;align-items:center;min-height:44px;margin-bottom:10px"><input type="checkbox" name="active" ${b.active ? "checked" : ""}>Aceitando agendamentos</label><div class="fim"><button class="btn" type="submit">Salvar</button>${id ? `<button class="btn perigo" type="button" data-a="rm-bar" data-v="${esc(id)}">Remover</button>` : `<button class="btn sec" type="button" data-a="fecha">Cancelar</button>`}</div></form>`);
+  abre(`<h2>${id ? "Editar barbeiro" : "Novo barbeiro"}</h2><form data-f="bar"><input type="hidden" name="id" value="${esc(b.id)}"><div class="campo"><label for="t-n">Nome</label><input id="t-n" name="name" value="${esc(b.name)}" required></div><div class="campo"><label for="t-e">Especialidade</label><input id="t-e" name="spec" value="${esc(b.spec)}"></div><div class="campo"><label for="t-w">WhatsApp deste barbeiro (opcional)</label><input id="t-w" name="wa" inputmode="tel" placeholder="(11) 90000-0000" value="${esc(b.whatsapp ? fone(b.whatsapp) : "")}"><span class="ajuda">Os pedidos com ele chegam neste n\xFAmero. Em branco, chegam no WhatsApp da barbearia.</span></div><fieldset class="campo" style="border:0;padding:0"><legend style="margin-bottom:6px">Dias que atende</legend><div class="filtros">${[1, 2, 3, 4, 5, 6, 0].map((d) => `<label class="chip ck-dia"><input type="checkbox" name="dia" value="${d}" ${!Array.isArray(b.dias) || b.dias.includes(d) ? "checked" : ""}>${DSEM[d]}</label>`).join("")}</div><span class="ajuda">Nos outros dias ele aparece de folga para o cliente.</span></fieldset><label class="ck" style="display:flex;gap:8px;align-items:center;min-height:44px;margin-bottom:10px"><input type="checkbox" name="active" ${b.active ? "checked" : ""}>Aceitando agendamentos</label><div class="fim"><button class="btn" type="submit">Salvar</button>${id ? `<button class="btn perigo" type="button" data-a="rm-bar" data-v="${esc(id)}">Remover</button>` : `<button class="btn sec" type="button" data-a="fecha">Cancelar</button>`}</div></form>`);
 }
 function dlgPlano(id) {
   const p = id ? (C().planos || []).find((x) => x.id == id) : { id: "", name: "", price: "", svcs: [], desc: "" };
@@ -2311,7 +2326,18 @@ const FORMS = {
       R(true);
       return;
     }
+    let jan = null;
+    U.zapPedido = null;
+    if (REAL && !U.balcao && (zapOk(C().whatsapp || "") || (C().barbers || []).some((b2) => zapOk(b2.whatsapp || "")))) {
+      try {
+        jan = window.open("", "_blank");
+        if (jan) jan.document.write('<p style="font:16px system-ui;padding:24px">Abrindo o WhatsApp da barbearia\u2026</p>');
+      } catch (err) {
+        jan = null;
+      }
+    }
     if (REAL && !navigator.onLine) {
+      if (jan) jan.close();
       toast("Sem internet agora. Seu pedido ainda n\xE3o foi enviado. Tente de novo quando a conex\xE3o voltar.");
       return;
     }
@@ -2369,6 +2395,21 @@ const FORMS = {
       U.enviado = id;
       return true;
     }, "N\xE3o consegui enviar seu pedido. Tente de novo.");
+    if (REAL && !U.balcao) {
+      const x = ok && todos().find((i) => i.id == U.enviado), z = x && zapDoPedido(x.b);
+      if (x && z) {
+        const link = wa(z, msgPedido(x, nome, tel, obs));
+        U.zapPedido = link;
+        if (jan) {
+          try {
+            jan.location.href = link;
+          } catch (err) {
+            jan.close();
+            jan = null;
+          }
+        }
+      } else if (jan) jan.close();
+    }
     if (ok) {
       vaPara(4);
       if (U.balcao) {
@@ -2424,7 +2465,9 @@ const FORMS = {
   async bar(f) {
     const n = f.name.value.trim();
     if (!n) return toast("Informe o nome.");
-    const c = Object.assign({}, C(), { barbers: C().barbers.slice() }), o = { id: f.id.value || "b" + novoId(), name: n, spec: f.spec.value.trim(), active: f.active.checked, dias: [...f.querySelectorAll("input[name=dia]:checked")].map((x) => +x.value) }, i = c.barbers.findIndex((x) => x.id == o.id);
+    const wb = telZap(f.wa.value);
+    if (f.wa.value.trim() && !zapOk(wb)) return toast("Confira o WhatsApp do barbeiro, com DDD.");
+    const c = Object.assign({}, C(), { barbers: C().barbers.slice() }), o = { id: f.id.value || "b" + novoId(), name: n, spec: f.spec.value.trim(), whatsapp: f.wa.value.trim() ? wb : "", active: f.active.checked, dias: [...f.querySelectorAll("input[name=dia]:checked")].map((x) => +x.value) }, i = c.barbers.findIndex((x) => x.id == o.id);
     if (i >= 0) c.barbers[i] = o;
     else c.barbers.push(o);
     await protege(() => Store.salvaCfg(c));
