@@ -1309,6 +1309,13 @@ function viewHoje() {
  <section class="kpis" aria-label="Resumo do dia"><div class="kpi"><span>Previsto hoje</span><b>${brl(vl)}</b><em class="${d == null ? "" : d >= 0 ? "sobe" : "desce"}">${d == null ? "sem base da semana passada" : `${I(d >= 0 ? "trending-up" : "trending-down")}${d >= 0 ? "+" : ""}${d}% vs. ${semana(k)} passada`}</em></div>
  <div class="kpi"><span>Atendidos</span><b>${feitos} de ${tot}</b><em>${tot - feitos} para atender</em></div>
  <div class="kpi ${ped.length ? "alerta" : ""}"><span>Pedidos para responder</span><b>${ped.length}</b><em>${ped.length ? I("hourglass") + "cliente aguardando" : "tudo respondido"}</em></div></section>
+ ${(() => {
+    const lb = lembrados(), v = dia.filter((x) => x.st == "confirmado" && x.s > n && pii(x).phone);
+    return k == hoje() && v.length ? `<section class="bloco"><h2>Lembrar os clientes de hoje <small>um toque abre o WhatsApp com a mensagem pronta</small></h2><div class="fila">${v.map((x) => {
+      const p = pii(x), f = lb.includes(String(x.id));
+      return `<div class="cli-l"><div><b>${hm(x.s)} \xB7 ${esc(p.name)}</b><small>${esc(x.n)}${f ? " \xB7 lembrado" : ""}</small></div><a class="btn ${f ? "sec " : ""}peq" href="${wa(p.phone, msgLembrete(x, p))}" target="_blank" rel="noopener" data-lembra="${esc(String(x.id))}">${I(f ? "check" : "message-circle")}${f ? "Lembrado" : "Lembrar"}</a></div>`;
+    }).join("")}</div></section>` : "";
+  })()}
  ${ped.length ? `<section class="bloco"><h2>Pedidos <small>o hor\xE1rio fica reservado at\xE9 voc\xEA responder</small></h2><div class="pedidos">${ped.map(pedido).join("")}</div></section>` : ""}
  ${(() => {
     const v = clientesDados().filter((c) => c.naHora);
@@ -1483,9 +1490,46 @@ function avisar(x, tipo) {
     fecha();
     return;
   }
-  const msg = tipo == "ok" ? `Oi, ${p.name}! Seu hor\xE1rio de ${x.n} ${dataCurta(x.d)} \xE0s ${hm(x.s)} com ${barbeiro(x.b).name} est\xE1 confirmado. Te espero na ${C().name}.` : `Oi, ${p.name}! Infelizmente n\xE3o consigo te atender ${dataCurta(x.d)} \xE0s ${hm(x.s)}. Pode escolher outro hor\xE1rio?`;
+  const msg = tipo == "ok" ? msgConfirma(x, p) : `Oi, ${p.name}! Infelizmente n\xE3o consigo te atender ${dataCurta(x.d)} \xE0s ${hm(x.s)}. Pode escolher outro hor\xE1rio?`;
   abre(`<h2>${tipo == "ok" ? "Aceito" : "Recusado"}</h2><p class="dica" style="margin:0 0 14px">Avise ${esc(p.name)} no WhatsApp: ${esc(fone(p.phone))}.</p><div class="campo"><span>Mensagem pronta</span><textarea readonly aria-label="Mensagem pronta">${esc(msg)}</textarea></div><div class="fim"><a class="btn" href="${wa(p.phone, msg)}" target="_blank" rel="noopener" data-a="fecha">${I("message-circle")}Abrir WhatsApp</a><button class="btn sec" data-a="fecha">Depois</button></div>`);
 }
+function msgConfirma(x, p) {
+  const c = C();
+  return `Oi, ${(p.name || "").split(" ")[0]}! \u2705 Seu hor\xE1rio est\xE1 confirmado:
+
+\u2702\uFE0F ${x.n}
+\u{1F4C5} ${dataCurta(x.d)} \xE0s ${hm(x.s)}
+\u{1F488} ${barbeiro(x.b).name} \xB7 ${c.name}${c.address ? `
+\u{1F4CD} ${c.address}` : ""}
+
+Se n\xE3o puder vir, me avisa por aqui. Te espero!`;
+}
+function msgLembrete(x, p) {
+  const c = C();
+  return `Bom dia, ${(p.name || "").split(" ")[0]}! \u{1F488} Passando para lembrar: hoje \xE0s ${hm(x.s)} tem ${x.n.toLowerCase()} aqui na ${c.name}${c.address ? ` (${c.address})` : ""}.
+
+Confirma que vem? Se n\xE3o puder, me avisa para eu liberar o hor\xE1rio.`;
+}
+const lembrados = () => {
+  try {
+    return JSON.parse(localStorage.getItem("space-lembrados") || "[]");
+  } catch (e) {
+    return [];
+  }
+};
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("a[data-lembra]");
+  if (!a) return;
+  try {
+    const l = lembrados();
+    if (!l.includes(a.dataset.lembra)) {
+      l.push(a.dataset.lembra);
+      localStorage.setItem("space-lembrados", JSON.stringify(l.slice(-300)));
+    }
+  } catch (err) {
+  }
+  setTimeout(() => R(true), 400);
+});
 function dlgManual(b, k, s) {
   const c = C(), d = k || U.ad || hoje();
   const bb = b || (U.pb != "todos" ? U.pb : (ativos()[0] || {}).id);
@@ -2125,9 +2169,21 @@ const ACOES = {
       toast("Este pedido j\xE1 foi respondido.");
       return fecha();
     }
+    const p = pii(x);
+    let jan = null;
+    if (REAL && p.phone) {
+      try {
+        jan = window.open(wa(p.phone, msgConfirma(x, p)), "_blank");
+      } catch (e) {
+      }
+    }
     await mudaStatus(o, id, "confirmado");
-    toast("Aceito. O cliente v\xEA na hora.");
-    avisar(x, "ok");
+    if (jan) {
+      toast("Aceito. No WhatsApp que abriu, toque em enviar para o cliente receber.");
+    } else {
+      toast("Aceito. O cliente v\xEA na hora.");
+      avisar(x, "ok");
+    }
   },
   async recusar(v) {
     const [o, id] = v.split("|"), x = achar(v);

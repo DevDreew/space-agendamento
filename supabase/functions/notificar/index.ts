@@ -1,5 +1,5 @@
 // Envia notificações (Web Push) para barbeiro e cliente a cada mudança de agendamento,
-// e lembretes na véspera (chamado pelo cron às 18h de Brasília).
+// lembretes na véspera (18h de Brasília) e na manhã do dia (8h de Brasília).
 import webpush from "npm:web-push@3.6.7";
 import { createClient } from "npm:@supabase/supabase-js@2.45.4";
 
@@ -101,12 +101,34 @@ async function lembretes() {
   return { lembretes: rows?.length || 0, clientes, barbeiros };
 }
 
+// Manhã do dia (8h de Brasília): lembra o cliente que hoje tem horário e manda ao barbeiro o resumo do dia.
+async function lembretesHoje() {
+  const hoje = hojeBR();
+  const { data: rows } = await sb.from("bookings").select("*").eq("day", hoje).eq("status", "confirmado").eq("lembrete_hoje", false).eq("is_example", false);
+  const porLoja: Record<string, any[]> = {};
+  let clientes = 0;
+  for (const r of rows || []) {
+    (porLoja[r.shop_id] ||= []).push(r);
+    const shop = await loja(r.shop_id);
+    const end = shop.config?.address ? ` ${shop.config.address}.` : "";
+    clientes += await enviar(await subsCliente(r.manage_token), { title: `Hoje é dia de ${r.svc_name.toLowerCase()}!`, body: `${shop.name}, hoje às ${hm(r.start_min)} com ${nomeBarbeiro(shop, r.barber_id)}.${end} Não pode ir? Toque para cancelar.`, url: `/${shop.slug}#meus`, tag: "hoje-" + r.id });
+    await sb.from("bookings").update({ lembrete_hoje: true }).eq("id", r.id);
+  }
+  let barbeiros = 0;
+  for (const id in porLoja) {
+    const l = porLoja[id].sort((a, b) => a.start_min - b.start_min);
+    const shop = await loja(id);
+    barbeiros += await enviar(await subsBarbeiro(id), { title: `Hoje: ${l.length} ${l.length === 1 ? "cliente" : "clientes"}`, body: `Primeiro às ${hm(l[0].start_min)} (${l[0].client_name}). Toque para ver e lembrar no WhatsApp.`, url: `/${shop.slug}/painel#hoje` });
+  }
+  return { hoje: rows?.length || 0, clientes, barbeiros };
+}
+
 Deno.serve(async (req) => {
   try {
     const s = await segredos();
     if (req.headers.get("x-space-secret") !== s.webhook) return new Response("nao autorizado", { status: 401 });
     const body = await req.json();
-    const out = body.type === "LEMBRETES" ? await lembretes() : body.type === "ASSINATURA" ? await assinatura(body) : await mudanca(body.type, body.record, body.old);
+    const out = body.type === "LEMBRETES" ? await lembretes() : body.type === "LEMBRETES_HOJE" ? await lembretesHoje() : body.type === "ASSINATURA" ? await assinatura(body) : await mudanca(body.type, body.record, body.old);
     return Response.json({ ok: true, ...out });
   } catch (e) {
     console.error(e);
