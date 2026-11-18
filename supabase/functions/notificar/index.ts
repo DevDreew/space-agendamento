@@ -51,7 +51,8 @@ async function mudanca(tipo: string, r: any, old: any) {
   const q = `${quando(r.day)} às ${hm(r.start_min)}`;
   const quem = nomeBarbeiro(shop, r.barber_id);
   if (tipo === "INSERT" && r.status === "pendente") {
-    return { barbeiro: await enviar(await subsBarbeiro(shop.id), { title: "Novo pedido de horário", body: `${r.client_name} · ${r.svc_name} · ${q} com ${quem}. Toque para aceitar.`, url: linkPro, tag: "pedido-" + r.id }) };
+    const tel = String(r.client_phone || "").replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
+    return { barbeiro: await enviar(await subsBarbeiro(shop.id), { title: `Novo agendamento · ${r.client_name}`, body: `${r.svc_name} · ${q} com ${quem}${tel ? ` · ${tel}` : ""}. Toque para ver.`, url: linkPro, tag: "pedido-" + r.id }) };
   }
   if (tipo !== "UPDATE" || !old) return {};
   const res: Record<string, number> = {};

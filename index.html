@@ -1498,15 +1498,14 @@ const zapDoPedido = (b) => {
   return zapOk(z) ? telZap(z) : "";
 };
 function msgPedido(x, nome, tel, obs) {
-  return `Ol\xE1! Acabei de agendar pelo app da ${C().name}:
+  return `\u{1F4CC} Novo agendamento \xB7 ${C().name}
 
+\u{1F464} ${nome}
+\u{1F4F1} ${fone(tel)}
 \u2702\uFE0F ${x.n} \xB7 ${brl(x.p)}
 \u{1F4C5} ${dataCurta(x.d)} \xE0s ${hm(x.s)}
-\u{1F488} com ${barbeiro(x.b).name}
-\u{1F464} ${nome} \xB7 ${fone(tel)}${obs ? `
-\u{1F4DD} ${obs}` : ""}
-
-Pode confirmar?`;
+\u{1F488} ${barbeiro(x.b).name}${obs ? `
+\u{1F4DD} ${obs}` : ""}`;
 }
 function msgCobranca(l) {
   const venc = l.vence < hoje();
@@ -1678,6 +1677,16 @@ addEventListener("online", () => {
   } catch (e) {
   }
 });
+document.addEventListener("click", () => {
+  try {
+    if (REAL && PAINEL && !ADMIN && !window._pediuAviso && Store.mode == "painel" && !Store.adminVendo && temPush() && Notification.permission == "default") {
+      window._pediuAviso = 1;
+      ativarPush("barbeiro").catch(() => {
+      });
+    }
+  } catch (e) {
+  }
+}, true);
 function alertaNovo() {
   toast("Pedido novo chegou.");
   try {
