@@ -51,6 +51,11 @@ function telZap(t: string) {
   if (d.length === 9) d = "11" + d;
   return /^[1-9][1-9]9\d{8}$/.test(d) ? d : "";
 }
+// O robô só manda mensagem para o BARBEIRO. Com o cliente, quem fala é o próprio barbeiro,
+// pelo WhatsApp dele: o painel abre a conversa com a mensagem pronta (confirmar, recusar, cancelar).
+async function zapCliente(_tel: string, _texto: string) { return 0; }
+const linkZap = (tel: string) => { const d = String(tel || "").replace(/\D/g, "").replace(/^55(?=\d{10,11}$)/, ""); return d.length >= 10 ? `https://wa.me/55${d}` : ""; };
+
 async function zap(tel: string, texto: string) {
   await segredos();
   const { data: s } = await sb.rpc("segredos_notificacao"); // sempre a chave mais nova
@@ -91,26 +96,26 @@ async function mudanca(tipo: string, r: any, old: any) {
   const quem = nomeBarbeiro(shop, r.barber_id);
   if (tipo === "INSERT" && r.status === "pendente") {
     const tel = String(r.client_phone || "").replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
-    const zapB = await zap(zapDoBarbeiro(shop, r.barber_id), `📌 *Novo agendamento · ${shop.name}*\n\n👤 Cliente: ${r.client_name}\n📱 WhatsApp: ${fone(r.client_phone)}\n${linhas(r, shop, quem)}${r.note ? `\n📝 Recado: ${r.note}` : ""}\n\nResponda no painel: ${SITE}/${shop.slug}/painel`);
+    const zapB = await zap(zapDoBarbeiro(shop, r.barber_id), `📌 *Novo agendamento · ${shop.name}*\n\n👤 Cliente: ${r.client_name}\n📱 WhatsApp: ${fone(r.client_phone)}\n${linhas(r, shop, quem)}${r.note ? `\n📝 Recado: ${r.note}` : ""}\n\n✅ Confirme no painel: ${SITE}/${shop.slug}/painel${linkZap(r.client_phone) ? `\n💬 Falar com o cliente: ${linkZap(r.client_phone)}` : ""}`);
     return { zap: zapB, barbeiro: await enviar(await subsBarbeiro(shop.id), { title: `Novo agendamento · ${r.client_name}`, body: `${r.svc_name} · ${q} com ${quem}${tel ? ` · ${tel}` : ""}. Toque para ver.`, url: linkPro, tag: "pedido-" + r.id }) };
   }
   if (tipo === "INSERT" && r.status === "confirmado" && r.client_phone) {
-    return { zap: await zap(r.client_phone, confirmacao(r, shop, quem)) };
+    return { zap: await zapCliente(r.client_phone, confirmacao(r, shop, quem)) };
   }
   if (tipo !== "UPDATE" || !old) return {};
   const res: Record<string, number> = {};
   if (r.status === "confirmado" && old.status === "pendente") {
     res.cliente = await enviar(await subsCliente(r.manage_token), { title: `Confirmado na ${shop.name}`, body: `${r.svc_name} ${q} com ${quem}. Te esperamos!`, url: linkCli, tag: "pedido-" + r.id });
-    res.zap = await zap(r.client_phone, confirmacao(r, shop, quem));
+    res.zap = await zapCliente(r.client_phone, confirmacao(r, shop, quem));
   }
   if (r.status === "recusado" && old.status !== "recusado")
-    res.zap = await zap(r.client_phone, `*${shop.name}*\n\nOlá, ${String(r.client_name || "").split(" ")[0]}! ${quem} não conseguiu atender ${q}. Escolha outro horário aqui: ${SITE}/${shop.slug}`);
+    res.zap = await zapCliente(r.client_phone, `*${shop.name}*\n\nOlá, ${String(r.client_name || "").split(" ")[0]}! ${quem} não conseguiu atender ${q}. Escolha outro horário aqui: ${SITE}/${shop.slug}`);
   if (r.status === "recusado")
     res.cliente = await enviar(await subsCliente(r.manage_token), { title: `${shop.name} não conseguiu esse horário`, body: `${quem} não pode ${q}. Toque para escolher outro.`, url: `/${shop.slug}`, tag: "pedido-" + r.id });
   if (r.status === "cancelado" && old.status !== "cancelado" && r.cancelado_por === "cliente")
-    res.zap = await zap(zapDoBarbeiro(shop, r.barber_id), `❌ *Horário cancelado · ${shop.name}*\n\n👤 Cliente: ${r.client_name}\n📱 WhatsApp: ${fone(r.client_phone)}\n${linhas(r, shop, quem)}\n\nO horário já está livre na agenda.`);
+    res.zap = await zap(zapDoBarbeiro(shop, r.barber_id), `❌ *Horário cancelado · ${shop.name}*\n\n👤 Cliente: ${r.client_name}\n📱 WhatsApp: ${fone(r.client_phone)}\n${linhas(r, shop, quem)}\n\nO horário já está livre na agenda.${linkZap(r.client_phone) ? `\n💬 Falar com o cliente: ${linkZap(r.client_phone)}` : ""}`);
   if (r.status === "cancelado" && old.status !== "cancelado" && r.cancelado_por !== "cliente" && old.status !== "pendente")
-    res.zapCli = await zap(r.client_phone, `*${shop.name}*\n\nOlá, ${String(r.client_name || "").split(" ")[0]}! ${r.motivo ? r.motivo + ". " : ""}Seu horário de ${q} foi cancelado. Marque outro aqui: ${SITE}/${shop.slug}`);
+    res.zapCli = await zapCliente(r.client_phone, `*${shop.name}*\n\nOlá, ${String(r.client_name || "").split(" ")[0]}! ${r.motivo ? r.motivo + ". " : ""}Seu horário de ${q} foi cancelado. Marque outro aqui: ${SITE}/${shop.slug}`);
   if (r.status === "cancelado" && r.cancelado_por === "cliente")
     res.barbeiro = await enviar(await subsBarbeiro(shop.id), { title: "Cliente cancelou", body: `${r.client_name} cancelou ${r.svc_name} ${q}. O horário ficou livre.`, url: linkPro });
   if (r.status === "cancelado" && r.cancelado_por !== "cliente")
@@ -163,7 +168,7 @@ async function lembretesHoje() {
     (porLoja[r.shop_id] ||= []).push(r);
     const shop = await loja(r.shop_id);
     const end = shop.config?.address ? ` ${shop.config.address}.` : "";
-    await zap(r.client_phone, `⏰ *Lembrete · ${shop.name}*\n\nBom dia, ${String(r.client_name || "").split(" ")[0]}! Seu horário é *hoje*:\n\n${linhas(r, shop, nomeBarbeiro(shop, r.barber_id))}${shop.config?.address ? `\n📍 Endereço: ${shop.config.address}` : ""}\n\nNão pode vir? Responda esta mensagem.`);
+    await zapCliente(r.client_phone, `⏰ *Lembrete · ${shop.name}*\n\nBom dia, ${String(r.client_name || "").split(" ")[0]}! Seu horário é *hoje*:\n\n${linhas(r, shop, nomeBarbeiro(shop, r.barber_id))}${shop.config?.address ? `\n📍 Endereço: ${shop.config.address}` : ""}\n\nNão pode vir? Responda esta mensagem.`);
     clientes += await enviar(await subsCliente(r.manage_token), { title: `Hoje é dia de ${r.svc_name.toLowerCase()}!`, body: `${shop.name}, hoje às ${hm(r.start_min)} com ${nomeBarbeiro(shop, r.barber_id)}.${end} Não pode ir? Toque para cancelar.`, url: `/${shop.slug}#meus`, tag: "hoje-" + r.id });
     await sb.from("bookings").update({ lembrete_hoje: true }).eq("id", r.id);
   }

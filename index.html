@@ -355,6 +355,10 @@ dialog .dl dt{color:var(--cinza)}dialog .dl dd{margin:0;text-align:right;font-we
 .conta-ok span{display:flex;align-items:center;gap:6px}.conta-ok svg{width:16px;height:16px;color:var(--ok)}
 .cli-l .tel-cli{display:block;color:var(--cinza);font-size:13px;margin-top:2px}
 .grade2{display:grid;gap:0 14px;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+.tel-zap{display:inline-flex;align-items:center;gap:6px;color:#25D366;font-weight:500;text-decoration:none;font-variant-numeric:tabular-nums}
+.tel-zap:hover{text-decoration:underline}
+.tel-zap svg{width:16px;height:16px}
+.cli-l .tel-cli.tel-zap{display:inline-flex;color:#25D366}
 </style></head>
 <body><div id="app"></div><dialog id="dlg"></dialog><div id="toast" role="status" aria-live="polite"></div><div id="tip" role="tooltip"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -1375,7 +1379,7 @@ function passo3() {
 function passo4() {
   const x = todos().find((i) => i.id == U.enviado);
   if (!x) return '<p class="dica">Pedido enviado.</p>';
-  const txt = { pendente: Store.zapAuto ? `Pronto! Seu pedido j\xE1 chegou no WhatsApp da ${C().name}. Quando ${barbeiro(x.b).name} confirmar, voc\xEA recebe a confirma\xE7\xE3o no seu WhatsApp.` : `Pronto! Seu hor\xE1rio est\xE1 guardado e ${barbeiro(x.b).name} j\xE1 foi avisado. No WhatsApp que abriu, toque em enviar. Quando ele confirmar, a resposta aparece aqui${U.push == "ativo" ? " e voc\xEA recebe um aviso" : ""}.`, confirmado: "Hor\xE1rio confirmado. At\xE9 l\xE1.", recusado: `${barbeiro(x.b).name} n\xE3o consegue nesse hor\xE1rio. Escolha outro.`, cancelado: "Este hor\xE1rio foi cancelado." }[x.st] || "";
+  const txt = { pendente: Store.zapAuto ? `Pronto! Seu pedido j\xE1 chegou no WhatsApp da ${C().name}. Quando ${barbeiro(x.b).name} confirmar, ele te chama no WhatsApp.` : `Pronto! Seu hor\xE1rio est\xE1 guardado e ${barbeiro(x.b).name} j\xE1 foi avisado. No WhatsApp que abriu, toque em enviar. Quando ele confirmar, a resposta aparece aqui${U.push == "ativo" ? " e voc\xEA recebe um aviso" : ""}.`, confirmado: "Hor\xE1rio confirmado. At\xE9 l\xE1.", recusado: `${barbeiro(x.b).name} n\xE3o consegue nesse hor\xE1rio. Escolha outro.`, cancelado: "Este hor\xE1rio foi cancelado." }[x.st] || "";
   return `<h2 class="h-etapa">${x.st == "pendente" ? "Pedido enviado" : STATUS[x.st][0]}</h2><p class="sub">${esc(txt)}</p>
  ${comanda({ n: x.n, b: barbeiro(x.b).name, d: x.d, s: x.s, dur: x.dur, p: x.p, pl: x.pl, st: x.st })}
  ${U.balcao ? `<div class="acoes"><button class="btn larga" data-a="novo">Pr\xF3ximo cliente</button></div><p class="volta-auto">A tela volta para o in\xEDcio sozinha em alguns segundos. Seu nome n\xE3o fica salvo neste aparelho.</p>` : `${U.zapPedido && x.st == "pendente" ? `<a class="btn larga" style="margin:10px 0" href="${esc(U.zapPedido)}" target="_blank" rel="noopener">${I("message-circle")}Enviar no WhatsApp da barbearia</a><p class="dica" style="margin:0 0 10px">Se o WhatsApp n\xE3o abriu sozinho, toque acima e depois em enviar.</p>` : ""}${cartaoConta(x)}${cartaoPush("cliente")}<div class="acoes"><a class="btn" href="#meus">Ver meus hor\xE1rios</a><button class="btn sec" data-a="novo">Marcar outro</button></div>`}`;
@@ -1426,7 +1430,7 @@ function viewHoje() {
   const prox = dia.find((x) => x.st == "confirmado" && x.s + x.dur > n);
   const pedido = (x) => {
     const p = pii(x);
-    return `<article class="pedido"><div class="qdo">${hm(x.s)}<small>${esc(dataCurta(x.d))}</small></div><p><b>${esc(p.name || "Cliente")}</b> <span>\xB7 ${esc(x.n)} \xB7 ${dur(x.dur)} \xB7 ${brl(x.p)} \xB7 ${esc(barbeiro(x.b).name)}</span></p>${p.note ? `<p><span>Recado: ${esc(p.note)}</span></p>` : ""}<div class="acoes"><button class="btn peq" data-a="aceitar" data-v="${esc(x.o + "|" + x.id)}">${I("check")}Aceitar</button><button class="btn sec peq" data-a="recusar" data-v="${esc(x.o + "|" + x.id)}">Recusar</button>${p.phone ? `<a class="btn sec peq" href="${wa(p.phone, `Oi, ${p.name}! Sobre seu pedido de ${x.n} ${dataCurta(x.d)} \xE0s ${hm(x.s)}:`)}" target="_blank" rel="noopener">${I("message-circle")}Chamar</a>` : ""}</div></article>`;
+    return `<article class="pedido"><div class="qdo">${hm(x.s)}<small>${esc(dataCurta(x.d))}</small></div><p><b>${esc(p.name || "Cliente")}</b> <span>\xB7 ${esc(x.n)} \xB7 ${dur(x.dur)} \xB7 ${brl(x.p)} \xB7 ${esc(barbeiro(x.b).name)}</span></p>${p.phone ? `<p><a class="tel-zap" href="${wa(p.phone, `Oi, ${p.name}!`)}" target="_blank" rel="noopener">${I("message-circle")}${esc(fone(p.phone))}</a></p>` : ""}${p.note ? `<p><span>Recado: ${esc(p.note)}</span></p>` : ""}<div class="acoes"><button class="btn peq" data-a="aceitar" data-v="${esc(x.o + "|" + x.id)}">${I("check")}Aceitar</button><button class="btn sec peq" data-a="recusar" data-v="${esc(x.o + "|" + x.id)}">Recusar</button>${p.phone ? `<a class="btn sec peq" href="${wa(p.phone, `Oi, ${p.name}! Sobre seu pedido de ${x.n} ${dataCurta(x.d)} \xE0s ${hm(x.s)}:`)}" target="_blank" rel="noopener">${I("message-circle")}Chamar</a>` : ""}</div></article>`;
   };
   const linha = (x) => `<button class="linha ${x == prox ? "prox" : ""} ${x.s + x.dur < n && x.st != "confirmado" ? "pass" : ""}" data-a="detalhe" data-v="${esc(x.o + "|" + x.id)}"><b class="t">${hm(x.s)}</b><div><b>${esc(nomeCli(x))}</b><small>${esc(x.n)} \xB7 ${esc(barbeiro(x.b).name)} \xB7 ${brl(x.p)}</small></div>${x == prox ? '<span class="pill confirmado">Pr\xF3ximo</span>' : pill(x.st)}</button>`;
   return shellPro(`<header class="topo-pro"><div><small>${esc(dataLonga(k))}</small><h1>Hoje</h1></div><button class="btn" data-a="manual">${I("plus")}Novo hor\xE1rio</button></header>${cartaoPush("barbeiro")}${fechado(k) && fechado(k).b == "todos" ? `<p class="leitura">Hoje a barbearia est\xE1 fechada: ${esc(fechado(k).motivo || "")}.</p>` : ""}${chipsB()}
@@ -1503,7 +1507,7 @@ function clientesDados() {
   }).sort((a, b) => (b.ult || "").localeCompare(a.ult || ""));
 }
 const msgRetorno = (c) => `Fala, ${c.nome.replace(" (exemplo)", "")}! J\xE1 faz ${c.dias} dias do seu \xFAltimo ${(c.ultSvc || "corte").toLowerCase()}. Bora deixar na r\xE9gua? Marca aqui em 1 minuto: ${location.origin}/${SLUG}`;
-const linhaCli = (c) => `<div class="cli-l"><div><b>${esc(c.nome)}</b>${c.plano ? `<span class="tag ok">${esc(c.plano.name)}</span>` : ""}${(Store.contas || /* @__PURE__ */ new Set()).has(telZap(c.tel || "")) ? `<span class="tag ok">tem conta</span>` : ""}<small class="tel-cli">${esc(fone(c.tel || ""))}</small>${c.naHora ? `<span class="tag">hora de voltar</span>` : c.sumido ? `<span class="tag">sumido h\xE1 ${c.dias} dias</span>` : ""}<small>${c.vis} ${c.vis == 1 ? "visita" : "visitas"} \xB7 ${brl(c.gasto)}${c.ult ? " \xB7 \xFAltima em " + esc(D(c.ult).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })) : ""}${c.ult ? ` \xB7 volta a cada ${c.ritmo} dias${c.proprio ? "" : " (padr\xE3o)"}` : ""}</small></div><div class="acoes" style="margin:0;justify-content:flex-end">${c.naHora || c.sumido ? `<a class="btn peq" href="${wa(c.tel, msgRetorno(c))}" target="_blank" rel="noopener" aria-label="Lembrar ${esc(c.nome)} no WhatsApp">${I("message-circle")}Lembrar</a>` : `<a class="btn sec peq" href="${wa(c.tel, `Oi, ${c.nome.replace(" (exemplo)", "")}!`)}" target="_blank" rel="noopener" aria-label="Chamar ${esc(c.nome)} no WhatsApp">${I("message-circle")}Chamar</a>`}<button class="btn sec peq" data-a="assin" data-v="${esc(c.tel + "|" + c.nome)}">${c.plano ? "Plano" : "Clube"}</button></div></div>`;
+const linhaCli = (c) => `<div class="cli-l"><div><b>${esc(c.nome)}</b>${c.plano ? `<span class="tag ok">${esc(c.plano.name)}</span>` : ""}${(Store.contas || /* @__PURE__ */ new Set()).has(telZap(c.tel || "")) ? `<span class="tag ok">tem conta</span>` : ""}${c.tel ? `<a class="tel-cli tel-zap" href="${wa(c.tel, `Oi, ${String(c.nome || "").split(" ")[0]}!`)}" target="_blank" rel="noopener">${esc(fone(c.tel))}</a>` : ""}${c.naHora ? `<span class="tag">hora de voltar</span>` : c.sumido ? `<span class="tag">sumido h\xE1 ${c.dias} dias</span>` : ""}<small>${c.vis} ${c.vis == 1 ? "visita" : "visitas"} \xB7 ${brl(c.gasto)}${c.ult ? " \xB7 \xFAltima em " + esc(D(c.ult).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })) : ""}${c.ult ? ` \xB7 volta a cada ${c.ritmo} dias${c.proprio ? "" : " (padr\xE3o)"}` : ""}</small></div><div class="acoes" style="margin:0;justify-content:flex-end">${c.naHora || c.sumido ? `<a class="btn peq" href="${wa(c.tel, msgRetorno(c))}" target="_blank" rel="noopener" aria-label="Lembrar ${esc(c.nome)} no WhatsApp">${I("message-circle")}Lembrar</a>` : `<a class="btn sec peq" href="${wa(c.tel, `Oi, ${c.nome.replace(" (exemplo)", "")}!`)}" target="_blank" rel="noopener" aria-label="Chamar ${esc(c.nome)} no WhatsApp">${I("message-circle")}Chamar</a>`}<button class="btn sec peq" data-a="assin" data-v="${esc(c.tel + "|" + c.nome)}">${c.plano ? "Plano" : "Clube"}</button></div></div>`;
 function listaClientes() {
   let l = clientesDados();
   if (U.filtro == "sumidos") l = l.filter((c) => c.sumido);
@@ -1605,7 +1609,7 @@ function detalhe(v) {
   if (!x) return;
   const p = pii(x), bl = x.st == "bloqueado", k = esc(x.o + "|" + x.id);
   const fut = x.d > hoje() || x.d == hoje() && x.s + x.dur > agoraMin();
-  abre(`<h2>${esc(nomeCli(x))}</h2>${pill(x.st)}<dl class="dl" style="margin-top:12px">${bl ? "" : `<dt>Servi\xE7o</dt><dd>${esc(x.n)}</dd>`}<dt>Barbeiro</dt><dd>${esc(barbeiro(x.b).name)}</dd><dt>Dia</dt><dd>${esc(dataCurta(x.d))}</dd><dt>Hor\xE1rio</dt><dd class="num">${hm(x.s)} \xE0s ${hm(x.s + x.dur)}</dd>${bl ? "" : `<dt>Valor</dt><dd class="num">${brl(x.p)}</dd>`}${p.phone ? `<dt>WhatsApp</dt><dd class="num">${esc(fone(p.phone))}</dd>` : ""}${p.note ? `<dt>Recado</dt><dd>${esc(p.note)}</dd>` : ""}</dl>
+  abre(`<h2>${esc(nomeCli(x))}</h2>${pill(x.st)}<dl class="dl" style="margin-top:12px">${bl ? "" : `<dt>Servi\xE7o</dt><dd>${esc(x.n)}</dd>`}<dt>Barbeiro</dt><dd>${esc(barbeiro(x.b).name)}</dd><dt>Dia</dt><dd>${esc(dataCurta(x.d))}</dd><dt>Hor\xE1rio</dt><dd class="num">${hm(x.s)} \xE0s ${hm(x.s + x.dur)}</dd>${bl ? "" : `<dt>Valor</dt><dd class="num">${brl(x.p)}</dd>`}${p.phone ? `<dt>WhatsApp</dt><dd class="num"><a class="tel-zap" href="${wa(p.phone, `Oi, ${p.name}!`)}" target="_blank" rel="noopener">${esc(fone(p.phone))}</a></dd>` : ""}${p.note ? `<dt>Recado</dt><dd>${esc(p.note)}</dd>` : ""}</dl>
  <div class="acoes">${x.st == "pendente" ? `<button class="btn peq" data-a="aceitar" data-v="${k}">Aceitar</button><button class="btn sec peq" data-a="recusar" data-v="${k}">Recusar</button>` : ""}${x.st == "confirmado" ? `<button class="btn peq" data-a="st" data-v="${k}|concluido">${I("check")}Atendido</button><button class="btn sec peq" data-a="st" data-v="${k}|nao-veio">N\xE3o veio</button>${fut ? `<button class="btn perigo peq" data-a="st" data-v="${k}|cancelado">Cancelar</button>` : ""}` : ""}${bl ? `<button class="btn perigo peq" data-a="st" data-v="${k}|cancelado">Liberar hor\xE1rio</button>` : ""}${p.phone ? `<a class="btn sec peq" href="${wa(p.phone, `Oi, ${p.name}!`)}" target="_blank" rel="noopener">${I("message-circle")}WhatsApp</a>` : ""}</div><div class="fim" style="margin-top:12px"><button class="btn sec" data-a="fecha">Fechar</button></div>`);
 }
 function avisar(x, tipo) {
@@ -1697,7 +1701,7 @@ function dlgManual(b, k, s) {
   const c = C(), d = k || U.ad || hoje();
   const bb = b || (U.pb != "todos" ? U.pb : (ativos()[0] || {}).id);
   const opt = grade(d).map((t) => `<option value="${t}" ${t == s ? "selected" : ""}>${hm(t)}</option>`).join("");
-  abre(`<h2>Novo hor\xE1rio</h2><form data-f="manual"><div class="campo"><label for="m-nome">Cliente</label><input id="m-nome" name="nome" required></div><div class="campo"><label for="m-tel">WhatsApp</label><input id="m-tel" name="tel" inputmode="tel" required placeholder="(11) 90000-0000"></div><div class="campo"><label for="m-svc">Servi\xE7o</label><select id="m-svc" name="svc">${c.services.map((v) => `<option value="${esc(v.id)}">${esc(v.name)} \xB7 ${dur(v.dur)} \xB7 ${brl(v.price)}</option>`).join("")}</select></div><div class="campo"><label for="m-b">Barbeiro</label><select id="m-b" name="b">${c.barbers.map((v) => `<option value="${esc(v.id)}" ${v.id == bb ? "selected" : ""}>${esc(v.name)}</option>`).join("")}</select></div><div class="campo"><label for="m-d">Dia</label><input id="m-d" type="date" name="d" value="${d}" data-a2="mdia" required></div><div class="campo"><label for="m-s">Hor\xE1rio</label><select id="m-s" name="s">${opt}</select></div>${REAL && !Store.zapAuto ? `<label class="ck-aviso"><input type="checkbox" name="zap" checked><span>Mandar a confirma\xE7\xE3o no WhatsApp do cliente</span></label>` : ""}${REAL && Store.zapAuto ? `<p class="dica" style="margin:0 0 8px">O cliente recebe a confirma\xE7\xE3o no WhatsApp sozinho.</p>` : ""}<p class="err" id="m-err" style="color:var(--ruim);font-size:14px"></p><div class="fim"><button class="btn" type="submit">Marcar</button><button class="btn sec" type="button" data-a="fecha">Cancelar</button></div></form>`);
+  abre(`<h2>Novo hor\xE1rio</h2><form data-f="manual"><div class="campo"><label for="m-nome">Cliente</label><input id="m-nome" name="nome" required></div><div class="campo"><label for="m-tel">WhatsApp</label><input id="m-tel" name="tel" inputmode="tel" required placeholder="(11) 90000-0000"></div><div class="campo"><label for="m-svc">Servi\xE7o</label><select id="m-svc" name="svc">${c.services.map((v) => `<option value="${esc(v.id)}">${esc(v.name)} \xB7 ${dur(v.dur)} \xB7 ${brl(v.price)}</option>`).join("")}</select></div><div class="campo"><label for="m-b">Barbeiro</label><select id="m-b" name="b">${c.barbers.map((v) => `<option value="${esc(v.id)}" ${v.id == bb ? "selected" : ""}>${esc(v.name)}</option>`).join("")}</select></div><div class="campo"><label for="m-d">Dia</label><input id="m-d" type="date" name="d" value="${d}" data-a2="mdia" required></div><div class="campo"><label for="m-s">Hor\xE1rio</label><select id="m-s" name="s">${opt}</select></div>${REAL ? `<label class="ck-aviso"><input type="checkbox" name="zap" checked><span>Mandar a confirma\xE7\xE3o no WhatsApp do cliente</span></label>` : ""}<p class="err" id="m-err" style="color:var(--ruim);font-size:14px"></p><div class="fim"><button class="btn" type="submit">Marcar</button><button class="btn sec" type="button" data-a="fecha">Cancelar</button></div></form>`);
 }
 function dlgLivre(v) {
   const [b, k, s] = v.split("|");
@@ -1791,7 +1795,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261118234202";
+const VERSAO = "20261119082739";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
@@ -2461,7 +2465,7 @@ O hor\xE1rio j\xE1 est\xE1 livre no app.`);
     }
     const p = pii(x);
     let jan = null;
-    if (REAL && p.phone && !Store.zapAuto) {
+    if (REAL && p.phone) {
       const lk = wa(p.phone, msgConfirma(x, p));
       if (CEL) {
         jan = 1;
@@ -2478,8 +2482,6 @@ O hor\xE1rio j\xE1 est\xE1 livre no app.`);
     await mudaStatus(o, id, "confirmado");
     if (jan) {
       toast("Aceito. No WhatsApp que abriu, toque em enviar para o cliente receber.");
-    } else if (Store.zapAuto) {
-      toast("Aceito. O cliente recebeu a confirma\xE7\xE3o no WhatsApp.");
     } else {
       toast("Aceito. O cliente v\xEA na hora.");
       avisar(x, "ok");
@@ -2489,14 +2491,23 @@ O hor\xE1rio j\xE1 est\xE1 livre no app.`);
     const [o, id] = v.split("|"), x = achar(v);
     if (!x) return;
     await mudaStatus(o, id, "recusado");
-    if (Store.zapAuto) toast("Recusado. O cliente foi avisado no WhatsApp.");
-    else {
-      toast("Recusado. O hor\xE1rio voltou a ficar livre.");
-      avisar(x, "no");
-    }
+    toast("Recusado. O hor\xE1rio voltou a ficar livre.");
+    avisar(x, "no");
   },
   async st(v) {
-    const [o, id, st] = v.split("|");
+    const [o, id, st] = v.split("|"), x = achar(o + "|" + id), p = x ? pii(x) : {};
+    if (REAL && st == "cancelado" && x && x.st == "confirmado" && p.phone) {
+      const lk = wa(p.phone, `Oi, ${p.name}! Infelizmente precisei cancelar seu hor\xE1rio de ${x.n} ${dataCurta(x.d)} \xE0s ${hm(x.s)}. Pode escolher outro aqui: ${location.origin}/${SLUG}`);
+      if (CEL) setTimeout(() => {
+        location.href = lk;
+      }, 50);
+      else {
+        try {
+          window.open(lk, "_blank");
+        } catch (e) {
+        }
+      }
+    }
     await mudaStatus(o, id, st);
     fecha();
     toast({ concluido: "Atendimento registrado.", "nao-veio": "Falta registrada.", cancelado: "Hor\xE1rio liberado." }[st]);
