@@ -4,8 +4,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import makeWASocket, { useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } from "@whiskeysockets/baileys";
+import makeWASocket, { useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion, Browsers } from "baileys";
 import qrcode from "qrcode-terminal";
+import QRCode from "qrcode";
+import readline from "node:readline/promises";
+import { exec } from "node:child_process";
 import pino from "pino";
 
 const PASTA = path.dirname(fileURLToPath(import.meta.url));
@@ -46,25 +49,81 @@ async function rpc(nome, corpo) {
 let sock = null;
 let conectado = false;
 
+const SESSAO = path.join(PASTA, "sessao-whatsapp");
+const PAGINA_QR = path.join(PASTA, "qr-code.html");
+let numeroPareamento = null;
+let codigoPedido = false;
+let qrAberto = false;
+
+function abrir(arquivo) {
+  const cmd = process.platform === "win32" ? `start "" "${arquivo}"` : process.platform === "darwin" ? `open "${arquivo}"` : `xdg-open "${arquivo}"`;
+  exec(cmd, () => {});
+}
+
+async function mostrarQR(qr) {
+  console.log("\nLeia este QR code no celular: WhatsApp > Aparelhos conectados > Conectar um aparelho.");
+  console.log("Se o QR da tela preta não ler, use o que abriu no navegador (arquivo qr-code.html).\n");
+  qrcode.generate(qr, { small: true });
+  const img = await QRCode.toDataURL(qr, { width: 360, margin: 2 });
+  fs.writeFileSync(PAGINA_QR, `<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="5"><title>Conectar WhatsApp</title><body style="font-family:sans-serif;text-align:center;background:#111;color:#eee;padding:30px"><h2>Robô DreewSolution</h2><p>No celular: WhatsApp &gt; Aparelhos conectados &gt; Conectar um aparelho</p><img src="${img}" style="background:#fff;padding:10px;border-radius:12px"><p style="color:#aaa">O código muda a cada 20 segundos. Esta página atualiza sozinha.</p></body>`);
+  if (!qrAberto) { qrAberto = true; abrir(PAGINA_QR); }
+}
+
+async function perguntarNumero() {
+  if (fs.existsSync(path.join(SESSAO, "creds.json"))) return null;
+  if (config.numero) return String(config.numero).replace(/\D/g, "");
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  console.log("\nComo quer conectar o WhatsApp que vai ENVIAR as mensagens?");
+  console.log("  - Digite o número com DDD (ex: 11912345678) para receber um código de 8 letras");
+  console.log("  - Ou só aperte Enter para usar QR code");
+  const r = (await rl.question("> ")).replace(/\D/g, "");
+  rl.close();
+  if (!r) return null;
+  return r.startsWith("55") ? r : "55" + r;
+}
+
 async function conectar() {
-  const { state, saveCreds } = await useMultiFileAuthState(path.join(PASTA, "sessao-whatsapp"));
+  const { state, saveCreds } = await useMultiFileAuthState(SESSAO);
   const { version } = await fetchLatestBaileysVersion().catch(() => ({ version: undefined }));
-  sock = makeWASocket({ auth: state, version, logger: pino({ level: "silent" }), browser: ["DreewSolution", "Chrome", "1.0"], markOnlineOnConnect: false });
+  sock = makeWASocket({ auth: state, version, logger: pino({ level: "silent" }), browser: Browsers.windows("Chrome"), markOnlineOnConnect: false, syncFullHistory: false });
   sock.ev.on("creds.update", saveCreds);
-  sock.ev.on("connection.update", ({ connection, lastDisconnect, qr }) => {
+  sock.ev.on("connection.update", async ({ connection, lastDisconnect, qr }) => {
     if (qr) {
-      console.log("\nAbra o WhatsApp do número do app → Aparelhos conectados → Conectar aparelho, e leia este QR code:\n");
-      qrcode.generate(qr, { small: true });
+      if (numeroPareamento && !state.creds.registered) {
+        if (!codigoPedido) {
+          codigoPedido = true;
+          try {
+            const codigo = await sock.requestPairingCode(numeroPareamento);
+            console.log("\n==============================================");
+            console.log("   SEU CÓDIGO:  " + (codigo.match(/.{1,4}/g) || [codigo]).join("-"));
+            console.log("==============================================");
+            console.log("No celular do número " + numeroPareamento + ":");
+            console.log("WhatsApp > Aparelhos conectados > Conectar um aparelho >");
+            console.log("'Conectar com número de telefone' e digite o código acima.\n");
+          } catch (e) {
+            log("Não consegui pedir o código (" + e.message + "). Vamos de QR code.");
+            numeroPareamento = null;
+            await mostrarQR(qr);
+          }
+        }
+      } else await mostrarQR(qr);
     }
-    if (connection === "open") { conectado = true; log("✅ WhatsApp conectado. O robô está enviando as mensagens."); }
+    if (connection === "open") {
+      conectado = true;
+      try { fs.unlinkSync(PAGINA_QR); } catch {}
+      log("✅ WhatsApp conectado (" + (sock.user?.id || "").split(":")[0] + "). O robô está enviando as mensagens.");
+    }
     if (connection === "close") {
       conectado = false;
       const motivo = lastDisconnect?.error?.output?.statusCode;
       if (motivo === DisconnectReason.loggedOut) {
-        log("O WhatsApp foi desconectado pelo celular. Apague a pasta sessao-whatsapp e abra o robô de novo para ler o QR code.");
+        log("O WhatsApp foi desconectado pelo celular. Apagando a sessão; abra o robô de novo para conectar.");
+        fs.rmSync(SESSAO, { recursive: true, force: true });
         process.exit(1);
       }
-      log("Conexão caiu. Tentando de novo em 5 segundos...");
+      if (motivo === DisconnectReason.restartRequired) { log("Conectando..."); return conectar(); }
+      log(`Conexão caiu (código ${motivo ?? "?"}). Tentando de novo em 5 segundos...`);
+      codigoPedido = false;
       setTimeout(conectar, 5000);
     }
   });
@@ -121,7 +180,7 @@ async function ciclo() {
 console.log("\n=== Robô de WhatsApp · DreewSolution ===");
 console.log("Deixe esta janela aberta. Fechou, o robô para e o app volta a pedir para o cliente enviar pelo WhatsApp dele.\n");
 if (TESTE) log("Modo teste: só mostra as mensagens na tela, sem enviar.");
-else await conectar();
+else { numeroPareamento = await perguntarNumero(); await conectar(); }
 // Avisa o app que o robô está ligado, mesmo sem mensagens na fila.
 setInterval(() => { ciclo().catch((e) => log("Erro:", e.message)); }, INTERVALO);
 ciclo().catch(() => {});

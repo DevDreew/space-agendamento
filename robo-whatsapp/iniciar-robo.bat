@@ -7,7 +7,7 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-if not exist node_modules (
+if not exist node_modules\baileys (
   echo Instalando o robo pela primeira vez, aguarde...
   call npm install --omit=dev
 )
