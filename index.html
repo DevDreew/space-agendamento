@@ -1791,7 +1791,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261118203457";
+const VERSAO = "20261118234202";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
@@ -1946,6 +1946,10 @@ function telaAdmin() {
     if (!r.ligado) return `<div class="acoes"><button class="btn peq" data-a="adm-robo-ligar">${I("play")}Ligar rob\xF4 no computador</button><a class="btn sec peq" href="/robo-whatsapp.zip" download>Baixar o rob\xF4</a></div>`;
     const visto = r.visto ? new Date(r.visto) : null;
     return `<p class="${r.online ? "push-ok" : "dica"}" style="margin:0 0 10px">${r.online ? `${I("check")}Rob\xF4 online agora.` : visto ? `Rob\xF4 offline. Visto pela \xFAltima vez em ${esc(visto.toLocaleString("pt-BR"))}.` : "Rob\xF4 ainda n\xE3o conectou. Abra o programa no computador."} \xB7 ${r.enviadas_hoje || 0} enviadas hoje \xB7 ${r.na_fila || 0} na fila${r.falhas ? ` \xB7 ${r.falhas} falharam` : ""}</p>
+  ${(() => {
+      const inf = r.info || {}, fresco = inf.em && Date.now() - new Date(inf.em) < 12e4, mapa = { conectado: "Conectado ao WhatsApp " + (inf.numero ? fone(String(inf.numero).replace(/^55/, "")) : ""), aguardando_codigo: "Esperando voc\xEA digitar o c\xF3digo no celular", aguardando_numero: "Ligado, esperando o n\xFAmero para conectar", desconectado: "Desconectado do WhatsApp", iniciando: "Iniciando" };
+      return fresco ? `<p class="dica" style="margin:0 0 10px">Programa ${inf.onde == "servidor" ? "na nuvem" : "no computador"}: <b>${esc(mapa[inf.estado] || inf.estado || "")}</b></p>${inf.codigo && inf.estado == "aguardando_codigo" ? `<div class="conta-card" style="text-align:center"><p style="margin:0">No celular ${esc(fone(String(r.parear || "").replace(/^55/, "")))}: WhatsApp \u2192 Aparelhos conectados \u2192 Conectar um aparelho \u2192 <b>Conectar com n\xFAmero de telefone</b> e digite:</p><p style="font-size:32px;letter-spacing:4px;margin:10px 0 0;font-weight:500">${esc(inf.codigo)}</p></div>` : ""}${inf.estado != "conectado" ? `<form data-f="admparear" class="grade2" style="align-items:end"><div class="campo" style="margin:0"><label for="rb-n">WhatsApp que vai enviar (com DDD)</label><input id="rb-n" name="n" type="tel" placeholder="(11) 91234-5678" value="${esc(fone(String(r.parear || "").replace(/^55/, "")))}"></div><button class="btn peq" type="submit">Gerar c\xF3digo</button></form>` : ""}` : "";
+    })()}
   <div class="campo"><label for="rb-k">Chave do rob\xF4 (cole no config.json)</label><input id="rb-k" readonly value="${esc(r.chave || "")}" onclick="this.select()"></div>
   <div class="acoes"><button class="btn sec peq" data-a="adm-robo-copiar">Copiar chave</button><a class="btn sec peq" href="/robo-whatsapp.zip" download>Baixar o rob\xF4</a><button class="btn sec peq" data-a="adm-robo-ligar">Trocar chave</button><button class="btn perigo peq" data-a="adm-robo-off">Desligar rob\xF4</button></div>`;
   })()}</section>
@@ -2877,6 +2881,21 @@ const FORMS = {
     await Store.carregaAdmin();
     toast("Cobran\xE7a salva.");
     R(true);
+  },
+  async admparear(f) {
+    const n = telZap(f.n.value);
+    if (!zapOk(n)) return toast("Coloque o n\xFAmero com DDD.");
+    const { error } = await Store.sb.rpc("admin_robo_parear", { p_numero: n });
+    if (error) return toast(erroAmigo(error) || "N\xE3o consegui.");
+    toast("Pedido enviado. O c\xF3digo aparece aqui em alguns segundos.");
+    let k = 0;
+    const t = setInterval(async () => {
+      k++;
+      await Store.carregaAdmin();
+      R(true);
+      const i = (Store.robo || {}).info || {};
+      if (i.codigo || i.estado == "conectado" || k > 20) clearInterval(t);
+    }, 3e3);
   },
   async admzap(f) {
     const i = f.i.value.trim(), t = f.t.value.trim(), c = f.c.value.trim();

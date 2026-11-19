@@ -17,6 +17,7 @@ const CHAVE_PUBLICA = "sb_publishable_BrrNsjOH5oRuGHHVCEG1mA_aJeX5mbL"; // chave
 const INTERVALO = 4000;      // olha a fila a cada 4 segundos
 const PAUSA_ENVIO = 1500;    // espera entre uma mensagem e outra, para o WhatsApp não estranhar
 const TESTE = process.argv.includes("--teste");
+const SERVIDOR = process.argv.includes("--servidor") || !process.stdin.isTTY;
 
 const hora = () => new Date().toLocaleTimeString("pt-BR");
 const log = (...a) => console.log(`[${hora()}]`, ...a);
@@ -24,7 +25,7 @@ const dorme = (ms) => new Promise((r) => setTimeout(r, ms));
 
 let config;
 try {
-  config = JSON.parse(fs.readFileSync(path.join(PASTA, "config.json"), "utf8"));
+  config = process.env.ROBO_CHAVE ? { chave: process.env.ROBO_CHAVE } : JSON.parse(fs.readFileSync(path.join(PASTA, "config.json"), "utf8"));
 } catch {
   console.log("\nFalta o arquivo config.json.");
   console.log("Copie config.exemplo.json para config.json e cole a chave do robô que aparece no painel do dono do app.\n");
@@ -69,7 +70,23 @@ async function mostrarQR(qr) {
   if (!qrAberto) { qrAberto = true; abrir(PAGINA_QR); }
 }
 
+let estado = "iniciando";
+let codigoAtual = null;
+async function informar() {
+  try {
+    const r = await rpc("robo_info", { p_chave: config.chave, p_info: { estado, codigo: codigoAtual, numero: (sock?.user?.id || "").split(":")[0] || null, onde: SERVIDOR ? "servidor" : "computador", versao: 2 } });
+    if (r?.parear && !conectado && r.parear !== numeroPareamento) {
+      numeroPareamento = r.parear; codigoPedido = false;
+      log("Painel pediu para conectar o número " + numeroPareamento + ". Gerando código...");
+      try { sock?.end?.(new Error("novo pareamento")); } catch {}
+    }
+  } catch (e) {
+    if (String(e.message).includes("chave_robo_invalida")) { log("A chave não vale mais. Pegue a chave nova no painel do dono."); process.exit(1); }
+  }
+}
+
 async function perguntarNumero() {
+  if (SERVIDOR) return config.numero ? String(config.numero).replace(/\D/g, "") : null;
   if (fs.existsSync(path.join(SESSAO, "creds.json"))) return null;
   if (config.numero) return String(config.numero).replace(/\D/g, "");
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -94,6 +111,7 @@ async function conectar() {
           codigoPedido = true;
           try {
             const codigo = await sock.requestPairingCode(numeroPareamento);
+            codigoAtual = (codigo.match(/.{1,4}/g) || [codigo]).join("-"); estado = "aguardando_codigo"; informar();
             console.log("\n==============================================");
             console.log("   SEU CÓDIGO:  " + (codigo.match(/.{1,4}/g) || [codigo]).join("-"));
             console.log("==============================================");
@@ -106,19 +124,22 @@ async function conectar() {
             await mostrarQR(qr);
           }
         }
-      } else await mostrarQR(qr);
+      } else if (SERVIDOR) { if (estado !== "aguardando_numero") { estado = "aguardando_numero"; log("Aguardando o número no painel do dono (WhatsApp automático > Conectar)."); informar(); } }
+      else await mostrarQR(qr);
     }
     if (connection === "open") {
-      conectado = true;
+      conectado = true; estado = "conectado"; codigoAtual = null; informar();
       try { fs.unlinkSync(PAGINA_QR); } catch {}
       log("✅ WhatsApp conectado (" + (sock.user?.id || "").split(":")[0] + "). O robô está enviando as mensagens.");
     }
     if (connection === "close") {
-      conectado = false;
+      conectado = false; if (estado === "conectado") estado = "desconectado";
       const motivo = lastDisconnect?.error?.output?.statusCode;
       if (motivo === DisconnectReason.loggedOut) {
         log("O WhatsApp foi desconectado pelo celular. Apagando a sessão; abra o robô de novo para conectar.");
         fs.rmSync(SESSAO, { recursive: true, force: true });
+        estado = "desconectado"; numeroPareamento = null; codigoAtual = null; await informar();
+        if (SERVIDOR) { setTimeout(conectar, 5000); return; }
         process.exit(1);
       }
       if (motivo === DisconnectReason.restartRequired) { log("Conectando..."); return conectar(); }
@@ -183,4 +204,6 @@ if (TESTE) log("Modo teste: só mostra as mensagens na tela, sem enviar.");
 else { numeroPareamento = await perguntarNumero(); await conectar(); }
 // Avisa o app que o robô está ligado, mesmo sem mensagens na fila.
 setInterval(() => { ciclo().catch((e) => log("Erro:", e.message)); }, INTERVALO);
+setInterval(() => { informar(); }, 15000);
+informar();
 ciclo().catch(() => {});
