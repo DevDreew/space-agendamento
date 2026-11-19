@@ -5,11 +5,11 @@
   "type": "module",
   "main": "robo.mjs",
   "scripts": {
-    "start": "node robo.mjs",
+    "start": "node robo.mjs --servidor",
     "teste": "node robo.mjs --teste"
   },
   "engines": {
-    "node": ">=20"
+    "node": "22.x"
   },
   "dependencies": {
     "baileys": "7.0.0-rc14",

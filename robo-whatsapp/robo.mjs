@@ -50,7 +50,7 @@ async function rpc(nome, corpo) {
 let sock = null;
 let conectado = false;
 
-const SESSAO = path.join(PASTA, "sessao-whatsapp");
+const SESSAO = process.env.SESSAO_DIR || path.join(PASTA, "sessao-whatsapp");
 const PAGINA_QR = path.join(PASTA, "qr-code.html");
 let numeroPareamento = null;
 let codigoPedido = false;
