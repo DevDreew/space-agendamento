@@ -359,10 +359,59 @@ dialog .dl dt{color:var(--cinza)}dialog .dl dd{margin:0;text-align:right;font-we
 .tel-zap:hover{text-decoration:underline}
 .tel-zap svg{width:16px;height:16px}
 .cli-l .tel-cli.tel-zap{display:inline-flex;color:#25D366}
+
+/* ---------- painel do dono: abas e análise ---------- */
+.adm-abas{display:flex;gap:6px;overflow-x:auto;margin:0 0 20px;padding:4px;background:var(--carvao);border:1px solid var(--linha);border-radius:12px;scrollbar-width:none}
+.adm-abas::-webkit-scrollbar{display:none}
+.adm-abas button{flex:1 0 auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:9px;font-size:14px;font-weight:600;color:var(--cinza);white-space:nowrap}
+.adm-abas button:hover{color:var(--branco)}
+.adm-abas button.on{background:var(--ouro);color:var(--sobre-ouro)}
+.adm-abas .i{width:18px;height:18px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.an-topo{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px}
+.an-topo .q{margin:0}
+.an-bloco{margin-bottom:18px}
+.an-bloco h3{display:flex;align-items:center;gap:8px}.an-bloco h3 .i{width:20px;height:20px;color:var(--ouro)}
+.kpi.alerta{border-color:var(--espera)}.kpi.alerta b{color:var(--espera)}
+.kpi em{font-style:normal;font-size:12px;color:var(--cinza);display:block;margin-top:2px}
+.an-funil{display:flex;height:22px;border-radius:99px;overflow:hidden;background:var(--grafite);gap:2px;margin:6px 0 14px}
+.an-funil i{display:block;min-width:4px}
+.an-leg{list-style:none;margin:0;padding:0;display:grid;gap:4px 18px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.an-leg li{display:flex;align-items:center;gap:8px;font-size:14px;padding:5px 0;border-bottom:1px solid var(--linha)}
+.an-leg li b{margin-left:auto;font-variant-numeric:tabular-nums}.an-leg li small{color:var(--cinza);width:38px;text-align:right;font-variant-numeric:tabular-nums}
+.an-cor{width:12px;height:12px;border-radius:3px;flex:none}
+.an-alertas{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.an-alertas li{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:10px;border:1px solid var(--linha);background:var(--grafite);cursor:pointer}
+.an-alertas li .i{width:20px;height:20px;flex:none;margin-top:2px}
+.an-alertas li div{display:grid;gap:3px}.an-alertas li b{font-size:15px}.an-alertas li span{font-size:14px;color:var(--cinza)}
+.an-alertas li.ruim{border-color:#f3948866}.an-alertas li.ruim .i{color:var(--ruim)}
+.an-alertas li.alerta{border-color:#f4c95d55}.an-alertas li.alerta .i{color:var(--espera)}
+.an-alertas li.info .i{color:var(--ouro)}
+.an-tab td small{display:block;font-size:12px;color:var(--cinza);font-weight:400;margin-top:2px}
+.an-tab td small.ouro{color:var(--ouro)}
+.an-tab td b{font-weight:600}
+.an-linha{cursor:pointer}.an-linha:hover td,.an-linha:focus-visible td{background:var(--grafite)}
+.an-tab .pill{font-size:12px}
+dialog.largo{width:min(1060px,calc(100vw - 24px));padding:22px}
+dialog.largo h2{font-size:30px;margin:0}
+.an-dlg-topo{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
+.an-dlg-topo .q{margin:4px 0 0;color:var(--cinza);font-size:14px}
+.an-kpis{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+.an-kpis .kpi b{font-size:clamp(22px,5vw,30px)}
+.an-h{font:600 13px var(--corpo,inherit);text-transform:uppercase;letter-spacing:.06em;color:var(--cinza);margin:20px 0 8px}
+.an-duo{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}
+.an-mini{display:flex;align-items:flex-end;gap:4px;height:110px;padding-bottom:20px}
+.an-mini div{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;position:relative;min-width:0}
+.an-mini i{display:block;background:var(--ouro);border-radius:3px 3px 0 0}
+.an-mini small{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:11px;color:var(--cinza);white-space:nowrap}
+@media (max-width:560px){.adm-abas{gap:2px;padding:3px}.adm-abas button{flex-direction:column;gap:3px;padding:6px 8px;min-height:54px;font-size:11px;flex:1 1 0;min-width:0}.an-topo{align-items:flex-start}}
+.kpis.an-k4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:760px){.kpis.an-k4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+dialog .an-alertas li{cursor:default}
 </style></head>
 <body><div id="app"></div><dialog id="dlg"></dialog><div id="toast" role="status" aria-live="polite"></div><div id="tip" role="tooltip"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script>const ICONS={"scissors": "<circle cx=\"6\" cy=\"6\" r=\"3\" /> <path d=\"M8.12 8.12 12 12\" /> <path d=\"M20 4 8.12 15.88\" /> <circle cx=\"6\" cy=\"18\" r=\"3\" /> <path d=\"M14.8 14.8 20 20\" />", "calendar-days": "<path d=\"M8 2v4\" /> <path d=\"M16 2v4\" /> <rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" /> <path d=\"M3 10h18\" /> <path d=\"M8 14h.01\" /> <path d=\"M12 14h.01\" /> <path d=\"M16 14h.01\" /> <path d=\"M8 18h.01\" /> <path d=\"M12 18h.01\" /> <path d=\"M16 18h.01\" />", "clock": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <polyline points=\"12 6 12 12 16 14\" />", "users": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" /> <path d=\"M22 21v-2a4 4 0 0 0-3-3.87\" /> <path d=\"M16 3.13a4 4 0 0 1 0 7.75\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "x": "<path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" />", "message-circle": "<path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\" />", "chevron-left": "<path d=\"m15 18-6-6 6-6\" />", "chevron-right": "<path d=\"m9 18 6-6-6-6\" />", "plus": "<path d=\"M5 12h14\" /> <path d=\"M12 5v14\" />", "trending-up": "<polyline points=\"22 7 13.5 15.5 8.5 10.5 2 17\" /> <polyline points=\"16 7 22 7 22 13\" />", "trending-down": "<polyline points=\"22 17 13.5 8.5 8.5 13.5 2 7\" /> <polyline points=\"16 17 22 17 22 11\" />", "settings": "<path d=\"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" />", "chart-column": "<path d=\"M3 3v16a2 2 0 0 0 2 2h16\" /> <path d=\"M18 17V9\" /> <path d=\"M13 17V5\" /> <path d=\"M8 17v-3\" />", "ban": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"m4.9 4.9 14.2 14.2\" />", "map-pin": "<path d=\"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0\" /> <circle cx=\"12\" cy=\"10\" r=\"3\" />", "search": "<circle cx=\"11\" cy=\"11\" r=\"8\" /> <path d=\"m21 21-4.3-4.3\" />", "trash-2": "<path d=\"M3 6h18\" /> <path d=\"M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6\" /> <path d=\"M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2\" /> <line x1=\"10\" x2=\"10\" y1=\"11\" y2=\"17\" /> <line x1=\"14\" x2=\"14\" y1=\"11\" y2=\"17\" />", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /> <path d=\"m15 5 4 4\" />", "lock": "<rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\" /> <path d=\"M7 11V7a5 5 0 0 1 10 0v4\" />", "hourglass": "<path d=\"M5 22h14\" /> <path d=\"M5 2h14\" /> <path d=\"M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22\" /> <path d=\"M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2\" />", "user-x": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" /> <line x1=\"17\" x2=\"22\" y1=\"8\" y2=\"13\" /> <line x1=\"22\" x2=\"17\" y1=\"8\" y2=\"13\" />", "arrow-right": "<path d=\"M5 12h14\" /> <path d=\"m12 5 7 7-7 7\" />", "repeat": "<path d=\"m17 2 4 4-4 4\" /> <path d=\"M3 11v-1a4 4 0 0 1 4-4h14\" /> <path d=\"m7 22-4-4 4-4\" /> <path d=\"M21 13v1a4 4 0 0 1-4 4H3\" />", "store": "<path d=\"m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7\" /> <path d=\"M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8\" /> <path d=\"M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4\" /> <path d=\"M2 7h20\" /> <path d=\"M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7\" />", "bell": "<path d=\"M10.268 21a2 2 0 0 0 3.464 0\" /> <path d=\"M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326\" />"};
+<script>const ICONS={"scissors": "<circle cx=\"6\" cy=\"6\" r=\"3\" /> <path d=\"M8.12 8.12 12 12\" /> <path d=\"M20 4 8.12 15.88\" /> <circle cx=\"6\" cy=\"18\" r=\"3\" /> <path d=\"M14.8 14.8 20 20\" />", "calendar-days": "<path d=\"M8 2v4\" /> <path d=\"M16 2v4\" /> <rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" /> <path d=\"M3 10h18\" /> <path d=\"M8 14h.01\" /> <path d=\"M12 14h.01\" /> <path d=\"M16 14h.01\" /> <path d=\"M8 18h.01\" /> <path d=\"M12 18h.01\" /> <path d=\"M16 18h.01\" />", "clock": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <polyline points=\"12 6 12 12 16 14\" />", "users": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" /> <path d=\"M22 21v-2a4 4 0 0 0-3-3.87\" /> <path d=\"M16 3.13a4 4 0 0 1 0 7.75\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "x": "<path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" />", "message-circle": "<path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\" />", "chevron-left": "<path d=\"m15 18-6-6 6-6\" />", "chevron-right": "<path d=\"m9 18 6-6-6-6\" />", "plus": "<path d=\"M5 12h14\" /> <path d=\"M12 5v14\" />", "trending-up": "<polyline points=\"22 7 13.5 15.5 8.5 10.5 2 17\" /> <polyline points=\"16 7 22 7 22 13\" />", "trending-down": "<polyline points=\"22 17 13.5 8.5 8.5 13.5 2 7\" /> <polyline points=\"16 17 22 17 22 11\" />", "settings": "<path d=\"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" />", "chart-column": "<path d=\"M3 3v16a2 2 0 0 0 2 2h16\" /> <path d=\"M18 17V9\" /> <path d=\"M13 17V5\" /> <path d=\"M8 17v-3\" />", "ban": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"m4.9 4.9 14.2 14.2\" />", "map-pin": "<path d=\"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0\" /> <circle cx=\"12\" cy=\"10\" r=\"3\" />", "search": "<circle cx=\"11\" cy=\"11\" r=\"8\" /> <path d=\"m21 21-4.3-4.3\" />", "trash-2": "<path d=\"M3 6h18\" /> <path d=\"M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6\" /> <path d=\"M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2\" /> <line x1=\"10\" x2=\"10\" y1=\"11\" y2=\"17\" /> <line x1=\"14\" x2=\"14\" y1=\"11\" y2=\"17\" />", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /> <path d=\"m15 5 4 4\" />", "lock": "<rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\" /> <path d=\"M7 11V7a5 5 0 0 1 10 0v4\" />", "hourglass": "<path d=\"M5 22h14\" /> <path d=\"M5 2h14\" /> <path d=\"M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22\" /> <path d=\"M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2\" />", "user-x": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" /> <line x1=\"17\" x2=\"22\" y1=\"8\" y2=\"13\" /> <line x1=\"22\" x2=\"17\" y1=\"8\" y2=\"13\" />", "arrow-right": "<path d=\"M5 12h14\" /> <path d=\"m12 5 7 7-7 7\" />", "repeat": "<path d=\"m17 2 4 4-4 4\" /> <path d=\"M3 11v-1a4 4 0 0 1 4-4h14\" /> <path d=\"m7 22-4-4 4-4\" /> <path d=\"M21 13v1a4 4 0 0 1-4 4H3\" />", "store": "<path d=\"m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7\" /> <path d=\"M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8\" /> <path d=\"M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4\" /> <path d=\"M2 7h20\" /> <path d=\"M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7\" />", "bell": "<path d=\"M10.268 21a2 2 0 0 0 3.464 0\" /> <path d=\"M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326\" />", "wallet": "<path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\" /> <path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\" />", "triangle-alert": "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\" /> <path d=\"M12 9v4\" /> <path d=\"M12 17h.01\" />", "lightbulb": "<path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /> <path d=\"M9 18h6\" /> <path d=\"M10 22h4\" />", "activity": "<path d=\"M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2\" />", "crown": "<path d=\"M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z\" /> <path d=\"M5 21h14\" />", "user-check": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" /> <polyline points=\"16 11 18 13 22 9\" />", "eye": "<path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" />"};
 "use strict";
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -1063,9 +1112,11 @@ const StoreSB = {
       this.robo = {};
     }
     try {
-      const [g, h] = await Promise.all([this.sb.rpc("admin_resumo"), this.sb.rpc("admin_assinaturas")]);
+      const [g, h, an, ct] = await Promise.all([this.sb.rpc("admin_resumo"), this.sb.rpc("admin_assinaturas"), this.sb.rpc("admin_analise", { p_dias: this.admDias == null ? 30 : this.admDias }), this.sb.rpc("admin_contas")]);
       this.resumo = g && g.data || null;
       this.assins = h && h.data || null;
+      this.analise = an && an.data || null;
+      this.contas = ct && ct.data || null;
     } catch (e) {
       this.resumo = null;
     }
@@ -1591,8 +1642,9 @@ function viewAjustes() {
  ${tem ? `<hr style="border:0;border-top:1px solid var(--linha);margin:16px 0"><p class="q">Os clientes marcados como exemplo s\xE3o fict\xEDcios. Apague antes de usar de verdade.</p><div class="acoes"><button class="btn sec peq" data-a="carregar">Carregar hist\xF3rico de exemplo</button><button class="btn perigo peq" data-a="limpar">${I("trash-2")}Apagar dados de exemplo</button></div>` : `<hr style="border:0;border-top:1px solid var(--linha);margin:16px 0"><p class="q">Quer ver o painel cheio antes de usar? Os exemplos podem ser apagados depois.</p><button class="btn sec peq" data-a="carregar">Carregar hist\xF3rico de exemplo</button>`}</section></div>`);
 }
 const dlg = () => $("#dlg");
-function abre(html) {
+function abre(html, cls = "") {
   const d = dlg();
+  d.className = cls;
   d.innerHTML = html;
   if (!d.open) d.showModal();
 }
@@ -1795,7 +1847,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261119082739";
+const VERSAO = "20261119154739";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
@@ -1928,6 +1980,108 @@ function painelAssin() {
   const a = Store.assin, st = { ativo: ["Em dia", "check", "confirmado"], aviso: ["Aviso de pagamento", "hourglass", "pendente"], suspenso: ["Suspensa", "ban", "cancelado"] }[a.status] || ["Em dia", "check", "confirmado"];
   return `<section class="painel"><h3>Mensalidade do app</h3><p class="q">Plano DreewSolution para a sua barbearia.</p><dl class="dl"><dt>Situa\xE7\xE3o</dt><dd><span class="pill ${st[2]}">${I(st[1])}${st[0]}</span></dd><dt>Valor</dt><dd class="num">${brl(a.mensalidade)} por m\xEAs</dd><dt>Pr\xF3ximo vencimento</dt><dd>${esc(brData(a.vence))}</dd></dl><div class="acoes">${pagar(a)}${suporte(a)}</div></section>`;
 }
+const nB = (v) => (+v || 0).toLocaleString("pt-BR");
+const pctB = (a, b) => b ? Math.round(a / b * 100) : 0;
+const diasDesde = (t) => t ? Math.floor((Date.now() - new Date(t)) / 864e5) : null;
+const quandoFoi = (t) => {
+  const d = diasDesde(t);
+  if (d == null) return "nunca";
+  if (d < 1) return "hoje";
+  if (d == 1) return "ontem";
+  return `h\xE1 ${d} dias`;
+};
+const FUNIL = [["concluido", "Atendidos", "#7ed7a4"], ["confirmado", "Confirmados", "#d4ab5f"], ["pendente", "Aguardando", "#f4c95d"], ["canc_cliente", "Cliente cancelou", "#9c97ad"], ["canc_barbeiro", "Barbeiro cancelou", "#c98a6a"], ["recusado", "Recusados", "#f39488"], ["nao_veio", "N\xE3o vieram", "#b98cf0"]];
+const somaLojas = (L) => {
+  const t = {};
+  ["pedidos", "pendente", "confirmado", "concluido", "nao_veio", "canc_cliente", "canc_barbeiro", "recusado", "faturado", "previsto", "sem_baixa", "clientes", "novos", "recorrentes", "contas_clientes", "contas_novas", "assinantes", "receita_clube"].forEach((k) => t[k] = L.reduce((s, l) => s + +(l[k] || 0), 0));
+  return t;
+};
+function alertasLoja(l, dias) {
+  const a = [], p = +l.pedidos || 0, nome = l.name;
+  const per = dias ? `nos \xFAltimos ${dias} dias` : "desde o in\xEDcio";
+  if (l.status == "suspenso") a.push(["ruim", `${nome} est\xE1 suspensa: os clientes n\xE3o conseguem marcar.`, "Confira a mensalidade na aba Mensalidades."]);
+  else if (l.vence && diasDesde(l.vence + "T12:00") >= 0) a.push(["ruim", `Mensalidade de ${nome} vencida desde ${brData(l.vence)}.`, "Envie o aviso de cobran\xE7a em Barbearias."]);
+  if (p >= 4 && pctB(l.recusado, p) >= 25) a.push(["ruim", `${nome} recusou ${l.recusado} de ${p} pedidos (${pctB(l.recusado, p)}%) ${per}.`, "O cliente est\xE1 pedindo hor\xE1rio que o barbeiro n\xE3o atende. Pe\xE7a para ajustar os dias e hor\xE1rios de trabalho e bloquear os hor\xE1rios ocupados."]);
+  if (+l.pendente > 0) a.push(["alerta", `${nome} tem ${l.pendente} pedido${l.pendente == 1 ? "" : "s"} esperando resposta.`, "Cliente sem resposta desiste. Pe\xE7a para o barbeiro aceitar ou recusar no painel."]);
+  if (+l.sem_baixa > 0) a.push(["alerta", `${nome} tem ${l.sem_baixa} hor\xE1rio${l.sem_baixa == 1 ? "" : "s"} que j\xE1 passou ainda como Confirmado.`, "O barbeiro n\xE3o est\xE1 marcando Atendido ou N\xE3o veio, ent\xE3o o faturamento aparece menor do que \xE9 de verdade."]);
+  if (p >= 4 && pctB(l.canc_cliente, p) >= 20) a.push(["alerta", `Clientes de ${nome} cancelaram ${pctB(l.canc_cliente, p)}% dos pedidos.`, "O lembrete da v\xE9spera ajuda. Vale o barbeiro confirmar pelo WhatsApp no dia anterior."]);
+  const fez = +l.concluido + +l.nao_veio;
+  if (fez >= 3 && pctB(l.nao_veio, fez) >= 15) a.push(["alerta", `${pctB(l.nao_veio, fez)}% dos clientes de ${nome} n\xE3o apareceram.`, "Sugira cobrar um sinal no Pix para hor\xE1rios longos, ou confirmar na manh\xE3 do dia."]);
+  if (!+l.push) a.push(["info", `O barbeiro de ${nome} n\xE3o ligou o aviso no celular.`, "Sem isso ele s\xF3 v\xEA o pedido se abrir o app. Pe\xE7a para tocar em Ativar avisos no painel."]);
+  const sp = diasDesde(l.ultimo_pedido);
+  if (sp == null) a.push(["info", `${nome} ainda n\xE3o recebeu nenhum pedido.`, "Ajude a divulgar o link na bio do Instagram e no status do WhatsApp."]);
+  else if (sp >= 7) a.push(["alerta", `${nome} est\xE1 sem pedidos h\xE1 ${sp} dias.`, "Vale chamar o barbeiro e ver se ele est\xE1 divulgando o link."]);
+  const lg = diasDesde(l.dono_login);
+  if (lg != null && lg >= 7) a.push(["info", `O dono de ${nome} n\xE3o entra no painel h\xE1 ${lg} dias.`, "Pode estar usando pouco o app. Um contato r\xE1pido evita cancelamento da assinatura."]);
+  const pl = l.planos || [];
+  if (!pl.length) a.push(["info", `${nome} n\xE3o tem clube de assinatura.`, "Clube d\xE1 receita fixa todo m\xEAs para a barbearia. Sugira criar um plano de corte mensal em Ajustes do painel dele."]);
+  else if (!+l.assinantes) a.push(["info", `${nome} tem clube, mas nenhum assinante ainda.`, "Sugira oferecer o clube para os clientes que mais voltam."]);
+  return a;
+}
+function telaAnalise() {
+  const A = Store.analise;
+  const dias = Store.admDias == null ? 30 : Store.admDias;
+  const chips = [[7, "7 dias"], [30, "30 dias"], [90, "90 dias"], [0, "Tudo"]].map(([v, t2]) => `<button class="chip${dias == v ? " on" : ""}" data-a="adm-dias" data-v="${v}">${t2}</button>`).join("");
+  if (!A) return `<div class="an-topo"><div class="chips">${chips}</div></div><p class="dica">Carregando a an\xE1lise...</p>`;
+  const L = A.lojas || [], t = somaLojas(L), canc = t.canc_cliente + t.canc_barbeiro, fez = t.concluido + t.nao_veio;
+  const k = (rot, val, sub, cls = "") => `<div class="kpi ${cls}"><span>${rot}</span><b>${val}</b><em>${sub}</em></div>`;
+  const seg = FUNIL.map(([c, r, cor]) => t[c] ? `<i style="flex:${t[c]};background:${cor}" title="${r}: ${t[c]}"></i>` : "").join("");
+  const leg = FUNIL.map(([c, r, cor]) => `<li><span class="an-cor" style="background:${cor}"></span>${r}<b>${nB(t[c])}</b><small>${pctB(t[c], t.pedidos)}%</small></li>`).join("");
+  const dd = A.por_dia || [], mx = Math.max(1, ...dd.map((x) => +x.pedidos || 0)), passo = Math.max(1, Math.ceil(dd.length / 8));
+  const barras = dd.map((x, i) => {
+    const d = /* @__PURE__ */ new Date(x.d + "T12:00");
+    return `<div class="vg-b" title="${d.toLocaleDateString("pt-BR")}: ${x.pedidos} pedido${x.pedidos == 1 ? "" : "s"}, ${x.atendidos} atendido${x.atendidos == 1 ? "" : "s"}, ${x.cancelados} cancelado${x.cancelados == 1 ? "" : "s"}/recusado${x.cancelados == 1 ? "" : "s"}"><i style="height:${x.pedidos ? Math.max(Math.round(x.pedidos / mx * 100), 4) : 0}%"></i>${i % passo == 0 || i == dd.length - 1 ? `<small>${d.getDate()}/${d.getMonth() + 1}</small>` : ""}</div>`;
+  }).join("");
+  const alertas = L.flatMap((l) => alertasLoja(l, dias).map((x) => [...x, l.id])), ordem = { ruim: 0, alerta: 1, info: 2 };
+  alertas.sort((a, b) => ordem[a[0]] - ordem[b[0]]);
+  const saude = (l) => {
+    const a = alertasLoja(l, dias);
+    return a.some((x) => x[0] == "ruim") ? ["cancelado", "Cr\xEDtica"] : a.some((x) => x[0] == "alerta") ? ["pendente", "Aten\xE7\xE3o"] : ["confirmado", "Boa"];
+  };
+  const linha = (l) => {
+    const s = saude(l), p = +l.pedidos;
+    return `<tr class="an-linha" data-a="adm-loja" data-v="${l.id}" tabindex="0"><td><b>${esc(l.name)}</b><small>/${esc(l.slug)}</small></td><td class="num">${nB(p)}</td><td class="num">${nB(l.concluido)}</td><td class="num">${nB(+l.canc_cliente + +l.canc_barbeiro)}<small>${+l.canc_barbeiro ? `${l.canc_barbeiro} pelo barbeiro` : ""}</small></td><td class="num">${nB(l.recusado)}<small>${p ? pctB(l.recusado, p) + "%" : ""}</small></td><td class="num">${nB(l.nao_veio)}</td><td class="num">${brl(l.faturado)}<small>${+l.previsto ? brl(l.previsto) + " marcado" : ""}</small></td><td class="num">${nB(l.clientes)}<small>${nB(l.novos)} novos</small></td><td class="num">${nB(l.assinantes)}<small>${+l.receita_clube ? brl(l.receita_clube) + "/m\xEAs" : (l.planos || []).length ? "sem assinante" : "sem clube"}</small></td><td><span class="pill ${s[0]}">${s[1]}</span></td></tr>`;
+  };
+  return `<div class="an-topo"><p class="q">${dias ? `Pedidos feitos nos \xFAltimos ${dias} dias` : "Todos os pedidos desde o in\xEDcio"}, somando ${L.length} barbearia${L.length == 1 ? "" : "s"}.</p><div class="chips">${chips}</div></div>
+ <section class="kpis an-k4">${k("Pedidos", nB(t.pedidos), `${nB(t.pendente)} aguardando resposta`)}${k("Atendidos", nB(t.concluido), fez ? `${pctB(t.concluido, fez)}% compareceram` : "nenhum hor\xE1rio passou ainda")}${k("Faturado", brl(t.faturado), `+ ${brl(t.previsto)} j\xE1 marcado`)}${k("Cancelados", nB(canc), `${nB(t.canc_cliente)} pelo cliente \xB7 ${nB(t.canc_barbeiro)} pelo barbeiro`, canc && pctB(canc, t.pedidos) >= 20 ? "alerta" : "")}${k("Recusados", nB(t.recusado), `${pctB(t.recusado, t.pedidos)}% dos pedidos`, t.pedidos >= 4 && pctB(t.recusado, t.pedidos) >= 25 ? "alerta" : "")}${k("N\xE3o vieram", nB(t.nao_veio), fez ? `${pctB(t.nao_veio, fez)}% dos hor\xE1rios` : "\u2014")}${k("Clientes", nB(t.clientes), `${nB(t.novos)} novos \xB7 ${nB(t.recorrentes)} voltaram`)}${k("Clube", nB(t.assinantes), `${brl(t.receita_clube)} por m\xEAs`)}</section>
+ <section class="painel an-bloco"><h3>Para onde v\xE3o os pedidos</h3><p class="q">De cada 100 pedidos, quantos viram atendimento, quantos se perdem e por qu\xEA.</p>${t.pedidos ? `<div class="an-funil">${seg}</div><ul class="an-leg">${leg}</ul>` : '<p class="dica">Nenhum pedido no per\xEDodo.</p>'}</section>
+ <section class="painel an-bloco"><h3>Pedidos por dia</h3><p class="q">Passe o dedo ou o mouse na barra para ver atendidos e cancelados do dia.</p><div class="vg-graf" role="img" aria-label="Pedidos por dia">${barras}</div></section>
+ <section class="painel an-bloco"><h3>${I("lightbulb")}O que eu recomendo</h3>${alertas.length ? `<ul class="an-alertas">${alertas.slice(0, 12).map(([n, txt, acao, id]) => `<li class="${n}" data-a="adm-loja" data-v="${id}">${I(n == "info" ? "lightbulb" : "triangle-alert")}<div><b>${esc(txt)}</b><span>${esc(acao)}</span></div></li>`).join("")}</ul>${alertas.length > 12 ? `<p class="dica">E mais ${alertas.length - 12}. Abra cada barbearia para ver todos.</p>` : ""}` : `<p class="push-ok">${I("check")}Tudo em ordem nas barbearias.</p>`}</section>
+ <section class="painel an-bloco"><h3>Cada barbearia</h3><p class="q">Toque em uma barbearia para ver barbeiros, clientes, clube e os \xFAltimos agendamentos.</p><div class="vg-tab"><table class="an-tab"><thead><tr><th>Barbearia</th><th>Pedidos</th><th>Atendidos</th><th>Cancelados</th><th>Recusados</th><th>N\xE3o vieram</th><th>Faturado</th><th>Clientes</th><th>Clube</th><th>Sa\xFAde</th></tr></thead><tbody>${L.map(linha).join("")}</tbody></table></div></section>`;
+}
+function telaContas() {
+  const C2 = Store.contas;
+  if (!C2) return '<p class="dica">Carregando contas...</p>';
+  const pap = { dono: ["confirmado", "Dono do app"], barbeiro: ["pendente", "Barbeiro"], sem_loja: ["cancelado", "Sem barbearia"] };
+  const n = (p) => C2.filter((c) => c.papel == p).length;
+  return `<section class="kpis an-k4">${[["Contas", C2.length, "no total"], ["Barbeiros", n("barbeiro"), "com barbearia montada"], ["Sem barbearia", n("sem_loja"), "criaram conta e pararam"], ["Ativos 7 dias", C2.filter((c) => diasDesde(c.ultimo_login) != null && diasDesde(c.ultimo_login) < 7).length, "entraram no painel"]].map(([a, b, c]) => `<div class="kpi"><span>${a}</span><b>${nB(b)}</b><em>${c}</em></div>`).join("")}</section>
+ <section class="painel an-bloco"><h3>Todas as contas</h3><p class="q">Quem criou conta, quando entrou pela \xFAltima vez e o que tem na barbearia. Para trocar a senha de um barbeiro, use Nova senha na aba Barbearias.</p><div class="vg-tab"><table class="an-tab"><thead><tr><th>E-mail</th><th>Tipo</th><th>Barbearia</th><th>Criada</th><th>\xDAltimo acesso</th><th>Pedidos</th><th>Clientes</th></tr></thead><tbody>${C2.map((c) => `<tr><td><b>${esc(c.email)}</b></td><td><span class="pill ${pap[c.papel][0]}">${pap[c.papel][1]}</span></td><td>${c.slug ? `<a href="/${esc(c.slug)}" target="_blank" rel="noopener">${esc(c.loja)}</a>` : "\u2014"}</td><td>${esc(new Date(c.criada).toLocaleDateString("pt-BR"))}</td><td${diasDesde(c.ultimo_login) >= 7 ? ' style="color:var(--ruim)"' : ""}>${esc(quandoFoi(c.ultimo_login))}</td><td class="num">${c.slug ? nB(c.pedidos) : "\u2014"}</td><td class="num">${c.slug ? nB(c.clientes) : "\u2014"}</td></tr>`).join("")}</tbody></table></div></section>`;
+}
+function barrasMini(itens, rot) {
+  const mx = Math.max(1, ...itens.map((x) => +x.n || 0));
+  return `<div class="an-mini">${itens.map((x) => `<div title="${esc(rot(x))}: ${x.n}"><i style="height:${x.n ? Math.max(Math.round(x.n / mx * 100), 6) : 0}%"></i><small>${esc(rot(x))}</small></div>`).join("")}</div>`;
+}
+function dlgLojaAdm(id) {
+  const A = Store.analise || {}, l = (A.lojas || []).find((x) => x.id == id);
+  if (!l) return;
+  const det = (Store.detalhe || {})[id], dias = Store.admDias == null ? 30 : Store.admDias;
+  const p = +l.pedidos, fez = +l.concluido + +l.nao_veio, al = alertasLoja(l, dias);
+  const sem = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "S\xE1b"];
+  const st = (s, por) => s == "cancelado" ? `<span class="pill cancelado">${I("ban")}${por == "cliente" ? "Cliente cancelou" : "Barbeiro cancelou"}</span>` : STATUS[s] ? pill(s) : esc(s);
+  const cli = det ? det.clientes : [], ag = det ? det.agendamentos : [], clube2 = det ? det.clube : [];
+  const planoNome = (pid) => ((l.planos || []).find((x) => x.id == pid) || {}).nome || pid;
+  abre(`<header class="an-dlg-topo"><div><h2>${esc(l.name)}</h2><p class="q">${esc(l.email)} \xB7 dono entrou ${esc(quandoFoi(l.dono_login))}${l.whatsapp ? ` \xB7 <a class="tel-zap" href="${wa(l.whatsapp, "Oi!")}" target="_blank" rel="noopener">${esc(fone(l.whatsapp))}</a>` : ""}</p></div><button class="btn sec peq" data-a="fecha" aria-label="Fechar">${I("x")}</button></header>
+ <div class="acoes" style="margin:0 0 14px"><a class="btn sec peq" href="/${esc(l.slug)}" target="_blank" rel="noopener">${I("eye")}P\xE1gina do cliente</a><a class="btn sec peq" href="/${esc(l.slug)}/painel" target="_blank" rel="noopener">${I("store")}Painel do barbeiro</a></div>
+ <section class="kpis an-kpis an-k4">${[["Pedidos", nB(p), `${nB(l.pendente)} aguardando`], ["Atendidos", nB(l.concluido), fez ? pctB(l.concluido, fez) + "% vieram" : "\u2014"], ["Faturado", brl(l.faturado), `+ ${brl(l.previsto)} marcado`], ["Cancelados", nB(+l.canc_cliente + +l.canc_barbeiro), `${nB(l.canc_cliente)} cliente \xB7 ${nB(l.canc_barbeiro)} barbeiro`], ["Recusados", nB(l.recusado), p ? pctB(l.recusado, p) + "%" : "\u2014"], ["Clientes", nB(l.clientes), `${nB(l.novos)} novos \xB7 ${nB(l.recorrentes)} voltaram`], ["Contas de cliente", nB(l.contas_clientes), `${nB(l.contas_novas)} criadas no per\xEDodo`], ["Clube", nB(l.assinantes), `${brl(l.receita_clube)}/m\xEAs`]].map(([a, b, c]) => `<div class="kpi"><span>${a}</span><b>${b}</b><em>${c}</em></div>`).join("")}</section>
+ ${al.length ? `<h3 class="an-h">O que fazer</h3><ul class="an-alertas">${al.map(([n, t, a]) => `<li class="${n}">${I(n == "info" ? "lightbulb" : "triangle-alert")}<div><b>${esc(t)}</b><span>${esc(a)}</span></div></li>`).join("")}</ul>` : ""}
+ <h3 class="an-h">Barbeiros</h3><div class="vg-tab"><table class="an-tab"><thead><tr><th>Barbeiro</th><th>Pedidos</th><th>Atendidos</th><th>Cancelados</th><th>Recusados</th><th>N\xE3o vieram</th><th>Faturado</th></tr></thead><tbody>${(l.barbeiros || []).map((b) => `<tr><td><b>${esc(b.nome)}</b>${b.ativo ? "" : "<small>inativo</small>"}</td><td class="num">${nB(b.pedidos)}</td><td class="num">${nB(b.concluido)}</td><td class="num">${nB(b.cancelados)}</td><td class="num">${nB(b.recusado)}</td><td class="num">${nB(b.nao_veio)}</td><td class="num">${brl(b.faturado)}</td></tr>`).join("")}</tbody></table></div>
+ <div class="an-duo"><div><h3 class="an-h">Servi\xE7os mais pedidos</h3>${(l.servicos || []).length ? `<ul class="vg-lista">${l.servicos.map((s) => `<li><span>${esc(s.nome)}</span><small>${nB(s.n)} pedido${s.n == 1 ? "" : "s"}${+s.valor ? " \xB7 " + brl(s.valor) : ""}</small></li>`).join("")}</ul>` : '<p class="dica">Sem pedidos no per\xEDodo.</p>'}</div>
+ <div><h3 class="an-h">Clube de assinatura</h3>${(l.planos || []).length ? `<ul class="vg-lista">${l.planos.map((x) => `<li><span>${esc(x.nome)} \xB7 ${brl(x.preco)}/m\xEAs</span><small>${nB(x.n)} assinante${x.n == 1 ? "" : "s"}</small></li>`).join("")}</ul>` : '<p class="dica">N\xE3o criou clube ainda.</p>'}${clube2.length ? `<ul class="vg-lista">${clube2.map((c) => `<li><span>${esc(c.nome || "Cliente")} \xB7 <a class="tel-zap" href="${wa(c.tel, "Oi!")}" target="_blank" rel="noopener">${esc(fone(c.tel))}</a></span><small>${esc(planoNome(c.plano))} desde ${esc(brData(c.desde))}</small></li>`).join("")}</ul>` : ""}</div></div>
+ <div class="an-duo"><div><h3 class="an-h">Dias mais procurados</h3>${barrasMini(l.semana || [], (x) => sem[x.d])}</div><div><h3 class="an-h">Hor\xE1rios mais procurados</h3>${barrasMini((l.horas || []).filter((x) => x.h >= 8 && x.h <= 21), (x) => x.h + "h")}</div></div>
+ <h3 class="an-h">Clientes (${nB(cli.length)})</h3>${!det ? '<p class="dica">Carregando...</p>' : cli.length ? `<div class="vg-tab"><table class="an-tab"><thead><tr><th>Cliente</th><th>WhatsApp</th><th>Vieram</th><th>Cancelou</th><th>Faltou</th><th>Gastou</th><th>\xDAltima vez</th><th>Pr\xF3ximo</th></tr></thead><tbody>${cli.map((c) => `<tr><td><b>${esc(c.nome || "Cliente")}</b>${c.conta ? "<small>tem conta</small>" : ""}${c.plano ? `<small class="ouro">${esc(planoNome(c.plano))}</small>` : ""}</td><td><a class="tel-zap" href="${wa(c.tel, `Oi, ${String(c.nome || "").split(" ")[0]}!`)}" target="_blank" rel="noopener">${esc(fone(c.tel))}</a></td><td class="num">${nB(c.visitas)}</td><td class="num">${nB(c.cancelados)}</td><td class="num">${nB(c.faltas)}</td><td class="num">${brl(c.gasto)}</td><td>${esc(brData(c.ultima))}</td><td>${c.proximo ? esc(brData(c.proximo)) : "\u2014"}</td></tr>`).join("")}</tbody></table></div>` : '<p class="dica">Nenhum cliente ainda.</p>'}
+ <h3 class="an-h">\xDAltimos agendamentos</h3>${!det ? '<p class="dica">Carregando...</p>' : ag.length ? `<div class="vg-tab"><table class="an-tab"><thead><tr><th>Pedido feito</th><th>Cliente</th><th>Servi\xE7o</th><th>Dia e hora</th><th>Barbeiro</th><th>Situa\xE7\xE3o</th></tr></thead><tbody>${ag.map((x) => `<tr><td>${esc(new Date(x.criado).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }))}</td><td><b>${esc(x.cliente)}</b><small>${esc(fone(x.tel || ""))}</small></td><td>${esc(x.servico)}<small>${brl(x.valor)}${x.plano ? " \xB7 " + esc(x.plano) : ""}</small></td><td>${esc(brData(x.dia))} \xB7 ${hm(x.hora)}</td><td>${esc(x.barbeiro || "")}</td><td>${st(x.status, x.por)}</td></tr>`).join("")}</tbody></table></div>` : '<p class="dica">Nenhum agendamento ainda.</p>'}
+ <div class="fim" style="margin-top:16px"><button class="btn sec" data-a="fecha">Fechar</button></div>`, "largo");
+}
 function telaAdmin() {
   var _a;
   const L = Store.lojas || [], c = Store.pconf || {}, hj = hoje();
@@ -1936,10 +2090,11 @@ function telaAdmin() {
   const card = (l) => `<article class="loja"><div class="loja-topo"><div><h3>${esc(l.name)}</h3><small>${esc(l.email)} \xB7 /${esc(l.slug)}</small></div>${pil(l)}</div>
  <dl class="dl"><dt>Mensalidade</dt><dd class="num">${brl(l.mensalidade)}</dd><dt>Vencimento</dt><dd${venc(l) ? ' style="color:var(--ruim)"' : ""}>${esc(brData(l.vence))}${venc(l) ? ` \xB7 vencida h\xE1 ${dias(l)} dias` : ""}</dd><dt>Pedidos (30 dias)</dt><dd class="num">${l.pedidos_30d}</dd><dt>Faturou (30 dias)</dt><dd class="num">${brl(l.faturado_30d)}</dd><dt>WhatsApp</dt><dd>${l.whatsapp ? esc(fone(l.whatsapp)) : "n\xE3o cadastrado"}</dd><dt>\xDAltimo pagamento</dt><dd>${l.ultimo_pagamento ? esc(new Date(l.ultimo_pagamento).toLocaleDateString("pt-BR")) + " \xB7 " + brl(l.ultimo_valor) : "nenhum pelo app"}</dd><dt>D\xE9bito autom\xE1tico</dt><dd>${l.debito_auto == "authorized" ? "Ativo no cart\xE3o" : l.debito_auto == "pending" ? "Esperando cart\xE3o" : "N\xE3o"}</dd><dt>Avisos no celular</dt><dd>${l.avisos_ativos > 0 ? "Ativados" : "N\xE3o ativou"}</dd></dl>
  ${l.aviso ? `<p class="dica" style="margin:0 0 10px">Aviso atual: ${esc(l.aviso)}</p>` : ""}
- <div class="acoes"><button class="btn peq" data-a="adm-pago" data-v="${l.id}">${I("check")}Marcar como pago</button><button class="btn sec peq" data-a="adm-aviso" data-v="${l.id}">${I("bell")}Enviar aviso</button>${l.status == "suspenso" ? `<button class="btn sec peq" data-a="adm-status" data-v="${l.id}|ativo">Reativar</button>` : `<button class="btn perigo peq" data-a="adm-status" data-v="${l.id}|suspenso">Suspender</button>`}<button class="btn sec peq" data-a="adm-editar" data-v="${l.id}">${I("pencil")}Valor e vencimento</button><button class="btn sec peq" data-a="adm-senha" data-v="${l.id}">Nova senha</button>${zapOk(l.whatsapp || "") ? `<a class="btn sec peq" href="${wa(telZap(l.whatsapp), msgCobranca(l))}" target="_blank" rel="noopener">${I("message-circle")}Cobrar no WhatsApp</a>` : ""}<a class="btn sec peq" href="/${esc(l.slug)}/painel" target="_blank" rel="noopener">${I("store")}Abrir painel</a></div></article>`;
+ <div class="acoes"><button class="btn sec peq" data-a="adm-loja" data-v="${l.id}">${I("chart-column")}Ver an\xE1lise</button><button class="btn peq" data-a="adm-pago" data-v="${l.id}">${I("check")}Marcar como pago</button><button class="btn sec peq" data-a="adm-aviso" data-v="${l.id}">${I("bell")}Enviar aviso</button>${l.status == "suspenso" ? `<button class="btn sec peq" data-a="adm-status" data-v="${l.id}|ativo">Reativar</button>` : `<button class="btn perigo peq" data-a="adm-status" data-v="${l.id}|suspenso">Suspender</button>`}<button class="btn sec peq" data-a="adm-editar" data-v="${l.id}">${I("pencil")}Valor e vencimento</button><button class="btn sec peq" data-a="adm-senha" data-v="${l.id}">Nova senha</button>${zapOk(l.whatsapp || "") ? `<a class="btn sec peq" href="${wa(telZap(l.whatsapp), msgCobranca(l))}" target="_blank" rel="noopener">${I("message-circle")}Cobrar no WhatsApp</a>` : ""}<a class="btn sec peq" href="/${esc(l.slug)}/painel" target="_blank" rel="noopener">${I("store")}Abrir painel</a></div></article>`;
+  const aba = Store.admAba || "analise", abas = [["analise", "chart-column", "An\xE1lise"], ["lojas", "store", "Barbearias"], ["contas", "users", "Contas"], ["financeiro", "wallet", "Mensalidades"], ["ajustes", "settings", "Ajustes"]];
   return `<main class="admin"><header class="topo-pro"><div><small>S\xF3 voc\xEA v\xEA esta \xE1rea</small><h1>Dono do app</h1></div><button class="btn sec" data-a="sair">${I("x")}Sair</button></header>
-
- ${visaoGeral()}
+ <nav class="adm-abas" aria-label="Se\xE7\xF5es do painel">${abas.map(([k, ic, t]) => `<button class="${aba == k ? "on" : ""}" data-a="adm-aba" data-v="${k}"${aba == k ? ' aria-current="page"' : ""}>${I(ic)}<span>${t}</span></button>`).join("")}</nav>
+ ${aba == "analise" ? telaAnalise() : ""}${aba == "contas" ? telaContas() : ""}${aba == "financeiro" ? visaoGeral() : ""}${aba == "ajustes" ? `
  <section class="painel" style="margin-bottom:18px"><h3>Cobran\xE7a</h3><p class="q">Valem para todas as barbearias que n\xE3o tiverem um link pr\xF3prio.</p><form data-f="admconf"><div class="campo"><label for="ac-l">Seu link de pagamento (cr\xE9dito, d\xE9bito, Pix)</label><input id="ac-l" name="link" type="url" placeholder="https://link.mercadopago.com.br/..." value="${esc(c.link_pagamento || "")}"><span class="ajuda">Crie no Mercado Pago, InfinitePay, PagSeguro ou Stripe e cole aqui.</span></div><div class="campo"><label for="ac-m">Mensalidade padr\xE3o para barbearias novas (R$)</label><input id="ac-m" name="mens" type="number" min="0" value="${esc(c.mensalidade || "149")}"></div><div class="campo"><label for="ac-w">Seu WhatsApp de suporte</label><input id="ac-w" name="wa" inputmode="tel" value="${esc(fone(c.contato_suporte || ""))}"><span class="ajuda">O barbeiro toca em "J\xE1 paguei" e fala com voc\xEA.</span></div><div class="campo"><label for="ac-s">Pausar a agenda depois de quantos dias de atraso</label><input id="ac-s" name="susp" type="number" min="0" max="60" value="${esc((_a = c.dias_suspensao) != null ? _a : "5")}"><span class="ajuda">Todo dia ao meio-dia o app avisa quem vence em 3 dias e quem atrasou, e pausa a agenda depois desse prazo. Coloque 0 para nunca pausar sozinho.</span></div><button class="btn peq" type="submit">Salvar</button></form></section>
  <section class="painel" style="margin-bottom:18px"><h3>WhatsApp autom\xE1tico</h3><p class="q">Um n\xFAmero de WhatsApp do app manda as mensagens sozinho: o pedido chega no WhatsApp do barbeiro na hora em que o cliente toca em Pedir, e a confirma\xE7\xE3o, a recusa e o lembrete do dia chegam no WhatsApp do cliente. Ningu\xE9m precisa abrir o WhatsApp para enviar.</p>
  ${(Store.zap || {}).conectado ? `<p class="push-ok">${I("check")}Ligado (inst\xE2ncia terminando em ${esc(Store.zap.final)}).</p>` : `<p class="dica" style="margin:0 0 12px">Desligado. Hoje o cliente abre o WhatsApp e toca em enviar.</p>`}
@@ -1959,9 +2114,8 @@ function telaAdmin() {
   })()}</section>
  <section class="painel" style="margin-bottom:18px"><h3>Recebimento autom\xE1tico</h3><p class="q">Com a sua chave do Mercado Pago, o barbeiro paga com cr\xE9dito, d\xE9bito ou Pix, e a conta \xE9 liberada sozinha por mais um m\xEAs assim que o pagamento \xE9 aprovado.</p>
  ${(Store.mp || {}).conectado ? `<p class="push-ok">${I("check")}Mercado Pago conectado (chave terminando em ${esc(Store.mp.final)}${Store.mp.teste ? ", modo de teste" : ""}).</p>` : `<p class="dica" style="margin:0 0 12px">Ainda n\xE3o conectado. Enquanto isso, o bot\xE3o de pagar usa o link de pagamento acima.</p>`}
- <form data-f="admmp" autocomplete="off"><div class="campo"><label for="mp-t">Access Token de produ\xE7\xE3o do Mercado Pago</label><input id="mp-t" name="t" type="password" placeholder="APP_USR-..." autocomplete="off"><span class="ajuda">No Mercado Pago Developers: Suas integra\xE7\xF5es, crie uma aplica\xE7\xE3o e abra Credenciais de produ\xE7\xE3o. Copie o Access Token. A chave fica guardada s\xF3 no servidor e n\xE3o aparece de novo.</span></div><div class="acoes"><button class="btn peq" type="submit">Salvar chave</button>${(Store.mp || {}).conectado ? `<button class="btn sec peq" type="button" data-a="adm-mp-testar">Testar conex\xE3o</button><button class="btn perigo peq" type="button" data-a="adm-mp-remover">Desconectar</button>` : ""}</div></form></section>
-
- <h2 class="titulo-sec">Barbearias</h2>${L.length ? `<div class="lojas">${L.map(card).join("")}</div>` : '<div class="vazio"><h3>Nenhuma barbearia ainda</h3></div>'}</main>`;
+ <form data-f="admmp" autocomplete="off"><div class="campo"><label for="mp-t">Access Token de produ\xE7\xE3o do Mercado Pago</label><input id="mp-t" name="t" type="password" placeholder="APP_USR-..." autocomplete="off"><span class="ajuda">No Mercado Pago Developers: Suas integra\xE7\xF5es, crie uma aplica\xE7\xE3o e abra Credenciais de produ\xE7\xE3o. Copie o Access Token. A chave fica guardada s\xF3 no servidor e n\xE3o aparece de novo.</span></div><div class="acoes"><button class="btn peq" type="submit">Salvar chave</button>${(Store.mp || {}).conectado ? `<button class="btn sec peq" type="button" data-a="adm-mp-testar">Testar conex\xE3o</button><button class="btn perigo peq" type="button" data-a="adm-mp-remover">Desconectar</button>` : ""}</div></form></section>` : ""}
+ ${aba == "lojas" ? `<h2 class="titulo-sec">Barbearias</h2>${L.length ? `<div class="lojas">${L.map(card).join("")}</div>` : '<div class="vazio"><h3>Nenhuma barbearia ainda</h3></div>'}` : ""}</main>`;
 }
 function assinaturasApp() {
   const a = Store.assins;
@@ -2136,6 +2290,39 @@ async function mudaStatus(o, id, st) {
   return protege(() => Store.mudar(o, id, { st }));
 }
 const ACOES = {
+  "adm-aba"(v) {
+    Store.admAba = v;
+    R(true);
+    scrollTo(0, 0);
+  },
+  async "adm-dias"(v) {
+    Store.admDias = +v;
+    Store.analise = null;
+    R(true);
+    const { data, error } = await Store.sb.rpc("admin_analise", { p_dias: +v });
+    if (error) return toast(erroAmigo(error) || "N\xE3o consegui carregar.");
+    Store.analise = data;
+    Store.detalhe = {};
+    R(true);
+  },
+  async "adm-loja"(id) {
+    if (!Store.analise) {
+      const { data } = await Store.sb.rpc("admin_analise", { p_dias: Store.admDias == null ? 30 : Store.admDias });
+      Store.analise = data;
+    }
+    dlgLojaAdm(id);
+    Store.detalhe = Store.detalhe || {};
+    if (!Store.detalhe[id]) {
+      const { data, error } = await Store.sb.rpc("admin_loja_detalhe", { p_shop: id });
+      if (error) return toast(erroAmigo(error) || "N\xE3o consegui carregar os detalhes.");
+      Store.detalhe[id] = data;
+    }
+    if (dlg().open) {
+      const y = dlg().scrollTop;
+      dlgLojaAdm(id);
+      dlg().scrollTop = y;
+    }
+  },
   ir(v) {
     vaPara(+v);
   },
