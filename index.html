@@ -408,6 +408,20 @@ dialog.largo h2{font-size:30px;margin:0}
 .kpis.an-k4{grid-template-columns:repeat(4,minmax(0,1fr))}
 @media (max-width:760px){.kpis.an-k4{grid-template-columns:repeat(2,minmax(0,1fr))}}
 dialog .an-alertas li{cursor:default}
+
+/* ---------- vários serviços no mesmo horário ---------- */
+.item.multi .ln{align-items:center}
+.item .ck{flex:none;width:26px;height:26px;border-radius:7px;border:2px solid var(--ouro-apagado);display:grid;place-items:center;align-self:center;transition:background .15s,border-color .15s}
+.item.on .ck{background:var(--ouro);border-color:var(--ouro);color:var(--sobre-ouro)}
+.item .ck .i{width:16px;height:16px;stroke-width:3}
+.item.multi small{padding-left:34px}
+.svc-barra{position:sticky;bottom:12px;z-index:5;margin-top:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 12px 12px 16px;background:var(--carvao);border:1px solid var(--ouro-apagado);border-radius:14px;box-shadow:0 10px 30px #0009;animation:sobe .2s ease-out}
+.svc-barra div{display:grid;min-width:0}
+.svc-barra small{color:var(--cinza);font-size:13px}
+.svc-barra b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.svc-barra .btn{flex:none;white-space:nowrap}
+@keyframes sobe{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
+@media (max-width:420px){.svc-barra{flex-direction:column;align-items:stretch}.svc-barra .btn{width:100%;justify-content:center}}
 </style></head>
 <body><div id="app"></div><dialog id="dlg"></dialog><div id="toast" role="status" aria-live="polite"></div><div id="tip" role="tooltip"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -1346,7 +1360,15 @@ const U = { balcao: (() => {
     return false;
   }
 })(), rota: "agendar", step: 1, svc: null, barber: "any", date: null, time: null, rapido: null, nome: "", tel: "", obs: "", enviado: null, erros: {}, pb: "todos", ad: hoje(), q: "", filtro: "todos", per: 30, sujo: false };
-const servico = (id) => C().services.find((s) => s.id == id);
+const servico = (id) => {
+  if (!id) return;
+  const L = C().services;
+  if (!String(id).includes("+")) return L.find((s) => s.id == id);
+  const ps = String(id).split("+").map((i) => L.find((s) => s.id == i));
+  if (!ps.length || ps.some((x) => !x)) return;
+  return { id: String(id), name: ps.map((x) => x.name).join(" + "), dur: ps.reduce((a, x) => a + (+x.dur || 0), 0), price: ps.reduce((a, x) => a + (+x.price || 0), 0), desc: ps.map((x) => x.name).join(", "), partes: ps };
+};
+const MAX_SVC = 4;
 const toast = (m) => {
   const t = $("#toast");
   t.textContent = m;
@@ -1373,9 +1395,15 @@ function trilho() {
 }
 function passo1() {
   const n = proximoLivre();
+  if (!U.marcados) U.marcados = U.svc ? String(U.svc).split("+").filter((i) => servico(i)) : [];
+  const mk = U.marcados, tot = servico(mk.join("+")) || { dur: 0, price: 0, name: "" };
   return `${n && Store.ready ? `<button class="rapido" data-a="rapido"><span><small>Pr\xF3ximo hor\xE1rio livre</small><b class="num">${esc(dataCurta(n.k))}, ${hm(n.s)}</b><em>com ${esc(n.b.name)}</em></span>${I("arrow-right", "seta")}</button>` : ""}
- <h2 class="h-etapa">O que vai ser?</h2><p class="sub">Toque no servi\xE7o. Sem cadastro.</p>
- <div class="tabela">${C().services.map((s) => `<button class="item ${U.svc == s.id ? "on" : ""}" data-a="svc" data-v="${esc(s.id)}"><span class="ln"><span class="nm">${esc(s.name)}</span><span class="dots"></span><span class="pr num">${brl(s.price)}</span></span><small>${esc(s.desc)} \xB7 ${dur(s.dur)}</small></button>`).join("")}</div>${clube()}`;
+ <h2 class="h-etapa">O que vai ser?</h2><p class="sub">Escolha um ou mais servi\xE7os. O tempo e o valor somam sozinhos.</p>
+ <div class="tabela">${C().services.map((s) => {
+    const on = mk.includes(s.id);
+    return `<button class="item multi ${on ? "on" : ""}" data-a="svc" data-v="${esc(s.id)}" aria-pressed="${on}"><span class="ln"><span class="ck" aria-hidden="true">${on ? I("check") : ""}</span><span class="nm">${esc(s.name)}</span><span class="dots"></span><span class="pr num">${brl(s.price)}</span></span><small>${esc(s.desc)} \xB7 ${dur(s.dur)}</small></button>`;
+  }).join("")}</div>${clube()}
+ ${mk.length ? `<div class="svc-barra" role="region" aria-label="Servi\xE7os escolhidos"><div><small>${mk.length} servi\xE7o${mk.length > 1 ? "s" : ""} \xB7 ${dur(tot.dur)}</small><b>${esc(tot.name)}</b></div><button class="btn" data-a="svc-ok"><span class="num">${brl(tot.price)}</span> \xB7 Continuar ${I("arrow-right")}</button></div>` : ""}`;
 }
 function clube() {
   const pl = C().planos || [];
@@ -1847,7 +1875,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261119154739";
+const VERSAO = "20261120104518";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
@@ -2276,7 +2304,7 @@ function vaPara(s) {
   R(true);
   scrollTo(0, 0);
 }
-const reinicia = () => Object.assign(U, { step: 1, svc: null, barber: BARB_LINK && C().barbers.some((b) => b.id == U.barber) ? U.barber : "any", time: null, rapido: null, obs: "", enviado: null, erros: {} });
+const reinicia = () => Object.assign(U, { step: 1, svc: null, marcados: null, barber: BARB_LINK && C().barbers.some((b) => b.id == U.barber) ? U.barber : "any", time: null, rapido: null, obs: "", enviado: null, erros: {} });
 async function protege(f, msg) {
   try {
     return await f();
@@ -2515,6 +2543,20 @@ const ACOES = {
     vaPara(1);
   },
   svc(v) {
+    const m = U.marcados || (U.marcados = []), i = m.indexOf(v);
+    if (i >= 0) m.splice(i, 1);
+    else {
+      if (m.length >= MAX_SVC) return toast(`D\xE1 para juntar at\xE9 ${MAX_SVC} servi\xE7os.`);
+      m.push(v);
+    }
+    const ord = C().services.map((x) => x.id);
+    m.sort((a, b) => ord.indexOf(a) - ord.indexOf(b));
+    R(true);
+  },
+  "svc-ok"() {
+    const m = U.marcados || [];
+    if (!m.length) return toast("Escolha pelo menos um servi\xE7o.");
+    const v = m.join("+");
     U.svc = v;
     const s = servico(v);
     if (U.rapido && livresEm(U.date, U.time, s.dur, U.barber).length) {
@@ -2553,7 +2595,10 @@ const ACOES = {
   },
   repetir(v) {
     reinicia();
-    if (servico(v)) U.svc = v;
+    if (servico(v)) {
+      U.svc = v;
+      U.marcados = null;
+    }
     location.hash = "agendar";
     U.step = servico(v) ? 2 : 1;
     R(true);
