@@ -2,7 +2,11 @@
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0b0c">
-<title>Barbearias perto de você · DreewSolution</title>
+<title>DreewSolution · Encontre sua barbearia</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="DreewSolution">
 <meta name="description" content="Ache barbearias perto de você, veja o próximo horário livre e marque pelo celular.">
 <link rel="icon" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -66,12 +70,52 @@ h1 span{color:var(--ouro)}
 .aviso{font-size:13px;color:var(--cinza);margin-top:8px}
 #toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%);background:var(--branco);color:var(--preto);padding:10px 16px;border-radius:10px;font-weight:600;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;text-align:center;z-index:1000}
 @media (min-width:700px){h1{font-size:56px}#mapa{height:380px}}
+.topo{position:sticky;top:0;z-index:1100;background:#0b0b0ce8;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--linha);padding-top:env(safe-area-inset-top,0px)}
+.topo-in{max-width:760px;margin:0 auto;padding:10px 16px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px}
+.topo .marca{font-size:20px}
+.abas{grid-column:1/-1;grid-row:2;display:grid;grid-template-columns:1fr 1fr;background:var(--carvao);border:1px solid var(--linha);border-radius:12px;padding:4px;gap:4px}
+.abas a{text-align:center;padding:9px 6px;border-radius:9px;font-weight:700;font-size:14px;color:var(--cinza);text-decoration:none}
+.abas a.on{background:var(--ouro);color:var(--sobre-ouro)}
+.instalar{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--ouro);color:var(--ouro-claro);border-radius:999px;padding:7px 12px;font-size:13px;font-weight:700}
+.instalar[hidden]{display:none}
+@media (min-width:760px){.topo-in{grid-template-columns:auto 1fr auto}.abas{grid-column:2;grid-row:1;justify-self:center;width:min(420px,100%)}}
+.wrap{padding-top:18px}
+.vista[hidden]{display:none}
+.barbeiro{display:block;text-decoration:none}.barbeiro b{display:block;font-family:var(--titulo);font-size:26px;font-weight:800;margin-bottom:4px}.barbeiro span{color:var(--cinza)}
+.pl{display:grid;gap:10px;background:var(--carvao);border:1px solid var(--ouro);border-radius:16px;padding:18px;margin:6px 0 18px}
+.pl-preco b{display:block;font-family:var(--titulo);font-weight:900;font-size:56px;line-height:1;color:var(--ouro-claro)}.pl-preco b span{font-size:22px;color:var(--cinza);margin-left:4px}
+.pl-preco small{display:block;color:var(--cinza);font-size:13px}
+.btn.grande{min-height:52px;font-size:17px}
+.recursos{list-style:none;display:grid;gap:10px}
+.recursos li{border:1px solid var(--linha);border-radius:14px;padding:14px 16px;background:var(--carvao)}
+.recursos b{display:block;font-size:16px;color:var(--ouro-claro)}.recursos span{color:var(--cinza);font-size:14px}
+@media (min-width:700px){.recursos{grid-template-columns:1fr 1fr}}
+.svcs{margin-top:10px;border-top:1px solid var(--linha);padding-top:8px;display:grid;gap:4px}
+.svc{display:flex;align-items:baseline;gap:8px;font-size:14px}
+.svc .n{color:var(--branco);font-weight:600}.svc .d{flex:1;border-bottom:1px dotted #6e5a35;transform:translateY(-3px);min-width:10px}.svc .p{color:var(--ouro-claro);font-weight:700;white-space:nowrap}.svc .t{color:var(--cinza);font-size:12px;white-space:nowrap}
+.mais{color:var(--ouro);font-weight:600;font-size:13px;text-align:left;padding:4px 0}
+.ios-dica{position:fixed;inset:0;z-index:2000;background:#000a;display:flex;align-items:flex-end;justify-content:center;padding:16px}
+.ios-dica[hidden]{display:none}
+.ios-dica>div{background:var(--carvao);border:1px solid var(--ouro);border-radius:16px;padding:18px;max-width:420px;width:100%;margin-bottom:env(safe-area-inset-bottom,0px)}
+.ios-dica b{color:var(--ouro-claro)}.ios-dica p{color:var(--cinza);margin:8px 0 14px}
+.card{grid-template-columns:56px minmax(0,1fr)}
+
 </style></head>
 <body>
+<header class="topo">
+  <div class="topo-in">
+    <a class="marca" href="/" aria-label="DreewSolution, início"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d4ab5f" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></svg>DREEW<b>SOLUTION</b></a>
+    <nav class="abas" aria-label="Seções">
+      <a href="#encontrar" data-aba="encontrar" class="on">Encontrar barbearia</a>
+      <a href="#adicionar" data-aba="adicionar">Adicionar barbearia</a>
+    </nav>
+    <button class="instalar" id="instalar" type="button" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg><span>Instalar app</span></button>
+  </div>
+</header>
 <main class="wrap">
-  <a class="marca" href="/buscar" aria-label="DreewSolution"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d4ab5f" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></svg>DREEW<b>SOLUTION</b></a>
+<section id="v-encontrar" class="vista">
   <h1>Barbearias <span>perto de você</span></h1>
-  <p class="sub">Veja quem está aberto, o próximo horário livre e marque pelo celular.</p>
+  <p class="sub">Compare preços, veja quem está aberto e marque seu horário sem precisar mandar mensagem.</p>
 
   <section class="loc" aria-label="Sua localização">
     <button class="btn ouro" id="gps" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Usar minha localização</button>
@@ -90,13 +134,30 @@ h1 span{color:var(--ouro)}
   <p class="qtd" id="qtd">Carregando barbearias...</p>
   <div id="lista"></div>
 
-  <section class="barbeiro">
-    <h2>É barbeiro? Coloque sua barbearia aqui</h2>
-    <p class="linha" style="margin-bottom:14px">Clientes da região te acham no mapa e marcam sozinhos. O pedido chega no seu WhatsApp. 15 dias grátis.</p>
-    <a class="btn ouro" href="/painel">Testar grátis</a>
-  </section>
   <p class="aviso">Sua localização é usada só para calcular a distância, neste aparelho. Ela não fica salva.</p>
+  <a class="barbeiro" href="#adicionar" data-aba="adicionar"><b>Tem uma barbearia?</b><span>Coloque ela no mapa e receba agendamentos pelo app. 15 dias grátis.</span></a>
+</section>
+
+<section id="v-adicionar" class="vista" hidden>
+  <h1>Sua barbearia <span>no app</span></h1>
+  <p class="sub">O cliente encontra sua barbearia no mapa, escolhe o serviço e o horário, e o pedido chega no seu WhatsApp. Você confirma no painel.</p>
+  <div class="pl">
+    <div class="pl-preco"><small>Depois de 15 dias grátis</small><b>R$ 80<span>/mês</span></b><small>Sem fidelidade. Sem limite de clientes.</small></div>
+    <a class="btn ouro grande" href="/painel">Cadastrar minha barbearia</a>
+    <a class="btn sec" href="/painel">Já tenho conta: entrar no painel</a>
+  </div>
+  <ul class="recursos">
+    <li><b>Link próprio</b><span>Um endereço só da sua barbearia para colocar no Instagram e no WhatsApp.</span></li>
+    <li><b>Agenda organizada</b><span>Horários, intervalo de almoço, folgas e vários barbeiros.</span></li>
+    <li><b>Pedido no WhatsApp</b><span>Cada agendamento chega no seu número com os dados do cliente.</span></li>
+    <li><b>Vários serviços</b><span>O cliente marca corte e barba juntos. O app soma o tempo e o valor.</span></li>
+    <li><b>Mapa e avaliações</b><span>Apareça para quem procura barbearia perto e mostre a nota dos seus clientes.</span></li>
+    <li><b>Resultados</b><span>Veja atendimentos, faturamento, faltas e clientes que sumiram.</span></li>
+  </ul>
+  <p class="aviso">Dúvidas? Fale com a DreewSolution: <a href="https://wa.me/5511940039508?text=Ol%C3%A1!%20Quero%20saber%20mais%20sobre%20o%20app%20de%20agendamento." target="_blank" rel="noopener">WhatsApp (11) 94003-9508</a></p>
+</section>
 </main>
+<div class="ios-dica" id="ios-dica" hidden><div><b>Instalar o DreewSolution</b><p>No Safari, toque em <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M12 3v12M8 7l4-4 4 4M5 12v8h14v-8"/></svg> Compartilhar e depois em <b>Adicionar à Tela de Início</b>.</p><button class="btn sec" type="button" id="ios-ok">Entendi</button></div></div>
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -113,7 +174,7 @@ const km=d=>d==null?'':d<1?Math.round(d*1000/10)*10+' m':d.toFixed(1).replace('.
 let toastT;const toast=t=>{const e=$('#toast');e.textContent=t;e.style.opacity=1;clearTimeout(toastT);toastT=setTimeout(()=>e.style.opacity=0,3200)};
 async function rpc(fn,args){const r=await fetch(SB_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(args||{})});if(!r.ok)throw new Error(await r.text());return r.json()}
 
-const S={pos:null,onde:'',lojas:[],filtros:new Set(),prox:{}};
+const S={pos:null,onde:'',lojas:[],filtros:new Set(),prox:{},abertos:new Set()};
 const agora=()=>{const d=new Date();return d.getHours()*60+d.getMinutes()};
 const horarioDe=(l,k)=>{const h=l.hours&&l.hours[new Date(k+'T12:00:00').getDay()];return Array.isArray(h)?h:null};
 const fechadoDia=(l,k,b)=>(l.fechados||[]).some(f=>f.d==k&&(f.b=='todos'||(b&&f.b==b)));
@@ -139,12 +200,16 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribu
 const camada=L.layerGroup().addTo(mapa);let euMk=null;
 
 function visiveis(){const f=S.filtros;return S.lojas.filter(l=>{if(f.has('aberto')&&!situacao(l).ab)return false;if(f.has('ate50')&&!(l.preco_min!=null&&l.preco_min<=50))return false;if(f.has('perto')&&!(l.dist_km!=null&&l.dist_km<=5))return false;if(f.has('hoje')){const p=S.prox[l.slug];if(!p||p.i!=0)return false}return true})}
+const durTxt=m=>m>=60?Math.floor(m/60)+'h'+(m%60?String(m%60).padStart(2,'0'):''):m+' min';
+function precos(l){const sv=(l.services||[]).filter(v=>v&&v.name);if(!sv.length)return'';const aberto=S.abertos.has(l.slug),ver=aberto?sv:sv.slice(0,4);
+ return`<div class="svcs" aria-label="Preços">${ver.map(v=>`<div class="svc"><span class="n">${esc(v.name)}</span><span class="t">${v.dur?durTxt(v.dur):''}</span><span class="d"></span><span class="p">${brl(v.price)}</span></div>`).join('')}${sv.length>4?`<button class="mais" type="button" data-precos="${esc(l.slug)}">${aberto?'Ver menos':'Ver todos os '+sv.length+' serviços'}</button>`:''}</div>`}
 function card(l){const sit=situacao(l),p=S.prox[l.slug],ini=esc((l.name||'?').trim()[0]||'?');const dest=`https://www.google.com/maps/dir/?api=1&destination=${l.lat},${l.lng}`;
   return`<article class="card${l.destaque?' dest':''}"><div class="logo">${l.logo?`<img src="${esc(l.logo)}" alt="">`:ini}</div><div>
   <div class="nome">${esc(l.name)}${l.destaque?'<span class="tag-d">Destaque</span>':''}</div>${l.verificada||+l.avaliacoes>0?`<p class="linha nota">${l.verificada?selo:''}${+l.avaliacoes>0?`${estrelas(+l.nota)}<b style="color:var(--branco)">${String(l.nota).replace('.',',')}</b> (${l.avaliacoes} ${l.avaliacoes==1?'avaliação':'avaliações'})`:''}</p>`:''}
   <p class="linha">${IC.pin}${l.dist_km!=null?`<b style="color:var(--branco)">${km(l.dist_km)}</b> · `:''}${esc(l.address||'')}</p>
   <p class="linha">${IC.rel}<span class="${sit.ab?'st-ab':'st-fe'}">${esc(sit.t)}</span></p>${l.preco_min!=null?`<p class="linha">${IC.din}A partir de <b style="color:var(--branco)">${brl(l.preco_min)}</b></p>`:''}
   ${p===undefined?'<span class="prox">Vendo horários...</span>':p?`<span class="prox">${IC.cal}Próximo horário livre <b>${quando(p)}, ${hm(p.s)}</b></span>`:'<span class="prox">Sem horário livre nas próximas 2 semanas</span>'}
+  ${precos(l)}
   <div class="acoes"><a class="btn ouro peq" href="/${encodeURIComponent(l.slug)}">Ver horários e marcar</a><a class="btn sec peq" href="${dest}" target="_blank" rel="noopener">Como chegar</a></div></div></article>`}
 function desenha(){const v=visiveis();
   $('#qtd').textContent=S.lojas.length?(v.length?`${v.length} barbearia${v.length>1?'s':''}${S.pos?' perto de você':''}`:'Nenhuma barbearia com esses filtros.'):'';
@@ -166,6 +231,18 @@ $('#fcep').onsubmit=async e=>{e.preventDefault();const c=$('#cep').value.replace
     if(lat==null&&j&&j.city){const q=[j.street,j.neighborhood,j.city+' - '+j.state].filter(Boolean).join(', ');let r=await(await fetch('https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&limit=1&q='+encodeURIComponent(q))).json();if(!r[0])r=await(await fetch('https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&limit=1&q='+encodeURIComponent((j.neighborhood?j.neighborhood+', ':'')+j.city+' - '+j.state))).json();if(r[0]){lat=+r[0].lat;lng=+r[0].lon}}
     if(lat==null)return toast('Não achei esse CEP no mapa. Tente usar a localização.');S.pos={lat,lng};defineOnde([j.neighborhood,j.city].filter(Boolean).join(', ')||c);marcaEu();carrega()}catch(err){toast('Não achei esse CEP. Confira os números.')}};
 document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{const f=b.dataset.f;if(f=='perto'&&!S.pos)return toast('Use a localização ou o CEP para filtrar por distância.');S.filtros.has(f)?S.filtros.delete(f):S.filtros.add(f);b.classList.toggle('on');desenha()});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-precos]');if(!b)return;const k=b.dataset.precos;S.abertos.has(k)?S.abertos.delete(k):S.abertos.add(k);desenha()});
+function aba(){const a=location.hash=='#adicionar'?'adicionar':'encontrar';document.querySelectorAll('.abas a').forEach(x=>x.classList.toggle('on',x.dataset.aba==a));$('#v-encontrar').hidden=a!='encontrar';$('#v-adicionar').hidden=a!='adicionar';if(a=='encontrar')setTimeout(()=>mapa.invalidateSize(),50);document.title=a=='adicionar'?'DreewSolution · Adicione sua barbearia':'DreewSolution · Encontre sua barbearia'}
+addEventListener('hashchange',()=>{aba();scrollTo(0,0)});aba();
+// instalar como app
+const instalado=matchMedia('(display-mode: standalone)').matches||navigator.standalone;let pedido=null;
+const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform=='MacIntel'&&navigator.maxTouchPoints>1);
+if(!instalado&&ios)$('#instalar').hidden=false;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();pedido=e;if(!instalado)$('#instalar').hidden=false});
+addEventListener('appinstalled',()=>{$('#instalar').hidden=true;toast('App instalado. Ele aparece na tela inicial do celular.')});
+$('#instalar').onclick=async()=>{if(pedido){pedido.prompt();const r=await pedido.userChoice;pedido=null;if(r&&r.outcome=='accepted')$('#instalar').hidden=true}else if(ios)$('#ios-dica').hidden=false;else toast('Abra o menu do navegador e escolha Instalar app ou Adicionar à tela inicial.')};
+$('#ios-ok').onclick=()=>$('#ios-dica').hidden=true;$('#ios-dica').onclick=e=>{if(e.target.id=='ios-dica')$('#ios-dica').hidden=true};
+if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 carrega();
 </script>
 </body></html>

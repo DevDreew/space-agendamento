@@ -1,5 +1,5 @@
 // DreewSolution · notificações no celular e funcionamento com internet fraca
-const CACHE = 'space-v2';
+const CACHE = 'space-v3';
 self.addEventListener('install', e => {
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/index.html', '/manifest.webmanifest', '/icon-192.png'])).catch(() => {}));
@@ -13,8 +13,9 @@ self.addEventListener('fetch', e => {
   const u = new URL(r.url);
   // Páginas do app: tenta a internet primeiro; se cair, abre a última versão guardada.
   if (r.mode === 'navigate' && u.origin === self.location.origin) {
-    e.respondWith(fetch(r).then(res => { const c = res.clone(); caches.open(CACHE).then(k => k.put('/index.html', c)); return res; })
-      .catch(() => caches.match('/index.html')));
+    const chave = (u.pathname === '/' || u.pathname === '/buscar' || u.pathname === '/buscar.html') ? '/buscar.html' : '/index.html';
+    e.respondWith(fetch(r).then(res => { if (res.ok) { const c = res.clone(); caches.open(CACHE).then(k => k.put(chave, c)); } return res; })
+      .catch(() => caches.match(chave)));
     return;
   }
   // Biblioteca do banco, fontes e ícones: usa o que já tem e atualiza por trás.
