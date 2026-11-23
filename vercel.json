@@ -13,7 +13,7 @@
     },
     {
       "source": "/",
-      "destination": "/space",
+      "destination": "/buscar",
       "permanent": false
     }
   ],
