@@ -53,6 +53,9 @@ h1 span{color:var(--ouro)}
 .nome{font-family:var(--titulo);font-weight:800;font-size:25px;line-height:1.05;color:var(--ouro-claro);text-transform:uppercase}
 .tag-d{display:inline-flex;align-items:center;gap:4px;background:var(--ouro);color:var(--sobre-ouro);font-size:11px;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:999px;text-transform:uppercase;vertical-align:4px;margin-left:6px}
 .linha{font-size:14px;color:var(--cinza);margin-top:2px}
+.linha.nota{display:flex;align-items:center;flex-wrap:wrap;gap:4px;margin:4px 0 2px}
+.es{width:14px;height:14px;fill:#3a3326}.es.on{fill:var(--ouro)}
+.selo-v{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--ouro-claro);border:1px solid #6e5a35;border-radius:999px;padding:2px 9px 2px 6px;margin-right:6px}.selo-v svg{width:14px;height:14px;color:var(--ouro)}
 .st-ab{color:var(--ok);font-weight:600}.st-fe{color:var(--ruim);font-weight:600}
 .prox{display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--grafite);font-size:14px}
 .prox b{color:var(--ouro-claro)}
@@ -128,6 +131,8 @@ async function proximoLivre(l){const k0=dia();let oc=[];try{oc=await rpc('horari
 const quando=p=>p.i==0?'hoje':p.i==1?'amanhã':DS[new Date(p.k+'T12:00:00').getDay()]+' '+p.k.slice(8)+'/'+p.k.slice(5,7);
 
 const IC={pin:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',rel:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',din:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M16 12h2M3 10h18"/></svg>',cal:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>'};
+const estrelas=n=>{let h='';for(let i=1;i<=5;i++)h+=`<svg class="es${n>=i-.25?' on':''}" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5-4.8-4.6 6.6-.9z"/></svg>`;return h};
+const selo='<span class="selo-v"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>Verificada</span>';
 const icTes='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14110a" stroke-width="2.4" stroke-linecap="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></svg>';
 const mapa=L.map('mapa',{zoomControl:true,attributionControl:true}).setView([-23.51,-46.88],12);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(mapa);
@@ -136,7 +141,7 @@ const camada=L.layerGroup().addTo(mapa);let euMk=null;
 function visiveis(){const f=S.filtros;return S.lojas.filter(l=>{if(f.has('aberto')&&!situacao(l).ab)return false;if(f.has('ate50')&&!(l.preco_min!=null&&l.preco_min<=50))return false;if(f.has('perto')&&!(l.dist_km!=null&&l.dist_km<=5))return false;if(f.has('hoje')){const p=S.prox[l.slug];if(!p||p.i!=0)return false}return true})}
 function card(l){const sit=situacao(l),p=S.prox[l.slug],ini=esc((l.name||'?').trim()[0]||'?');const dest=`https://www.google.com/maps/dir/?api=1&destination=${l.lat},${l.lng}`;
   return`<article class="card${l.destaque?' dest':''}"><div class="logo">${l.logo?`<img src="${esc(l.logo)}" alt="">`:ini}</div><div>
-  <div class="nome">${esc(l.name)}${l.destaque?'<span class="tag-d">Destaque</span>':''}</div>
+  <div class="nome">${esc(l.name)}${l.destaque?'<span class="tag-d">Destaque</span>':''}</div>${l.verificada||+l.avaliacoes>0?`<p class="linha nota">${l.verificada?selo:''}${+l.avaliacoes>0?`${estrelas(+l.nota)}<b style="color:var(--branco)">${String(l.nota).replace('.',',')}</b> (${l.avaliacoes} ${l.avaliacoes==1?'avaliação':'avaliações'})`:''}</p>`:''}
   <p class="linha">${IC.pin}${l.dist_km!=null?`<b style="color:var(--branco)">${km(l.dist_km)}</b> · `:''}${esc(l.address||'')}</p>
   <p class="linha">${IC.rel}<span class="${sit.ab?'st-ab':'st-fe'}">${esc(sit.t)}</span></p>${l.preco_min!=null?`<p class="linha">${IC.din}A partir de <b style="color:var(--branco)">${brl(l.preco_min)}</b></p>`:''}
   ${p===undefined?'<span class="prox">Vendo horários...</span>':p?`<span class="prox">${IC.cal}Próximo horário livre <b>${quando(p)}, ${hm(p.s)}</b></span>`:'<span class="prox">Sem horário livre nas próximas 2 semanas</span>'}

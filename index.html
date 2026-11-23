@@ -423,9 +423,10 @@ dialog .an-alertas li{cursor:default}
 @keyframes sobe{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
 @media (max-width:420px){.svc-barra{flex-direction:column;align-items:stretch}.svc-barra .btn{width:100%;justify-content:center}}
 /* barbearias perto: botão no canto e mapa */
-.perto-fab{position:fixed;right:12px;bottom:calc(72px + var(--base));z-index:6;display:inline-flex;align-items:center;gap:6px;padding:10px 14px 10px 12px;border-radius:999px;background:var(--carvao);border:1px solid var(--ouro);color:var(--ouro-claro);font-size:13px;font-weight:700;box-shadow:0 6px 20px #000a}
-.perto-fab svg{width:18px;height:18px}
-@media(min-width:900px){.perto-fab{bottom:24px;right:24px;font-size:14px;padding:12px 18px 12px 14px}}
+.marca{position:relative}
+.perto-fab{position:absolute;top:calc(14px + var(--topo));right:14px;z-index:3;display:inline-flex;align-items:center;gap:6px;padding:8px 12px 8px 10px;border-radius:999px;background:#0b0b0cd9;border:1px solid var(--ouro);color:var(--ouro-claro);font-size:13px;font-weight:700;backdrop-filter:blur(4px)}
+.perto-fab svg{width:16px;height:16px;color:var(--ouro)}
+@media(min-width:900px){.marca{position:sticky}.perto-fab{position:static;align-self:flex-start;margin:0 0 18px;order:-1}}
 .balcao .perto-fab{display:none}
 dialog.perto{padding:16px}
 .perto-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
@@ -463,10 +464,45 @@ dialog.perto{padding:16px}
 .pi-ic{width:40px;height:40px;flex:none;border-radius:12px;display:grid;place-items:center;background:linear-gradient(160deg,#f5dc9a,#c9993f);color:#14110a}.pi-ic svg{width:20px;height:20px}
 .pi-txt{flex:1;min-width:0}.pi-nome{font-family:var(--titulo);font-weight:800;font-size:21px;line-height:1.05;color:var(--ouro-claro);text-transform:uppercase}
 .perto-item .btn{align-self:center}
+/* avaliações e selo */
+.estrelas{display:inline-flex;gap:1px;vertical-align:-2px;margin-right:5px}
+.estrelas .st svg{width:14px;height:14px;color:#5a4f3b;fill:transparent}
+.estrelas .st.on svg{color:var(--ouro);fill:var(--ouro)}
+.estrelas .st.meia svg{color:var(--ouro);fill:var(--ouro);opacity:.55}
+.estrelas.grande .st svg{width:22px;height:22px}
+.n-tot{color:var(--cinza);font-weight:400}
+.selo-v{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--ouro-claro);border:1px solid var(--ouro-apagado);border-radius:999px;padding:2px 9px 2px 6px;margin-right:8px;vertical-align:1px}
+.selo-v svg{width:14px;height:14px;color:var(--ouro)}
+.marca-nota{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:8px 0 2px;font-size:14px}
+.marca-nota .nota-l{display:inline-flex;align-items:center;color:var(--branco);font-size:14px}
+.pi-info li.pi-nota{align-items:center;color:var(--branco)}.pi-info li.pi-nota svg{margin-top:0}
+.pi-info .estrelas .st svg{width:13px;height:13px;color:#5a4f3b;margin:0}.pi-info .estrelas .st.on svg{color:var(--ouro)}
+.aval-pede{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:10px;padding:10px 12px;border:1px solid var(--ouro-apagado);border-radius:10px;background:#1c1810}
+.aval-pede span{font-size:14px;font-weight:600}
+.aval-st{display:flex;gap:4px}
+.aval-st button{width:36px;height:36px;display:grid;place-items:center;border-radius:8px}
+.aval-st button svg{width:24px;height:24px;color:var(--ouro);fill:transparent;transition:fill .15s}
+.aval-st button:hover svg,.aval-st button.on svg{fill:var(--ouro)}
+.aval-st.grande{justify-content:center;margin:10px 0 2px}.aval-st.grande button{width:48px;height:48px}.aval-st.grande button svg{width:34px;height:34px}
+.aval-rot{text-align:center;color:var(--ouro-claro);font-weight:700;min-height:22px;margin:0 0 10px}
+.aval-feita{margin:8px 0 0;font-size:13px;color:var(--cinza)}
+.aval-google{border:1px solid var(--ouro-apagado);border-radius:12px;padding:14px;margin:12px 0;background:#1c1810}
+.aval-google p{font-size:14px;margin:0 0 12px;color:var(--cinza)}
+.aval-resumo{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:4px 0 14px}
+.aval-resumo b{font-family:var(--titulo);font-size:44px;line-height:1;color:var(--ouro-claro)}
+.aval-resumo.peq b{font-size:34px}
+.aval-resumo span:last-child{color:var(--cinza);font-size:14px;width:100%}
+.aval-item{border-top:1px solid var(--linha);padding:10px 0}
+.aval-item small{color:var(--cinza);font-size:12px}
+.aval-item p{margin:4px 0 0;font-size:14px}
+.vitrine{display:grid;gap:10px;margin-top:14px;padding-top:14px;border-top:1px solid var(--linha)}
+.vit-l{display:flex;align-items:center;gap:12px}
+.vit-l>svg{width:22px;height:22px;flex:none;color:var(--ouro)}
+.vit-l>div{flex:1}.vit-l b{display:block;font-size:15px}.vit-l small{display:block;color:var(--cinza);font-size:13px;line-height:1.4}
 </style></head>
 <body><div id="app"></div><dialog id="dlg"></dialog><div id="toast" role="status" aria-live="polite"></div><div id="tip" role="tooltip"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
-<script>const ICONS={"scissors": "<circle cx=\"6\" cy=\"6\" r=\"3\" /> <path d=\"M8.12 8.12 12 12\" /> <path d=\"M20 4 8.12 15.88\" /> <circle cx=\"6\" cy=\"18\" r=\"3\" /> <path d=\"M14.8 14.8 20 20\" />", "calendar-days": "<path d=\"M8 2v4\" /> <path d=\"M16 2v4\" /> <rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" /> <path d=\"M3 10h18\" /> <path d=\"M8 14h.01\" /> <path d=\"M12 14h.01\" /> <path d=\"M16 14h.01\" /> <path d=\"M8 18h.01\" /> <path d=\"M12 18h.01\" /> <path d=\"M16 18h.01\" />", "clock": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <polyline points=\"12 6 12 12 16 14\" />", "users": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" /> <path d=\"M22 21v-2a4 4 0 0 0-3-3.87\" /> <path d=\"M16 3.13a4 4 0 0 1 0 7.75\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "x": "<path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" />", "message-circle": "<path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\" />", "chevron-left": "<path d=\"m15 18-6-6 6-6\" />", "chevron-right": "<path d=\"m9 18 6-6-6-6\" />", "plus": "<path d=\"M5 12h14\" /> <path d=\"M12 5v14\" />", "trending-up": "<polyline points=\"22 7 13.5 15.5 8.5 10.5 2 17\" /> <polyline points=\"16 7 22 7 22 13\" />", "trending-down": "<polyline points=\"22 17 13.5 8.5 8.5 13.5 2 7\" /> <polyline points=\"16 17 22 17 22 11\" />", "settings": "<path d=\"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" />", "chart-column": "<path d=\"M3 3v16a2 2 0 0 0 2 2h16\" /> <path d=\"M18 17V9\" /> <path d=\"M13 17V5\" /> <path d=\"M8 17v-3\" />", "ban": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"m4.9 4.9 14.2 14.2\" />", "map-pin": "<path d=\"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0\" /> <circle cx=\"12\" cy=\"10\" r=\"3\" />", "search": "<circle cx=\"11\" cy=\"11\" r=\"8\" /> <path d=\"m21 21-4.3-4.3\" />", "trash-2": "<path d=\"M3 6h18\" /> <path d=\"M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6\" /> <path d=\"M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2\" /> <line x1=\"10\" x2=\"10\" y1=\"11\" y2=\"17\" /> <line x1=\"14\" x2=\"14\" y1=\"11\" y2=\"17\" />", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /> <path d=\"m15 5 4 4\" />", "lock": "<rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\" /> <path d=\"M7 11V7a5 5 0 0 1 10 0v4\" />", "hourglass": "<path d=\"M5 22h14\" /> <path d=\"M5 2h14\" /> <path d=\"M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22\" /> <path d=\"M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2\" />", "user-x": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" /> <line x1=\"17\" x2=\"22\" y1=\"8\" y2=\"13\" /> <line x1=\"22\" x2=\"17\" y1=\"8\" y2=\"13\" />", "arrow-right": "<path d=\"M5 12h14\" /> <path d=\"m12 5 7 7-7 7\" />", "repeat": "<path d=\"m17 2 4 4-4 4\" /> <path d=\"M3 11v-1a4 4 0 0 1 4-4h14\" /> <path d=\"m7 22-4-4 4-4\" /> <path d=\"M21 13v1a4 4 0 0 1-4 4H3\" />", "store": "<path d=\"m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7\" /> <path d=\"M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8\" /> <path d=\"M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4\" /> <path d=\"M2 7h20\" /> <path d=\"M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7\" />", "bell": "<path d=\"M10.268 21a2 2 0 0 0 3.464 0\" /> <path d=\"M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326\" />", "wallet": "<path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\" /> <path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\" />", "triangle-alert": "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\" /> <path d=\"M12 9v4\" /> <path d=\"M12 17h.01\" />", "lightbulb": "<path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /> <path d=\"M9 18h6\" /> <path d=\"M10 22h4\" />", "activity": "<path d=\"M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2\" />", "crown": "<path d=\"M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z\" /> <path d=\"M5 21h14\" />", "user-check": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" /> <polyline points=\"16 11 18 13 22 9\" />", "eye": "<path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" />"};
+<script>const ICONS={"scissors": "<circle cx=\"6\" cy=\"6\" r=\"3\" /> <path d=\"M8.12 8.12 12 12\" /> <path d=\"M20 4 8.12 15.88\" /> <circle cx=\"6\" cy=\"18\" r=\"3\" /> <path d=\"M14.8 14.8 20 20\" />", "calendar-days": "<path d=\"M8 2v4\" /> <path d=\"M16 2v4\" /> <rect width=\"18\" height=\"18\" x=\"3\" y=\"4\" rx=\"2\" /> <path d=\"M3 10h18\" /> <path d=\"M8 14h.01\" /> <path d=\"M12 14h.01\" /> <path d=\"M16 14h.01\" /> <path d=\"M8 18h.01\" /> <path d=\"M12 18h.01\" /> <path d=\"M16 18h.01\" />", "clock": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <polyline points=\"12 6 12 12 16 14\" />", "users": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" /> <path d=\"M22 21v-2a4 4 0 0 0-3-3.87\" /> <path d=\"M16 3.13a4 4 0 0 1 0 7.75\" />", "check": "<path d=\"M20 6 9 17l-5-5\" />", "x": "<path d=\"M18 6 6 18\" /> <path d=\"m6 6 12 12\" />", "message-circle": "<path d=\"M7.9 20A9 9 0 1 0 4 16.1L2 22Z\" />", "chevron-left": "<path d=\"m15 18-6-6 6-6\" />", "chevron-right": "<path d=\"m9 18 6-6-6-6\" />", "plus": "<path d=\"M5 12h14\" /> <path d=\"M12 5v14\" />", "trending-up": "<polyline points=\"22 7 13.5 15.5 8.5 10.5 2 17\" /> <polyline points=\"16 7 22 7 22 13\" />", "trending-down": "<polyline points=\"22 17 13.5 8.5 8.5 13.5 2 7\" /> <polyline points=\"16 17 22 17 22 11\" />", "settings": "<path d=\"M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" />", "chart-column": "<path d=\"M3 3v16a2 2 0 0 0 2 2h16\" /> <path d=\"M18 17V9\" /> <path d=\"M13 17V5\" /> <path d=\"M8 17v-3\" />", "ban": "<circle cx=\"12\" cy=\"12\" r=\"10\" /> <path d=\"m4.9 4.9 14.2 14.2\" />", "map-pin": "<path d=\"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0\" /> <circle cx=\"12\" cy=\"10\" r=\"3\" />", "search": "<circle cx=\"11\" cy=\"11\" r=\"8\" /> <path d=\"m21 21-4.3-4.3\" />", "trash-2": "<path d=\"M3 6h18\" /> <path d=\"M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6\" /> <path d=\"M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2\" /> <line x1=\"10\" x2=\"10\" y1=\"11\" y2=\"17\" /> <line x1=\"14\" x2=\"14\" y1=\"11\" y2=\"17\" />", "pencil": "<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\" /> <path d=\"m15 5 4 4\" />", "lock": "<rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\" /> <path d=\"M7 11V7a5 5 0 0 1 10 0v4\" />", "hourglass": "<path d=\"M5 22h14\" /> <path d=\"M5 2h14\" /> <path d=\"M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22\" /> <path d=\"M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2\" />", "user-x": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" /> <line x1=\"17\" x2=\"22\" y1=\"8\" y2=\"13\" /> <line x1=\"22\" x2=\"17\" y1=\"8\" y2=\"13\" />", "arrow-right": "<path d=\"M5 12h14\" /> <path d=\"m12 5 7 7-7 7\" />", "repeat": "<path d=\"m17 2 4 4-4 4\" /> <path d=\"M3 11v-1a4 4 0 0 1 4-4h14\" /> <path d=\"m7 22-4-4 4-4\" /> <path d=\"M21 13v1a4 4 0 0 1-4 4H3\" />", "store": "<path d=\"m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7\" /> <path d=\"M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8\" /> <path d=\"M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4\" /> <path d=\"M2 7h20\" /> <path d=\"M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7\" />", "bell": "<path d=\"M10.268 21a2 2 0 0 0 3.464 0\" /> <path d=\"M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326\" />", "wallet": "<path d=\"M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1\" /> <path d=\"M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4\" />", "triangle-alert": "<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\" /> <path d=\"M12 9v4\" /> <path d=\"M12 17h.01\" />", "lightbulb": "<path d=\"M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5\" /> <path d=\"M9 18h6\" /> <path d=\"M10 22h4\" />", "activity": "<path d=\"M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2\" />", "crown": "<path d=\"M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z\" /> <path d=\"M5 21h14\" />", "user-check": "<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\" /> <circle cx=\"9\" cy=\"7\" r=\"4\" /> <polyline points=\"16 11 18 13 22 9\" />", "eye": "<path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\" /> <circle cx=\"12\" cy=\"12\" r=\"3\" />", "star": "<path d=\"M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z\" />", "badge-check": "<path d=\"M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z\" /> <path d=\"m9 12 2 2 4-4\" />"};
 "use strict";
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -632,7 +668,15 @@ async function livreLoja(l) {
   }
   return null;
 }
-const infoLoja = (l, st, lv) => `<ul class="pi-info">${l.dist_km != null || l.address ? `<li>${I("map-pin")}<span>${l.dist_km != null ? `<b>${kmTxt(l.dist_km)}</b>` : ""}${l.dist_km != null && l.address ? " \xB7 " : ""}${esc(l.address || "")}</span></li>` : ""}<li>${I("clock")}<span class="${st.ab ? "ok" : "fe"}">${esc(st.t)}</span></li>${l.preco_min != null ? `<li>${I("wallet")}<span>A partir de <b>${brl(l.preco_min)}</b></span></li>` : ""}${lv ? `<li>${I("calendar-days")}<span>Pr\xF3ximo livre: <b class="ouro">${esc(lv)}</b></span></li>` : ""}</ul>`;
+const estrelas = (n, cls = "") => {
+  const v = Math.round((+n || 0) * 2) / 2;
+  let h = "";
+  for (let i = 1; i <= 5; i++) h += `<span class="st${v >= i ? " on" : v >= i - 0.5 ? " meia" : ""}">${I("star")}</span>`;
+  return `<span class="estrelas ${cls}" aria-label="Nota ${String(n).replace(".", ",")} de 5">${h}</span>`;
+};
+const notaTxt = (n, t) => t > 0 ? `${estrelas(n)}<b>${String(n).replace(".", ",")}</b> <span class="n-tot">(${t} ${t == 1 ? "avalia\xE7\xE3o" : "avalia\xE7\xF5es"})</span>` : "";
+const seloVerif = () => `<span class="selo-v" title="Barbearia verificada pela DreewSolution">${I("badge-check")}Verificada</span>`;
+const infoLoja = (l, st, lv) => `<ul class="pi-info">${l.verificada || +l.avaliacoes > 0 ? `<li class="pi-nota">${l.verificada ? seloVerif() : ""}${+l.avaliacoes > 0 ? `<span class="nota-l">${notaTxt(l.nota, +l.avaliacoes)}</span>` : ""}</li>` : ""}${l.dist_km != null || l.address ? `<li>${I("map-pin")}<span>${l.dist_km != null ? `<b>${kmTxt(l.dist_km)}</b>` : ""}${l.dist_km != null && l.address ? " \xB7 " : ""}${esc(l.address || "")}</span></li>` : ""}<li>${I("clock")}<span class="${st.ab ? "ok" : "fe"}">${esc(st.t)}</span></li>${l.preco_min != null ? `<li>${I("wallet")}<span>A partir de <b>${brl(l.preco_min)}</b></span></li>` : ""}${lv ? `<li>${I("calendar-days")}<span>Pr\xF3ximo livre: <b class="ouro">${esc(lv)}</b></span></li>` : ""}</ul>`;
 const PERTO = { pos: null, lojas: [], livre: {}, mapa: null, cam: null, eu: null };
 function pertoLista() {
   const el = $("#perto-lista");
@@ -1094,6 +1138,11 @@ const StoreSB = {
     }
     this.aplicaLoja(data);
     this.mode = "cliente";
+    this.sb.rpc("nota_loja", { p_slug: SLUG }).then((r) => {
+      this.nota = r && r.data || null;
+      R();
+    }).catch(() => {
+    });
     if (BARB_LINK) {
       const bb = this.cfg.barbers.find((b) => b.active && (b.id == BARB_LINK || slugify(b.name) == BARB_LINK));
       if (bb) {
@@ -1147,6 +1196,14 @@ const StoreSB = {
       cli.me.items[r.id] = { name: r.client_name, phone: r.client_phone };
     });
     if (meus2[0]) cli.me.me = { name: meus2[0].client_name, phone: meus2[0].client_phone };
+    const tks = meus2.map((r) => r.manage_token).filter(Boolean);
+    if (tks.length) this.sb.rpc("avaliados", { p_tokens: tks.slice(0, 80) }).then((r) => {
+      const a = {};
+      (r && r.data || []).forEach((x) => a[x.booking_id] = x.nota);
+      this.avaliados = a;
+      R();
+    }).catch(() => {
+    });
     this.slots = sl;
     this.cli = cli;
   },
@@ -1566,7 +1623,8 @@ const toast = (m) => {
 function marca() {
   const [a, t] = aberto(), c = C(), partes = c.name.split(" ");
   const ult = partes.pop();
-  return `<aside class="marca">${c.fachada ? `<img class="fachada" src="${esc(c.fachada)}" alt="Fachada da ${esc(c.name)}">` : ""}<small>${c.logo ? `<img class="logo" src="${esc(c.logo)}" alt="">` : I("scissors")} Barbearia</small><h1>${partes.length ? esc(partes.join(" ")) + " " : ""}<span>${esc(ult)}</span></h1>
+  const fab = REAL && Store.mode == "cliente" && !U.balcao && C().busca !== false ? `<button class="perto-fab" data-a="perto" aria-label="Ver outras barbearias perto no mapa">${I("map-pin")}<span>Barbearias perto</span></button>` : "";
+  return `<aside class="marca">${fab}${c.fachada ? `<img class="fachada" src="${esc(c.fachada)}" alt="Fachada da ${esc(c.name)}">` : ""}<small>${c.logo ? `<img class="logo" src="${esc(c.logo)}" alt="">` : I("scissors")} Barbearia</small><h1>${partes.length ? esc(partes.join(" ")) + " " : ""}<span>${esc(ult)}</span></h1>${REAL && Store.nota && (Store.nota.verificada || Store.nota.total > 0) ? `<div class="marca-nota">${Store.nota.verificada ? seloVerif() : ""}${Store.nota.total > 0 ? `<button class="nota-l" data-a="ver-aval">${notaTxt(Store.nota.media, Store.nota.total)}</button>` : ""}</div>` : ""}
  <div class="info"><div class="aberto ${a ? "sim" : "nao"}">${I("clock")}${esc(t)}</div><div>${I("map-pin")}${esc(c.address)}</div></div>
  <div class="esp"></div>${tabs()}</aside>`;
 }
@@ -1668,14 +1726,20 @@ function meus() {
   const m = todos().filter((x) => x.o == Store.uid).sort((a, b) => (b.d + pad(b.s)).localeCompare(a.d + pad(a.s)));
   const fut = (x) => x.d > hoje() || x.d == hoje() && x.s > agoraMin();
   const prox = m.filter((x) => fut(x) && ["pendente", "confirmado"].includes(x.st)).reverse(), resto = m.filter((x) => !prox.includes(x));
-  const lin = (x) => `<article class="etiqueta"><div class="qdo">${hm(x.s)}<small>${esc(dataCurta(x.d))}</small></div><div><h3>${esc(x.n)}</h3><p>com ${esc(barbeiro(x.b).name)} \xB7 ${brl(x.p)}</p>${pill(x.st)}
+  const av = Store.avaliados || {}, podeAval = (x) => REAL && x.tk && (x.st == "concluido" || x.st == "confirmado" && !fut(x) && (x.d < hoje() || x.s + (x.dur || 0) <= agoraMin()));
+  const lin = (x) => `<article class="etiqueta"><div class="qdo">${hm(x.s)}<small>${esc(dataCurta(x.d))}</small></div><div><h3>${esc(x.n)}</h3><p>com ${esc(barbeiro(x.b).name)} \xB7 ${brl(x.p)}</p>${pill(x.st)}${podeAval(x) ? av[x.id] ? `<p class="aval-feita">Sua avalia\xE7\xE3o ${estrelas(av[x.id])}</p>` : `<div class="aval-pede"><span>Como foi o atendimento?</span><div class="aval-st">${[1, 2, 3, 4, 5].map((n) => `<button data-a="aval" data-v="${esc(x.id)}|${n}" aria-label="${n} ${n == 1 ? "estrela" : "estrelas"}">${I("star")}</button>`).join("")}</div></div>` : ""}
  <div class="acoes">${["pendente", "confirmado"].includes(x.st) && fut(x) ? `<button class="btn sec peq" data-a="cli-cancela" data-v="${esc(x.id)}">Cancelar hor\xE1rio</button>` : ""}${!["pendente", "confirmado"].includes(x.st) || !fut(x) ? `<button class="btn sec peq" data-a="repetir" data-v="${esc(x.svc)}">${I("repeat")}Marcar de novo</button>` : ""}</div></div></article>`;
   return `<main class="fluxo" id="conteudo"><h2 class="h-etapa">Meus hor\xE1rios</h2><p class="sub">Acompanhe a resposta do barbeiro aqui.</p>${blocoConta()}${m.length ? cartaoPush("cliente") : ""}
  ${m.length ? `${prox.length ? `<h3 class="rotulo">Pr\xF3ximos</h3>${prox.map(lin).join("")}` : ""}${resto.length ? `<h3 class="rotulo">Anteriores</h3>${resto.slice(0, 12).map(lin).join("")}` : ""}` : `<div class="vazio"><h3>Nenhum hor\xE1rio ainda</h3><p>Seus pedidos aparecem aqui.</p><a class="btn" href="#agendar">Marcar hor\xE1rio</a></div>`}</main>`;
 }
+function dlgAval() {
+  const a = U.aval, x = ((Store.slots.me || {}).items || {})[a.id];
+  if (!x) return;
+  const rot = ["", "Ruim", "Fraco", "Bom", "Muito bom", "Excelente"];
+  abre(`<h2>Avaliar atendimento</h2><p class="q">${esc(x.n)} com ${esc(barbeiro(x.b).name)} \xB7 ${esc(dataCurta(x.d))}</p><div class="aval-st grande">${[1, 2, 3, 4, 5].map((n) => `<button class="${a.n >= n ? "on" : ""}" data-a="aval-n" data-v="${n}" aria-label="${n} ${n == 1 ? "estrela" : "estrelas"}">${I("star")}</button>`).join("")}</div><p class="aval-rot">${rot[a.n] || ""}</p><div class="campo"><label for="av-c">Coment\xE1rio (opcional)</label><textarea id="av-c" maxlength="400" rows="3" placeholder="Conte como foi o corte, o atendimento, o ambiente.">${esc(a.c || "")}</textarea></div><div class="fim"><button class="btn sec" data-a="fecha">Cancelar</button><button class="btn" id="av-btn" data-a="aval-env">Enviar avalia\xE7\xE3o</button></div>`);
+}
 function cliente() {
-  const fab = REAL && Store.mode == "cliente" && !U.balcao && C().busca !== false ? `<button class="perto-fab" data-a="perto" aria-label="Ver outras barbearias perto no mapa">${I("map-pin")}<span>Barbearias perto</span></button>` : "";
-  return `<div class="cli">${marca()}${U.rota == "meus" ? meus() : agendar()}</div>${fab}`;
+  return `<div class="cli">${marca()}${U.rota == "meus" ? meus() : agendar()}</div>`;
 }
 const pendentes = () => todos().filter((x) => x.st == "pendente" && (x.d > hoje() || x.d == hoje() && x.s + x.dur > agoraMin())).sort((a, b) => a.at - b.at);
 const NAV = [["hoje", "Hoje", "clock"], ["agenda", "Agenda", "calendar-days"], ["clientes", "Clientes", "users"], ["resultados", "Resultados", "chart-column"], ["ajustes", "Ajustes", "settings"]];
@@ -1828,6 +1892,35 @@ function viewResultados() {
  ${cur.length ? `<div class="graf-grid"><section class="painel wide"><h3>Faturamento por dia da semana, em R$</h3><p class="q">Em quais dias vale ter mais barbeiros na casa?</p><div class="colunas">${porDia.map((v, i) => `<div class="c ${i == iTop ? "top" : ""}" tabindex="0" data-tip="${nomeD[dias[i]]}: ${brl(v)}"><span class="v">${Math.round(v).toLocaleString("pt-BR")}</span><div class="b" style="height:${v / mx * 82}%"></div></div>`).join("")}</div><div class="eixo">${dias.map((d) => `<span>${d}</span>`).join("")}</div></section>
  <section class="painel"><h3>Servi\xE7os</h3><p class="q">O que mais traz dinheiro?</p>${barras(grupo((x) => x.n))}</section><section class="painel"><h3>Barbeiros</h3><p class="q">Quem faturou mais no per\xEDodo?</p>${barras(grupo((x) => barbeiro(x.b).name))}</section></div>` : `<div class="vazio"><h3>Sem atendimentos no per\xEDodo</h3><p>Marque atendimentos como atendidos para ver o faturamento.</p></div>`}`);
 }
+function carregaVitrine() {
+  if (!REAL || Store.adminVendo || Store._vitCarregando) return;
+  Store._vitCarregando = 1;
+  Promise.all([Store.sb.rpc("minha_vitrine"), Store.sb.rpc("minhas_avaliacoes")]).then(([v, a]) => {
+    Store.vitrine = v && v.data || {};
+    Store.minhasAval = a && a.data || [];
+    R();
+  }).catch(() => {
+    Store.vitrine = {};
+    Store.minhasAval = [];
+  });
+}
+function painelVitrine() {
+  if (Store.adminVendo) return "";
+  const v = Store.vitrine;
+  if (v === void 0) {
+    setTimeout(carregaVitrine, 0);
+    return "";
+  }
+  const dest = v.destaque_ate && v.destaque_ate >= hoje();
+  return `<div class="vitrine"><div class="vit-l">${I("crown")}<div><b>Destaque no topo</b><small>${dest ? `Ativo at\xE9 ${esc(brData(v.destaque_ate))}. Sua barbearia aparece primeiro no mapa e na lista.` : v.destaque_pedido ? `Pedido enviado em ${esc(new Date(v.destaque_pedido).toLocaleDateString("pt-BR"))}. A DreewSolution entra em contato para ativar.` : "Apare\xE7a primeiro para os clientes da sua regi\xE3o, com selo de destaque no mapa."}</small></div>${!dest && !v.destaque_pedido ? `<button class="btn peq" data-a="pedir-destaque">Quero destaque</button>` : ""}</div>
+ <div class="vit-l">${I("badge-check")}<div><b>${v.verificada ? "Barbearia verificada" : "Selo de verificada"}</b><small>${v.verificada ? "O selo aparece ao lado do nome da sua barbearia para os clientes." : "A DreewSolution confere endere\xE7o, fotos e WhatsApp e libera o selo. Mantenha logo, fachada e endere\xE7o atualizados."}</small></div></div></div>`;
+}
+function painelAval() {
+  if (Store.adminVendo) return "";
+  const c = C(), l = Store.minhasAval || [], m = l.length ? Math.round(l.reduce((a, x) => a + x.nota, 0) / l.length * 10) / 10 : 0;
+  return `<section class="painel"><h3>Avalia\xE7\xF5es dos clientes</h3><p class="q">Depois do atendimento, o cliente avalia de 1 a 5 estrelas em Meus hor\xE1rios. A nota aparece na sua p\xE1gina e no mapa.</p>${l.length ? `<div class="aval-resumo peq"><b>${String(m).replace(".", ",")}</b>${estrelas(m)}<span>${l.length} ${l.length == 1 ? "avalia\xE7\xE3o" : "avalia\xE7\xF5es"}</span></div>${l.filter((x) => x.comentario).slice(0, 5).map((a) => `<div class="aval-item"><div>${estrelas(a.nota)}<small>${esc(a.nome || "Cliente")} \xB7 ${esc(new Date(a.criado).toLocaleDateString("pt-BR"))}${a.barber_id ? " \xB7 " + esc(barbeiro(a.barber_id).name) : ""}</small></div><p>${esc(a.comentario)}</p></div>`).join("")}` : '<p class="dica" style="margin:0 0 12px">Nenhuma avalia\xE7\xE3o ainda.</p>'}
+ <form data-f="google" style="margin-top:12px"><div class="campo"><label for="a-gg">Link de avalia\xE7\xE3o do Google</label><input id="a-gg" name="g" inputmode="url" placeholder="https://g.page/r/..." value="${esc(c.google_review || "")}"></div><p class="dica" style="margin:-4px 0 10px">No Google, abra o perfil da barbearia, toque em <b>Pedir avalia\xE7\xF5es</b> e copie o link. Depois de avaliar no app, todo cliente recebe o convite para avaliar tamb\xE9m no Google.</p><button class="btn peq" type="submit">Salvar link</button></form></section>`;
+}
 function viewAjustes() {
   var _a, _b, _c, _d, _e, _f;
   const c = C(), ds = ["Domingo", "Segunda", "Ter\xE7a", "Quarta", "Quinta", "Sexta", "S\xE1bado"], ordem = [1, 2, 3, 4, 5, 6, 0];
@@ -1856,7 +1949,7 @@ function viewAjustes() {
  <div class="campo" style="margin-top:10px"><label for="a-step">Intervalo entre hor\xE1rios (min)</label><input id="a-step" type="number" name="step" min="10" max="120" step="5" value="${c.step}"></div><button class="btn peq" type="submit">Salvar hor\xE1rios</button></form></section>
  ${REAL ? (() => {
     const g = c.geo, on = c.busca !== false;
-    return `<section class="painel"><h3>Aparecer para clientes perto</h3><p class="q">Clientes que procuram barbearia na regi\xE3o encontram a sua no mapa, com a dist\xE2ncia e o pr\xF3ximo hor\xE1rio livre.</p><label class="ck" style="margin:4px 0 12px"><input type="checkbox" data-a="busca-on" ${on ? "checked" : ""}>Mostrar minha barbearia na busca</label><p class="dica" style="margin:0 0 10px">${I("map-pin")}${g && g.lat ? g.fonte == "gps" ? "No mapa pela localiza\xE7\xE3o marcada na barbearia." : g.fonte == "endereco" ? "No mapa pelo endere\xE7o cadastrado." : 'No mapa, mas com ponto aproximado (o mapa n\xE3o achou a rua exata). Na barbearia, toque em "Estou na barbearia" para acertar.' : "Ainda n\xE3o est\xE1 no mapa. Confira o endere\xE7o acima ou use a localiza\xE7\xE3o."}</p><div class="acoes"><button class="btn sec peq" data-a="geo-end">Achar pelo endere\xE7o</button><button class="btn sec peq" data-a="geo-gps">Estou na barbearia: usar minha localiza\xE7\xE3o</button>${g && g.lat ? `<a class="btn sec peq" href="https://www.openstreetmap.org/?mlat=${g.lat}&mlon=${g.lng}#map=18/${g.lat}/${g.lng}" target="_blank" rel="noopener">${I("eye")}Ver no mapa</a>` : ""}</div><p class="dica" style="margin:10px 0 0">Busca dos clientes: <a href="/buscar" target="_blank" rel="noopener">${esc(location.host)}/buscar</a></p></section>`;
+    return `<section class="painel"><h3>Aparecer para clientes perto</h3><p class="q">Clientes que procuram barbearia na regi\xE3o encontram a sua no mapa, com a dist\xE2ncia e o pr\xF3ximo hor\xE1rio livre.</p><label class="ck" style="margin:4px 0 12px"><input type="checkbox" data-a="busca-on" ${on ? "checked" : ""}>Mostrar minha barbearia na busca</label><p class="dica" style="margin:0 0 10px">${I("map-pin")}${g && g.lat ? g.fonte == "gps" ? "No mapa pela localiza\xE7\xE3o marcada na barbearia." : g.fonte == "endereco" ? "No mapa pelo endere\xE7o cadastrado." : 'No mapa, mas com ponto aproximado (o mapa n\xE3o achou a rua exata). Na barbearia, toque em "Estou na barbearia" para acertar.' : "Ainda n\xE3o est\xE1 no mapa. Confira o endere\xE7o acima ou use a localiza\xE7\xE3o."}</p><div class="acoes"><button class="btn sec peq" data-a="geo-end">Achar pelo endere\xE7o</button><button class="btn sec peq" data-a="geo-gps">Estou na barbearia: usar minha localiza\xE7\xE3o</button>${g && g.lat ? `<a class="btn sec peq" href="https://www.openstreetmap.org/?mlat=${g.lat}&mlon=${g.lng}#map=18/${g.lat}/${g.lng}" target="_blank" rel="noopener">${I("eye")}Ver no mapa</a>` : ""}</div><p class="dica" style="margin:10px 0 0">Busca dos clientes: <a href="/buscar" target="_blank" rel="noopener">${esc(location.host)}/buscar</a></p>${painelVitrine()}</section>${painelAval()}`;
   })() : ""}<section class="painel"><h3>Link para os clientes</h3><p class="q">Mande este endere\xE7o no WhatsApp, coloque na bio do Instagram e no QR code do balc\xE3o.</p><p class="num" style="font-weight:600;word-break:break-all;margin-bottom:10px">${esc(location.origin + "/" + SLUG)}</p><button class="btn sec peq" data-a="copiar">Copiar link</button></section>${""}${REAL ? `<section class="painel"><h3>Seu acesso</h3><p class="q">O painel abre s\xF3 com o seu email e senha. Clientes nunca veem esta \xE1rea.</p><p class="num" style="font-weight:600;word-break:break-all;margin-bottom:10px">${esc(location.origin + "/" + SLUG + "/painel")}</p><button class="btn sec peq" data-a="sair">${I("x")}Sair da conta</button></section>` : ""}<section class="painel"><h3>Tablet no balc\xE3o</h3><p class="q">Abra este endere\xE7o no tablet da recep\xE7\xE3o. Cada cliente marca e a tela limpa sozinha para o pr\xF3ximo, sem guardar nomes.</p><a class="btn sec peq" href="${REAL ? "/" + esc(SLUG) + "#balcao" : "#balcao"}" ${REAL ? 'target="_blank" rel="noopener"' : ""}>${I("store")}Abrir modo balc\xE3o aqui</a></section><section class="painel"><h3>Barbearia</h3><p class="q">Nome e contato que o cliente v\xEA.</p><form data-f="casa"><div class="campo"><label for="a-nome">Nome</label><input id="a-nome" name="name" value="${esc(c.name)}" required></div><div class="campo"><label for="a-end">Endere\xE7o</label><input id="a-end" name="address" value="${esc(c.address)}"></div><div class="campo"><label for="a-wa">WhatsApp da barbearia</label><input id="a-wa" name="whatsapp" inputmode="tel" value="${esc(fone(c.whatsapp))}"></div><button class="btn peq" type="submit">Salvar</button></form>
  ${tem ? `<hr style="border:0;border-top:1px solid var(--linha);margin:16px 0"><p class="q">Os clientes marcados como exemplo s\xE3o fict\xEDcios. Apague antes de usar de verdade.</p><div class="acoes"><button class="btn sec peq" data-a="carregar">Carregar hist\xF3rico de exemplo</button><button class="btn perigo peq" data-a="limpar">${I("trash-2")}Apagar dados de exemplo</button></div>` : `<hr style="border:0;border-top:1px solid var(--linha);margin:16px 0"><p class="q">Quer ver o painel cheio antes de usar? Os exemplos podem ser apagados depois.</p><button class="btn sec peq" data-a="carregar">Carregar hist\xF3rico de exemplo</button>`}</section></div>`);
 }
@@ -2066,7 +2159,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261123143303";
+const VERSAO = "20261123144314";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
@@ -2307,9 +2400,9 @@ function telaAdmin() {
   const venc = (l) => l.vence < hj, dias = (l) => Math.round((D(hj) - D(l.vence)) / 864e5), mrr = L.filter((l) => l.status != "suspenso").reduce((t, l) => t + +l.mensalidade, 0);
   const pil = (l) => ({ ativo: `<span class="pill confirmado">${I("check")}Ativa</span>`, aviso: `<span class="pill pendente">${I("hourglass")}Em aviso</span>`, suspenso: `<span class="pill cancelado">${I("ban")}Suspensa</span>` })[l.status];
   const card = (l) => `<article class="loja"><div class="loja-topo"><div><h3>${esc(l.name)}</h3><small>${esc(l.email)} \xB7 /${esc(l.slug)}</small></div>${pil(l)}</div>
- <dl class="dl"><dt>Mensalidade</dt><dd class="num">${brl(l.mensalidade)}</dd><dt>Vencimento</dt><dd${venc(l) ? ' style="color:var(--ruim)"' : ""}>${esc(brData(l.vence))}${venc(l) ? ` \xB7 vencida h\xE1 ${dias(l)} dias` : ""}</dd><dt>Pedidos (30 dias)</dt><dd class="num">${l.pedidos_30d}</dd><dt>Faturou (30 dias)</dt><dd class="num">${brl(l.faturado_30d)}</dd><dt>WhatsApp</dt><dd>${l.whatsapp ? esc(fone(l.whatsapp)) : "n\xE3o cadastrado"}</dd><dt>\xDAltimo pagamento</dt><dd>${l.ultimo_pagamento ? esc(new Date(l.ultimo_pagamento).toLocaleDateString("pt-BR")) + " \xB7 " + brl(l.ultimo_valor) : "nenhum pelo app"}</dd><dt>D\xE9bito autom\xE1tico</dt><dd>${l.debito_auto == "authorized" ? "Ativo no cart\xE3o" : l.debito_auto == "pending" ? "Esperando cart\xE3o" : "N\xE3o"}</dd><dt>Avisos no celular</dt><dd>${l.avisos_ativos > 0 ? "Ativados" : "N\xE3o ativou"}</dd><dt>Busca perto</dt><dd>${!l.na_busca ? "Escondida pelo barbeiro" : l.tem_mapa ? l.destaque_ate && l.destaque_ate >= hoje() ? "No mapa \xB7 destaque at\xE9 " + esc(brData(l.destaque_ate)) : "No mapa" : "Sem endere\xE7o no mapa"}</dd></dl>
+ <dl class="dl"><dt>Mensalidade</dt><dd class="num">${brl(l.mensalidade)}</dd><dt>Vencimento</dt><dd${venc(l) ? ' style="color:var(--ruim)"' : ""}>${esc(brData(l.vence))}${venc(l) ? ` \xB7 vencida h\xE1 ${dias(l)} dias` : ""}</dd><dt>Pedidos (30 dias)</dt><dd class="num">${l.pedidos_30d}</dd><dt>Faturou (30 dias)</dt><dd class="num">${brl(l.faturado_30d)}</dd><dt>WhatsApp</dt><dd>${l.whatsapp ? esc(fone(l.whatsapp)) : "n\xE3o cadastrado"}</dd><dt>\xDAltimo pagamento</dt><dd>${l.ultimo_pagamento ? esc(new Date(l.ultimo_pagamento).toLocaleDateString("pt-BR")) + " \xB7 " + brl(l.ultimo_valor) : "nenhum pelo app"}</dd><dt>D\xE9bito autom\xE1tico</dt><dd>${l.debito_auto == "authorized" ? "Ativo no cart\xE3o" : l.debito_auto == "pending" ? "Esperando cart\xE3o" : "N\xE3o"}</dd><dt>Avisos no celular</dt><dd>${l.avisos_ativos > 0 ? "Ativados" : "N\xE3o ativou"}</dd><dt>Avalia\xE7\xF5es</dt><dd>${+l.avaliacoes > 0 ? esc(String(l.nota).replace(".", ",")) + " de 5 \xB7 " + l.avaliacoes : "nenhuma"}</dd><dt>Selo</dt><dd>${l.verificada ? "Verificada" : "N\xE3o verificada"}</dd>${l.destaque_pedido && !(l.destaque_ate && l.destaque_ate >= hoje()) ? `<dt>Destaque</dt><dd style="color:var(--ouro-claro)">Pediu em ${esc(new Date(l.destaque_pedido).toLocaleDateString("pt-BR"))}</dd>` : ""}<dt>Busca perto</dt><dd>${!l.na_busca ? "Escondida pelo barbeiro" : l.tem_mapa ? l.destaque_ate && l.destaque_ate >= hoje() ? "No mapa \xB7 destaque at\xE9 " + esc(brData(l.destaque_ate)) : "No mapa" : "Sem endere\xE7o no mapa"}</dd></dl>
  ${l.aviso ? `<p class="dica" style="margin:0 0 10px">Aviso atual: ${esc(l.aviso)}</p>` : ""}
- <div class="acoes"><button class="btn sec peq" data-a="adm-loja" data-v="${l.id}">${I("chart-column")}Ver an\xE1lise</button><button class="btn peq" data-a="adm-pago" data-v="${l.id}">${I("check")}Marcar como pago</button><button class="btn sec peq" data-a="adm-aviso" data-v="${l.id}">${I("bell")}Enviar aviso</button><button class="btn sec peq" data-a="adm-destaque" data-v="${l.id}">${I("crown")}${l.destaque_ate && l.destaque_ate >= hoje() ? "Destaque at\xE9 " + esc(brData(l.destaque_ate)) : "P\xF4r em destaque"}</button>${l.status == "suspenso" ? `<button class="btn sec peq" data-a="adm-status" data-v="${l.id}|ativo">Reativar</button>` : `<button class="btn perigo peq" data-a="adm-status" data-v="${l.id}|suspenso">Suspender</button>`}<button class="btn sec peq" data-a="adm-editar" data-v="${l.id}">${I("pencil")}Valor e vencimento</button><button class="btn sec peq" data-a="adm-senha" data-v="${l.id}">Nova senha</button>${zapOk(l.whatsapp || "") ? `<a class="btn sec peq" href="${wa(telZap(l.whatsapp), msgCobranca(l))}" target="_blank" rel="noopener">${I("message-circle")}Cobrar no WhatsApp</a>` : ""}<a class="btn sec peq" href="/${esc(l.slug)}/painel" target="_blank" rel="noopener">${I("store")}Abrir painel</a></div></article>`;
+ <div class="acoes"><button class="btn sec peq" data-a="adm-loja" data-v="${l.id}">${I("chart-column")}Ver an\xE1lise</button><button class="btn peq" data-a="adm-pago" data-v="${l.id}">${I("check")}Marcar como pago</button><button class="btn sec peq" data-a="adm-aviso" data-v="${l.id}">${I("bell")}Enviar aviso</button><button class="btn sec peq" data-a="adm-verificar" data-v="${l.id}">${I("badge-check")}${l.verificada ? "Remover selo" : "Verificar"}</button><button class="btn sec peq" data-a="adm-destaque" data-v="${l.id}">${I("crown")}${l.destaque_ate && l.destaque_ate >= hoje() ? "Destaque at\xE9 " + esc(brData(l.destaque_ate)) : "P\xF4r em destaque"}</button>${l.status == "suspenso" ? `<button class="btn sec peq" data-a="adm-status" data-v="${l.id}|ativo">Reativar</button>` : `<button class="btn perigo peq" data-a="adm-status" data-v="${l.id}|suspenso">Suspender</button>`}<button class="btn sec peq" data-a="adm-editar" data-v="${l.id}">${I("pencil")}Valor e vencimento</button><button class="btn sec peq" data-a="adm-senha" data-v="${l.id}">Nova senha</button>${zapOk(l.whatsapp || "") ? `<a class="btn sec peq" href="${wa(telZap(l.whatsapp), msgCobranca(l))}" target="_blank" rel="noopener">${I("message-circle")}Cobrar no WhatsApp</a>` : ""}<a class="btn sec peq" href="/${esc(l.slug)}/painel" target="_blank" rel="noopener">${I("store")}Abrir painel</a></div></article>`;
   const aba = Store.admAba || "analise", abas = [["analise", "chart-column", "An\xE1lise"], ["lojas", "store", "Barbearias"], ["contas", "users", "Contas"], ["financeiro", "wallet", "Mensalidades"], ["ajustes", "settings", "Ajustes"]];
   return `<main class="admin"><header class="topo-pro"><div><small>S\xF3 voc\xEA v\xEA esta \xE1rea</small><h1>Dono do app</h1></div><button class="btn sec" data-a="sair">${I("x")}Sair</button></header>
  <nav class="adm-abas" aria-label="Se\xE7\xF5es do painel">${abas.map(([k, ic, t]) => `<button class="${aba == k ? "on" : ""}" data-a="adm-aba" data-v="${k}"${aba == k ? ' aria-current="page"' : ""}>${I(ic)}<span>${t}</span></button>`).join("")}</nav>
@@ -2509,6 +2602,65 @@ async function mudaStatus(o, id, st) {
   return protege(() => Store.mudar(o, id, { st }));
 }
 const ACOES = {
+  aval(v) {
+    const [id, n] = v.split("|");
+    U.aval = { id, n: +n };
+    dlgAval();
+  },
+  "aval-n"(n) {
+    U.aval.n = +n;
+    const t = $("#av-c");
+    U.aval.c = t ? t.value : "";
+    dlgAval();
+  },
+  async "aval-env"() {
+    const a = U.aval, x = ((Store.slots.me || {}).items || {})[a.id];
+    if (!x) return fecha();
+    const t = $("#av-c"), c = t ? t.value.trim() : "";
+    const b = $("#av-btn");
+    if (b) {
+      b.disabled = true;
+      b.textContent = "Enviando...";
+    }
+    const { data, error } = await Store.sb.rpc("avaliar", { p_token: x.tk, p_nota: a.n, p_comentario: c });
+    if (error) {
+      const m = String(error.message || "");
+      if (b) {
+        b.disabled = false;
+        b.textContent = "Enviar avalia\xE7\xE3o";
+      }
+      return toast(/ja_avaliou/.test(m) ? "Voc\xEA j\xE1 avaliou este atendimento." : /ainda_nao/.test(m) ? "Voc\xEA poder\xE1 avaliar depois do atendimento." : "N\xE3o foi poss\xEDvel enviar agora. Tente novamente.");
+    }
+    Store.avaliados = Object.assign({}, Store.avaliados, { [a.id]: a.n });
+    Store.sb.rpc("nota_loja", { p_slug: SLUG }).then((r) => {
+      Store.nota = r && r.data || Store.nota;
+      R();
+    });
+    const g = data && data.google;
+    abre(`<h2>Obrigado pela avalia\xE7\xE3o</h2><p class="q">Sua opini\xE3o ajuda ${esc(C().name)} a melhorar o atendimento.</p>${g ? `<div class="aval-google"><p>Se puder, publique sua avalia\xE7\xE3o tamb\xE9m no Google. Leva menos de um minuto e ajuda outros clientes a encontrar a barbearia.</p><a class="btn larga" href="${esc(g)}" target="_blank" rel="noopener" data-a="fecha">Avaliar no Google</a></div>` : ""}<div class="fim"><button class="btn sec" data-a="fecha">${g ? "Agora n\xE3o" : "Fechar"}</button></div>`);
+    R();
+  },
+  "ver-aval"() {
+    const n = Store.nota || {};
+    abre(`<h2>Avalia\xE7\xF5es</h2><div class="aval-resumo"><b>${String(n.media || 0).replace(".", ",")}</b>${estrelas(n.media, "grande")}<span>${n.total} ${n.total == 1 ? "avalia\xE7\xE3o" : "avalia\xE7\xF5es"} de clientes que foram atendidos</span></div>${(n.ultimas || []).length ? (n.ultimas || []).map((a) => `<div class="aval-item"><div>${estrelas(a.nota)}<small>${esc(a.nome || "Cliente")} \xB7 ${esc(brData(a.dia))}</small></div><p>${esc(a.comentario)}</p></div>`).join("") : '<p class="dica">Ainda n\xE3o h\xE1 coment\xE1rios escritos.</p>'}<div class="fim"><button class="btn sec" data-a="fecha">Fechar</button></div>`);
+  },
+  async "pedir-destaque"() {
+    const { error } = await Store.sb.rpc("pedir_destaque");
+    if (error) return toast("N\xE3o foi poss\xEDvel enviar o pedido agora.");
+    Store.vitrine = Object.assign({}, Store.vitrine, { destaque_pedido: (/* @__PURE__ */ new Date()).toISOString() });
+    toast("Pedido enviado. A DreewSolution entra em contato para ativar.");
+    R(true);
+  },
+  async "adm-verificar"(id) {
+    const l = Store.lojas.find((x) => x.id == id);
+    const v = !l.verificada;
+    if (!confirm(v ? `Marcar ${l.name} como verificada? O selo aparece para os clientes.` : `Remover o selo de verificada de ${l.name}?`)) return;
+    const { error } = await Store.sb.rpc("admin_verificar", { p_shop: id, p_sim: v });
+    if (error) return toast(erroAmigo(error) || "N\xE3o consegui.");
+    l.verificada = v;
+    toast(v ? "Barbearia verificada." : "Selo removido.");
+    R(true);
+  },
   async perto() {
     abre(`<div class="perto-cab"><h2>Barbearias perto</h2><button class="x" data-a="fecha" aria-label="Fechar">${I("x")}</button></div><p class="q">Toque no mapa ou na lista para ver os hor\xE1rios de outra barbearia.</p><button class="btn sec peq" data-a="perto-gps" style="margin-bottom:10px">${I("map-pin")}Usar minha localiza\xE7\xE3o</button><div id="mapa-perto"><p class="dica" style="padding:16px">Carregando mapa...</p></div><div id="perto-lista"></div>`, "largo perto");
     try {
@@ -3092,6 +3244,14 @@ O hor\xE1rio j\xE1 est\xE1 livre no app.`);
   }
 };
 const FORMS = {
+  async google(f) {
+    const g = f.g.value.trim();
+    if (g && !/^https:\/\/[^\s]+$/.test(g)) return toast("Cole o link completo, come\xE7ando com https://");
+    if (g && !/(google\.|g\.page|goo\.gl|maps\.app)/i.test(g)) return toast("Esse n\xE3o parece um link do Google. Confira e cole de novo.");
+    await protege(() => Store.salvaCfg(Object.assign({}, C(), { google_review: g })));
+    toast(g ? "Link salvo." : "Link removido.");
+    R(true);
+  },
   async criaconta(f) {
     const sn = f.senha.value;
     if (sn.length < 4) return toast("A senha precisa de pelo menos 4 caracteres.");
