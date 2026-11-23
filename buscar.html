@@ -38,7 +38,7 @@ h1 span{color:var(--ouro)}
 .leaflet-container{background:#1b1b1c;font-family:var(--texto)}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--carvao);color:var(--branco);border:1px solid var(--ouro)}.leaflet-popup-content b:first-child{font-family:var(--titulo);font-size:22px!important;color:var(--ouro-claro);text-transform:uppercase}
 .ic{width:15px;height:15px;color:var(--ouro);vertical-align:-2px;margin-right:5px}
-.leaflet-popup-content{margin:12px 14px;font-size:14px}
+.leaflet-popup-content{margin:12px 14px;font-size:13px;overflow-wrap:anywhere}
 .leaflet-popup-content a.btn{color:var(--sobre-ouro);margin-top:8px}
 .leaflet-control-attribution{background:#0b0b0cc0!important;color:#8a867d!important}.leaflet-control-attribution a{color:#b9b4a8!important}
 .pino{width:38px;height:38px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);background:linear-gradient(160deg,#f5dc9a,#c9993f);border:2px solid #0b0b0c;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px #0009}
@@ -151,7 +151,7 @@ function desenha(){const v=visiveis();
   $('#lista').innerHTML=S.lojas.length?v.map(card).join(''):`<div class="vazio">Ainda não tem barbearia cadastrada${S.pos?' perto de você':''}. Conhece uma? Mostra este app pra ela.</div>`;
   camada.clearLayers();const pts=[];
   v.forEach(l=>{if(l.lat==null)return;const ic=L.divIcon({className:'',html:`<div class="pino${l.destaque?' top':''}">${icTes}</div>`,iconSize:l.destaque?[46,46]:[38,38],iconAnchor:l.destaque?[6,46]:[5,38],popupAnchor:[14,-36]});
-    const p=S.prox[l.slug];L.marker([l.lat,l.lng],{icon:ic,zIndexOffset:l.destaque?1000:0,title:l.name}).bindPopup(`<b style="font-size:16px">${esc(l.name)}</b><br>${l.dist_km!=null?km(l.dist_km)+' · ':''}${esc(situacao(l).t)}${p?`<br>Próximo: <b>${quando(p)}, ${hm(p.s)}</b>`:''}<br><a class="btn ouro peq" href="/${encodeURIComponent(l.slug)}">Marcar horário</a>`).addTo(camada);pts.push([l.lat,l.lng])});
+    const p=S.prox[l.slug];L.marker([l.lat,l.lng],{icon:ic,zIndexOffset:l.destaque?1000:0,title:l.name}).bindPopup(`<b style="font-size:16px">${esc(l.name)}</b><br>${l.dist_km!=null?km(l.dist_km)+' · ':''}${esc(situacao(l).t)}${p?`<br>Próximo: <b>${quando(p)}, ${hm(p.s)}</b>`:''}<br><a class="btn ouro peq" href="/${encodeURIComponent(l.slug)}">Marcar horário</a>`,{maxWidth:Math.min(260,innerWidth-90),autoPanPadding:[24,24],keepInView:true}).addTo(camada);pts.push([l.lat,l.lng])});
   if(S.pos)pts.push([S.pos.lat,S.pos.lng]);
   if(pts.length>1)mapa.fitBounds(pts,{padding:[40,40],maxZoom:15});else if(pts.length==1)mapa.setView(pts[0],15)}
 async function carrega(){try{S.lojas=await rpc('busca_barbearias',S.pos?{p_lat:S.pos.lat,p_lng:S.pos.lng,p_raio_km:60}:{})}catch(e){$('#qtd').textContent='Não consegui carregar agora. Tente de novo em instantes.';return}
