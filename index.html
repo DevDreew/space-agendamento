@@ -422,6 +422,31 @@ dialog .an-alertas li{cursor:default}
 .svc-barra .btn{flex:none;white-space:nowrap}
 @keyframes sobe{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
 @media (max-width:420px){.svc-barra{flex-direction:column;align-items:stretch}.svc-barra .btn{width:100%;justify-content:center}}
+/* barbearias perto: botão no canto e mapa */
+.perto-fab{position:fixed;right:12px;bottom:calc(72px + var(--base));z-index:6;display:inline-flex;align-items:center;gap:6px;padding:10px 14px 10px 12px;border-radius:999px;background:var(--carvao);border:1px solid var(--ouro);color:var(--ouro-claro);font-size:13px;font-weight:700;box-shadow:0 6px 20px #000a}
+.perto-fab svg{width:18px;height:18px}
+@media(min-width:900px){.perto-fab{bottom:24px;right:24px;font-size:14px;padding:12px 18px 12px 14px}}
+.balcao .perto-fab{display:none}
+dialog.perto{padding:16px}
+.perto-cab{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:4px}
+.perto-cab h2{margin:0}
+.perto-cab .x{width:40px;height:40px;display:grid;place-items:center;border-radius:10px;border:1px solid var(--linha)}
+#mapa-perto{height:min(46vh,420px);border-radius:12px;border:1px solid var(--linha);overflow:hidden;background:#1b1b1c;margin-bottom:12px}
+#mapa-perto .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9) saturate(.35)}
+#mapa-perto .leaflet-container,#mapa-perto.leaflet-container{background:#1b1b1c;font-family:var(--texto)}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--carvao)!important;color:var(--branco)!important;border:1px solid var(--linha)}
+.leaflet-popup-content a.btn{color:var(--sobre-ouro)}
+.leaflet-control-attribution{background:#0b0b0cc0!important;color:#8a867d!important}.leaflet-control-attribution a{color:#b9b4a8!important}
+.pino{width:38px;height:38px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);background:var(--ouro);border:2px solid #0b0b0c;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px #0009}
+.pino svg{transform:rotate(45deg);width:18px;height:18px;color:#14110a}
+.pino.top{background:#f5dc9a}.pino.aqui{background:var(--branco)}
+.eu{width:18px;height:18px;border-radius:50%;background:#4ea1ff;border:3px solid #fff;box-shadow:0 0 0 6px #4ea1ff44}
+.perto-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--linha);border-radius:12px;margin-bottom:8px}
+.perto-item p{margin:2px 0 0;font-size:13px;color:var(--cinza)}.perto-item p b{color:var(--branco)}.perto-item .ouro{color:var(--ouro-claro)}
+.perto-item .ok{color:var(--ok);font-weight:600}.perto-item .fe{color:var(--ruim);font-weight:600}
+.perto-item.dest{border-color:var(--ouro)}.perto-item.aqui{opacity:.75}
+.aqui-tag,.dest-tag{margin-left:8px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--grafite);color:var(--cinza);vertical-align:2px}
+.dest-tag{background:var(--ouro);color:var(--sobre-ouro)}
 </style></head>
 <body><div id="app"></div><dialog id="dlg"></dialog><div id="toast" role="status" aria-live="polite"></div><div id="tip" role="tooltip"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -540,6 +565,100 @@ const PADRAO = {
   barbers: [{ id: "rafael", name: "Rafael", spec: "Degrad\xEA e navalhado", active: true }, { id: "diego", name: "Diego", spec: "Barba e corte cl\xE1ssico", active: true }, { id: "vitor", name: "Vitor", spec: "Luzes e platinado", active: true }],
   services: [{ id: "corte", name: "Corte", desc: "M\xE1quina e tesoura, com acabamento", dur: 40, price: 50 }, { id: "barba", name: "Barba", desc: "Toalha quente e navalha", dur: 40, price: 40 }, { id: "combo", name: "Corte e barba", desc: "O combo da casa", dur: 60, price: 80 }, { id: "luzes", name: "Luzes e corte", desc: "Descolora\xE7\xE3o e corte", dur: 80, price: 130 }, { id: "sobrancelha", name: "Sobrancelha", desc: "Limpeza na navalha", dur: 40, price: 20 }]
 };
+const TILES = "https://tile.openstreetmap.org/{z}/{x}/{y}.png", TILES_ATR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+let _lf = null;
+const leaflet = () => _lf || (_lf = new Promise((ok, nao) => {
+  if (window.L) return ok(window.L);
+  const c = document.createElement("link");
+  c.rel = "stylesheet";
+  c.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+  document.head.appendChild(c);
+  const j = document.createElement("script");
+  j.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+  j.onload = () => ok(window.L);
+  j.onerror = () => {
+    _lf = null;
+    nao(new Error("mapa"));
+  };
+  document.head.appendChild(j);
+}));
+const kmTxt = (d) => d == null ? "" : d < 1 ? Math.round(d * 100) * 10 + " m" : d.toFixed(1).replace(".", ",") + " km";
+function sitLoja(l) {
+  const k = hoje(), hh = (x) => {
+    const h2 = l.hours && l.hours[D(x).getDay()];
+    return Array.isArray(h2) ? h2 : null;
+  }, fd = (x, b) => (l.fechados || []).some((f) => f.d == x && (f.b == "todos" || b && f.b == b)), n = agoraMin(), h = hh(k);
+  if (h && !fd(k) && n >= h[0] && n < h[1]) return l.lunch && n >= l.lunch[0] && n < l.lunch[1] ? { ab: false, t: "No almo\xE7o \xB7 volta " + hm(l.lunch[1]) } : { ab: true, t: "Aberto agora \xB7 fecha " + hm(h[1]) };
+  for (let i = 0; i < 8; i++) {
+    const x = soma(k, i), q = hh(x);
+    if (!q || fd(x) || i == 0 && n >= q[0]) continue;
+    return { ab: false, t: "Fechado \xB7 abre " + (i == 0 ? "hoje" : i == 1 ? "amanh\xE3" : DSEM[D(x).getDay()]) + " " + hm(q[0]) };
+  }
+  return { ab: false, t: "Fechado" };
+}
+async function livreLoja(l) {
+  const k0 = hoje();
+  const { data } = await Store.sb.rpc("horarios_ocupados", { p_slug: l.slug, p_de: k0, p_ate: soma(k0, 13) });
+  const oc = data || [], n = agoraMin(), st = l.step || 40;
+  for (let i = 0; i < 14; i++) {
+    const k = soma(k0, i), h = l.hours && l.hours[D(k).getDay()];
+    if (!Array.isArray(h) || (l.fechados || []).some((f) => f.d == k && f.b == "todos")) continue;
+    const dw = D(k).getDay();
+    for (let s = h[0]; s + st <= h[1]; s += st) {
+      if (i == 0 && s <= n + 10) continue;
+      if (l.lunch && s < l.lunch[1] && s + st > l.lunch[0]) continue;
+      for (const b of l.barbers || []) {
+        if (Array.isArray(b.dias) && b.dias.length && !b.dias.includes(dw)) continue;
+        if ((l.fechados || []).some((f) => f.d == k && f.b == b.id)) continue;
+        if (!oc.some((o) => o.barber_id == b.id && o.day == k && o.start_min < s + st && o.start_min + o.dur > s)) return (i == 0 ? "hoje" : i == 1 ? "amanh\xE3" : dataCurta(k)) + ", " + hm(s);
+      }
+    }
+  }
+  return null;
+}
+const PERTO = { pos: null, lojas: [], livre: {}, mapa: null, cam: null, eu: null };
+function pertoLista() {
+  const el = $("#perto-lista");
+  if (!el) return;
+  const L = window.L, ls = PERTO.lojas;
+  el.innerHTML = ls.length ? ls.map((l) => {
+    const aqui = l.slug == SLUG, st = sitLoja(l), lv = PERTO.livre[l.slug];
+    return `<div class="perto-item${aqui ? " aqui" : ""}${l.destaque && !aqui ? " dest" : ""}"><div><b>${esc(l.name)}</b>${aqui ? '<small class="aqui-tag">Voc\xEA est\xE1 aqui</small>' : l.destaque ? '<small class="dest-tag">Destaque</small>' : ""}<p>${l.dist_km != null ? `<b>${kmTxt(l.dist_km)}</b> \xB7 ` : ""}<span class="${st.ab ? "ok" : "fe"}">${esc(st.t)}</span>${l.preco_min != null ? " \xB7 a partir de " + brl(l.preco_min) : ""}</p>${lv ? `<p>Pr\xF3ximo livre: <b class="ouro">${esc(lv)}</b></p>` : ""}</div>${aqui ? "" : `<a class="btn peq" href="/${encodeURIComponent(l.slug)}">Marcar</a>`}</div>`;
+  }).join("") : '<p class="dica">Ainda n\xE3o tem outra barbearia no mapa por aqui.</p>';
+  if (!PERTO.mapa || !L) return;
+  PERTO.cam.clearLayers();
+  const pts = [];
+  ls.forEach((l) => {
+    if (l.lat == null) return;
+    const aqui = l.slug == SLUG, cls = aqui ? "pino aqui" : l.destaque ? "pino top" : "pino";
+    const ic = L.divIcon({ className: "", html: `<div class="${cls}">${I("scissors")}</div>`, iconSize: [38, 38], iconAnchor: [5, 38], popupAnchor: [14, -34] });
+    const lv = PERTO.livre[l.slug];
+    L.marker([l.lat, l.lng], { icon: ic, title: l.name, zIndexOffset: aqui ? 500 : l.destaque ? 1e3 : 0 }).bindPopup(`<b style="font-size:16px">${esc(l.name)}</b><br>${l.dist_km != null ? kmTxt(l.dist_km) + " \xB7 " : ""}${esc(sitLoja(l).t)}${lv ? `<br>Pr\xF3ximo livre: <b>${esc(lv)}</b>` : ""}${aqui ? "<br><i>Voc\xEA est\xE1 nesta barbearia</i>" : `<br><a class="btn peq" style="margin-top:8px" href="/${encodeURIComponent(l.slug)}">Ver hor\xE1rios e marcar</a>`}`).addTo(PERTO.cam);
+    pts.push([l.lat, l.lng]);
+  });
+  if (PERTO.pos) pts.push([PERTO.pos.lat, PERTO.pos.lng]);
+  if (pts.length > 1) PERTO.mapa.fitBounds(pts, { padding: [30, 30], maxZoom: 15 });
+  else if (pts.length) PERTO.mapa.setView(pts[0], 15);
+}
+async function pertoCarrega() {
+  const g = PERTO.pos || (C().geo && C().geo.lat ? C().geo : null);
+  const { data, error } = await Store.sb.rpc("busca_barbearias", g ? { p_lat: g.lat, p_lng: g.lng, p_raio_km: 60 } : {});
+  if (error) {
+    toast("N\xE3o consegui carregar o mapa agora.");
+    return;
+  }
+  PERTO.lojas = data || [];
+  pertoLista();
+  PERTO.lojas.slice(0, 15).forEach((l) => {
+    if (PERTO.livre[l.slug] !== void 0) return;
+    PERTO.livre[l.slug] = null;
+    livreLoja(l).then((v) => {
+      PERTO.livre[l.slug] = v;
+      pertoLista();
+    }).catch(() => {
+    });
+  });
+}
 const limpaEnd = (a) => String(a || "").replace(/·/g, ",").replace(/\s+/g, " ").trim();
 async function geoEndereco(addr) {
   const a = limpaEnd(addr);
@@ -1538,7 +1657,8 @@ function meus() {
  ${m.length ? `${prox.length ? `<h3 class="rotulo">Pr\xF3ximos</h3>${prox.map(lin).join("")}` : ""}${resto.length ? `<h3 class="rotulo">Anteriores</h3>${resto.slice(0, 12).map(lin).join("")}` : ""}` : `<div class="vazio"><h3>Nenhum hor\xE1rio ainda</h3><p>Seus pedidos aparecem aqui.</p><a class="btn" href="#agendar">Marcar hor\xE1rio</a></div>`}</main>`;
 }
 function cliente() {
-  return `<div class="cli">${marca()}${U.rota == "meus" ? meus() : agendar()}</div>`;
+  const fab = REAL && Store.mode == "cliente" && !U.balcao && C().busca !== false ? `<button class="perto-fab" data-a="perto" aria-label="Ver outras barbearias perto no mapa">${I("map-pin")}<span>Barbearias perto</span></button>` : "";
+  return `<div class="cli">${marca()}${U.rota == "meus" ? meus() : agendar()}</div>${fab}`;
 }
 const pendentes = () => todos().filter((x) => x.st == "pendente" && (x.d > hoje() || x.d == hoje() && x.s + x.dur > agoraMin())).sort((a, b) => a.at - b.at);
 const NAV = [["hoje", "Hoje", "clock"], ["agenda", "Agenda", "calendar-days"], ["clientes", "Clientes", "users"], ["resultados", "Resultados", "chart-column"], ["ajustes", "Ajustes", "settings"]];
@@ -1929,7 +2049,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261123135548";
+const VERSAO = "20261123142247";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
@@ -2372,6 +2492,42 @@ async function mudaStatus(o, id, st) {
   return protege(() => Store.mudar(o, id, { st }));
 }
 const ACOES = {
+  async perto() {
+    abre(`<div class="perto-cab"><h2>Barbearias perto</h2><button class="x" data-a="fecha" aria-label="Fechar">${I("x")}</button></div><p class="q">Toque no mapa ou na lista para ver os hor\xE1rios de outra barbearia.</p><button class="btn sec peq" data-a="perto-gps" style="margin-bottom:10px">${I("map-pin")}Usar minha localiza\xE7\xE3o</button><div id="mapa-perto"><p class="dica" style="padding:16px">Carregando mapa...</p></div><div id="perto-lista"></div>`, "largo perto");
+    try {
+      const L = await leaflet();
+      const el = $("#mapa-perto");
+      if (!el) return;
+      el.innerHTML = "";
+      if (PERTO.mapa) try {
+        PERTO.mapa.remove();
+      } catch (e) {
+      }
+      PERTO.mapa = L.map(el).setView([-23.51, -46.88], 12);
+      L.tileLayer(TILES, { maxZoom: 19, attribution: TILES_ATR }).addTo(PERTO.mapa);
+      PERTO.cam = L.layerGroup().addTo(PERTO.mapa);
+      if (PERTO.pos) PERTO.eu = L.marker([PERTO.pos.lat, PERTO.pos.lng], { icon: L.divIcon({ className: "", html: '<div class="eu"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }), zIndexOffset: 2e3 }).addTo(PERTO.mapa);
+      setTimeout(() => PERTO.mapa && PERTO.mapa.invalidateSize(), 200);
+    } catch (e) {
+      const el = $("#mapa-perto");
+      if (el) el.innerHTML = '<p class="dica" style="padding:16px">O mapa n\xE3o abriu. Veja a lista abaixo.</p>';
+    }
+    pertoCarrega();
+  },
+  async "perto-gps"() {
+    toast("Pegando sua localiza\xE7\xE3o...");
+    try {
+      PERTO.pos = await minhaPosicao();
+      const L = window.L;
+      if (L && PERTO.mapa) {
+        if (PERTO.eu) PERTO.eu.remove();
+        PERTO.eu = L.marker([PERTO.pos.lat, PERTO.pos.lng], { icon: L.divIcon({ className: "", html: '<div class="eu"></div>', iconSize: [18, 18], iconAnchor: [9, 9] }), zIndexOffset: 2e3, title: "Voc\xEA" }).addTo(PERTO.mapa);
+      }
+      pertoCarrega();
+    } catch (e) {
+      toast("N\xE3o consegui sua localiza\xE7\xE3o. Libere no navegador.");
+    }
+  },
   async "busca-on"() {
     const on = C().busca === false;
     await protege(() => Store.salvaCfg(Object.assign({}, C(), { busca: on })));
