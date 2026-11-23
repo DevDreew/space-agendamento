@@ -432,14 +432,14 @@ dialog.perto{padding:16px}
 .perto-cab h2{margin:0}
 .perto-cab .x{width:40px;height:40px;display:grid;place-items:center;border-radius:10px;border:1px solid var(--linha)}
 #mapa-perto{height:min(46vh,420px);border-radius:12px;border:1px solid var(--linha);overflow:hidden;background:#1b1b1c;margin-bottom:12px}
-#mapa-perto .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9) saturate(.35)}
+#mapa-perto .leaflet-tile-pane{filter:grayscale(1) invert(1) brightness(.78) contrast(1.15) sepia(.55) saturate(1.3)}
 #mapa-perto .leaflet-container,#mapa-perto.leaflet-container{background:#1b1b1c;font-family:var(--texto)}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--carvao)!important;color:var(--branco)!important;border:1px solid var(--linha)}
 .leaflet-popup-content a.btn{color:var(--sobre-ouro)}
 .leaflet-control-attribution{background:#0b0b0cc0!important;color:#8a867d!important}.leaflet-control-attribution a{color:#b9b4a8!important}
-.pino{width:38px;height:38px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);background:var(--ouro);border:2px solid #0b0b0c;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px #0009}
+.pino{width:40px;height:40px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);background:var(--ouro);border:2px solid #0b0b0c;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px #0009}
 .pino svg{transform:rotate(45deg);width:18px;height:18px;color:#14110a}
-.pino.top{background:#f5dc9a}.pino.aqui{background:var(--branco)}
+.pino{background:linear-gradient(160deg,#f5dc9a,#c9993f)}.pino.top{width:46px;height:46px;box-shadow:0 0 0 4px #d4ab5f55,0 6px 16px #000a}.pino.aqui{box-shadow:0 0 0 4px #f7f5f0,0 6px 16px #000a}
 .eu{width:18px;height:18px;border-radius:50%;background:#4ea1ff;border:3px solid #fff;box-shadow:0 0 0 6px #4ea1ff44}
 .perto-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border:1px solid var(--linha);border-radius:12px;margin-bottom:8px}
 .perto-item p{margin:2px 0 0;font-size:13px;color:var(--cinza)}.perto-item p b{color:var(--branco)}.perto-item .ouro{color:var(--ouro-claro)}
@@ -447,6 +447,22 @@ dialog.perto{padding:16px}
 .perto-item.dest{border-color:var(--ouro)}.perto-item.aqui{opacity:.75}
 .aqui-tag,.dest-tag{margin-left:8px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--grafite);color:var(--cinza);vertical-align:2px}
 .dest-tag{background:var(--ouro);color:var(--sobre-ouro)}
+
+.leaflet-popup.pop-ouro .leaflet-popup-content-wrapper{border:1px solid var(--ouro);border-radius:14px;box-shadow:0 10px 30px #000c}
+.leaflet-popup.pop-ouro .leaflet-popup-tip{border:1px solid var(--ouro)}
+.leaflet-popup.pop-ouro .leaflet-popup-content{margin:14px 16px;min-width:210px}
+.leaflet-popup.pop-ouro a.leaflet-popup-close-button{color:var(--ouro)}
+.pop-nome{display:block;font-family:var(--titulo);font-weight:800;font-size:24px;line-height:1.05;color:var(--ouro-claro);text-transform:uppercase;margin-bottom:6px}
+.pop-btn{display:flex;width:100%;margin-top:10px;justify-content:center}
+.pop-aqui{display:flex;align-items:center;gap:6px;margin:8px 0 0!important;color:var(--ouro-claro);font-weight:600;font-size:13px}.pop-aqui svg{width:16px;height:16px}
+.pi-info{list-style:none;padding:0;margin:6px 0 0;display:grid;gap:4px}
+.pi-info li{display:flex;align-items:flex-start;gap:7px;font-size:13px;color:var(--cinza);line-height:1.35}
+.pi-info li svg{width:15px;height:15px;flex:none;color:var(--ouro);margin-top:1px}
+.pi-info b{color:var(--branco)}.pi-info .ouro{color:var(--ouro-claro)}.pi-info .ok{color:var(--ok);font-weight:600}.pi-info .fe{color:var(--ruim);font-weight:600}
+.perto-item{align-items:flex-start}
+.pi-ic{width:40px;height:40px;flex:none;border-radius:12px;display:grid;place-items:center;background:linear-gradient(160deg,#f5dc9a,#c9993f);color:#14110a}.pi-ic svg{width:20px;height:20px}
+.pi-txt{flex:1;min-width:0}.pi-nome{font-family:var(--titulo);font-weight:800;font-size:21px;line-height:1.05;color:var(--ouro-claro);text-transform:uppercase}
+.perto-item .btn{align-self:center}
 </style></head>
 <body><div id="app"></div><dialog id="dlg"></dialog><div id="toast" role="status" aria-live="polite"></div><div id="tip" role="tooltip"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -616,6 +632,7 @@ async function livreLoja(l) {
   }
   return null;
 }
+const infoLoja = (l, st, lv) => `<ul class="pi-info">${l.dist_km != null || l.address ? `<li>${I("map-pin")}<span>${l.dist_km != null ? `<b>${kmTxt(l.dist_km)}</b>` : ""}${l.dist_km != null && l.address ? " \xB7 " : ""}${esc(l.address || "")}</span></li>` : ""}<li>${I("clock")}<span class="${st.ab ? "ok" : "fe"}">${esc(st.t)}</span></li>${l.preco_min != null ? `<li>${I("wallet")}<span>A partir de <b>${brl(l.preco_min)}</b></span></li>` : ""}${lv ? `<li>${I("calendar-days")}<span>Pr\xF3ximo livre: <b class="ouro">${esc(lv)}</b></span></li>` : ""}</ul>`;
 const PERTO = { pos: null, lojas: [], livre: {}, mapa: null, cam: null, eu: null };
 function pertoLista() {
   const el = $("#perto-lista");
@@ -623,17 +640,17 @@ function pertoLista() {
   const L = window.L, ls = PERTO.lojas;
   el.innerHTML = ls.length ? ls.map((l) => {
     const aqui = l.slug == SLUG, st = sitLoja(l), lv = PERTO.livre[l.slug];
-    return `<div class="perto-item${aqui ? " aqui" : ""}${l.destaque && !aqui ? " dest" : ""}"><div><b>${esc(l.name)}</b>${aqui ? '<small class="aqui-tag">Voc\xEA est\xE1 aqui</small>' : l.destaque ? '<small class="dest-tag">Destaque</small>' : ""}<p>${l.dist_km != null ? `<b>${kmTxt(l.dist_km)}</b> \xB7 ` : ""}<span class="${st.ab ? "ok" : "fe"}">${esc(st.t)}</span>${l.preco_min != null ? " \xB7 a partir de " + brl(l.preco_min) : ""}</p>${lv ? `<p>Pr\xF3ximo livre: <b class="ouro">${esc(lv)}</b></p>` : ""}</div>${aqui ? "" : `<a class="btn peq" href="/${encodeURIComponent(l.slug)}">Marcar</a>`}</div>`;
+    return `<div class="perto-item${aqui ? " aqui" : ""}${l.destaque && !aqui ? " dest" : ""}"><div class="pi-ic">${I(l.destaque && !aqui ? "crown" : "scissors")}</div><div class="pi-txt"><b class="pi-nome">${esc(l.name)}</b>${aqui ? '<small class="aqui-tag">Voc\xEA est\xE1 aqui</small>' : l.destaque ? '<small class="dest-tag">Destaque</small>' : ""}${infoLoja(l, st, lv)}</div>${aqui ? "" : `<a class="btn peq" href="/${encodeURIComponent(l.slug)}">Marcar</a>`}</div>`;
   }).join("") : '<p class="dica">Ainda n\xE3o tem outra barbearia no mapa por aqui.</p>';
   if (!PERTO.mapa || !L) return;
   PERTO.cam.clearLayers();
   const pts = [];
   ls.forEach((l) => {
     if (l.lat == null) return;
-    const aqui = l.slug == SLUG, cls = aqui ? "pino aqui" : l.destaque ? "pino top" : "pino";
-    const ic = L.divIcon({ className: "", html: `<div class="${cls}">${I("scissors")}</div>`, iconSize: [38, 38], iconAnchor: [5, 38], popupAnchor: [14, -34] });
+    const aqui = l.slug == SLUG, cls = aqui ? "pino aqui" : l.destaque ? "pino top" : "pino", tam = l.destaque && !aqui ? 46 : 40;
+    const ic = L.divIcon({ className: "", html: `<div class="${cls}">${I(l.destaque && !aqui ? "crown" : "scissors")}</div>`, iconSize: [tam, tam], iconAnchor: [6, tam], popupAnchor: [tam / 2 - 6, -tam + 4] });
     const lv = PERTO.livre[l.slug];
-    L.marker([l.lat, l.lng], { icon: ic, title: l.name, zIndexOffset: aqui ? 500 : l.destaque ? 1e3 : 0 }).bindPopup(`<b style="font-size:16px">${esc(l.name)}</b><br>${l.dist_km != null ? kmTxt(l.dist_km) + " \xB7 " : ""}${esc(sitLoja(l).t)}${lv ? `<br>Pr\xF3ximo livre: <b>${esc(lv)}</b>` : ""}${aqui ? "<br><i>Voc\xEA est\xE1 nesta barbearia</i>" : `<br><a class="btn peq" style="margin-top:8px" href="/${encodeURIComponent(l.slug)}">Ver hor\xE1rios e marcar</a>`}`).addTo(PERTO.cam);
+    L.marker([l.lat, l.lng], { icon: ic, title: l.name, zIndexOffset: aqui ? 500 : l.destaque ? 1e3 : 0 }).bindPopup(`<div class="pop"><b class="pop-nome">${esc(l.name)}</b>${l.destaque && !aqui ? '<small class="dest-tag" style="margin:0 0 4px;display:inline-block">Destaque</small>' : ""}${infoLoja(l, sitLoja(l), lv)}${aqui ? `<p class="pop-aqui">${I("map-pin")}Voc\xEA est\xE1 nesta barbearia</p>` : `<a class="btn peq pop-btn" href="/${encodeURIComponent(l.slug)}">Ver hor\xE1rios e marcar</a>`}</div>`, { className: "pop-ouro", maxWidth: 280 }).addTo(PERTO.cam);
     pts.push([l.lat, l.lng]);
   });
   if (PERTO.pos) pts.push([PERTO.pos.lat, PERTO.pos.lng]);
@@ -2049,7 +2066,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261123143035";
+const VERSAO = "20261123143303";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
