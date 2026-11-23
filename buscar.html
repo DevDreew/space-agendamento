@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0c">
+<title>Barbearias perto de você · DreewSolution</title>
+<meta name="description" content="Ache barbearias perto de você, veja o próximo horário livre e marque pelo celular.">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{color-scheme:dark;--preto:#0b0b0c;--carvao:#161617;--grafite:#232325;--linha:#37342d;--branco:#f7f5f0;--cinza:#aca89e;--ouro:#d4ab5f;--ouro-claro:#efd59f;--sobre-ouro:#14110a;--ok:#7ed7a4;--ruim:#f39488;
+--titulo:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;--texto:"Figtree","Segoe UI",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--preto);color:var(--branco);font:400 16px/1.5 var(--texto)}
+a{color:inherit}button,input{font:inherit;color:inherit}button{cursor:pointer;background:none;border:0}
+.wrap{max-width:760px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 18px) 16px calc(env(safe-area-inset-bottom,0px) + 40px)}
+.marca{text-decoration:none;display:flex;align-items:center;gap:8px;font-family:var(--titulo);font-weight:800;font-size:22px;letter-spacing:.04em}
+.marca b{color:var(--ouro)}
+h1{font-family:var(--titulo);font-weight:900;font-size:44px;line-height:.98;margin:14px 0 6px;letter-spacing:.01em}
+h1 span{color:var(--ouro)}
+.sub{color:var(--cinza);margin-bottom:16px}
+.loc{display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:var(--carvao);border:1px solid var(--linha);border-radius:14px;padding:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;font-weight:700;text-decoration:none}
+.btn.ouro{background:var(--ouro);color:var(--sobre-ouro)}
+.btn.sec{border:1px solid var(--linha);background:var(--grafite)}
+.btn.peq{min-height:38px;padding:0 12px;font-size:14px}
+.cep{display:flex;gap:6px;flex:1;min-width:210px}
+.cep input{flex:1;min-width:0;height:44px;border-radius:10px;border:1px solid var(--linha);background:var(--preto);padding:0 12px}
+.onde{width:100%;font-size:14px;color:var(--cinza);display:flex;align-items:center;gap:6px}
+.onde b{color:var(--branco);font-weight:600}
+.filtros{display:flex;gap:8px;overflow-x:auto;margin:14px 0 12px;padding-bottom:2px;scrollbar-width:none}
+.chip{flex:none;border:1px solid var(--linha);border-radius:999px;padding:7px 14px;font-size:14px;font-weight:600;color:var(--cinza)}
+.chip.on{background:var(--ouro);border-color:var(--ouro);color:var(--sobre-ouro)}
+#mapa{height:300px;border-radius:16px;border:1px solid var(--linha);overflow:hidden;background:var(--carvao)}
+.leaflet-container{background:#1b1b1c;font-family:var(--texto)}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--carvao);color:var(--branco);border:1px solid var(--linha)}
+.leaflet-popup-content{margin:12px 14px;font-size:14px}
+.leaflet-popup-content a.btn{color:var(--sobre-ouro);margin-top:8px}
+.leaflet-control-attribution{background:#0b0b0cc0!important;color:#8a867d!important}.leaflet-control-attribution a{color:#b9b4a8!important}
+.pino{width:38px;height:38px;border-radius:50% 50% 50% 4px;transform:rotate(-45deg);background:var(--ouro);border:2px solid #0b0b0c;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px #0009}
+.pino svg{transform:rotate(45deg)}
+.pino.top{background:#f5dc9a;width:46px;height:46px}
+.eu{width:18px;height:18px;border-radius:50%;background:#4ea1ff;border:3px solid #fff;box-shadow:0 0 0 6px #4ea1ff44}
+.qtd{margin:18px 0 8px;font-size:14px;color:var(--cinza)}
+.card{display:grid;grid-template-columns:56px 1fr;gap:14px;padding:16px;border:1px solid var(--linha);border-radius:16px;background:var(--carvao);margin-bottom:12px}
+.card.dest{border-color:var(--ouro);background:linear-gradient(180deg,#221c10,var(--carvao) 70%)}
+.logo{width:56px;height:56px;border-radius:14px;background:var(--grafite);display:flex;align-items:center;justify-content:center;overflow:hidden;font-family:var(--titulo);font-weight:900;font-size:26px;color:var(--ouro)}
+.logo img{width:100%;height:100%;object-fit:cover}
+.nome{font-family:var(--titulo);font-weight:800;font-size:25px;line-height:1.05}
+.tag-d{display:inline-flex;align-items:center;gap:4px;background:var(--ouro);color:var(--sobre-ouro);font-size:11px;font-weight:700;letter-spacing:.06em;padding:2px 8px;border-radius:999px;text-transform:uppercase;vertical-align:4px;margin-left:6px}
+.linha{font-size:14px;color:var(--cinza);margin-top:2px}
+.st-ab{color:var(--ok);font-weight:600}.st-fe{color:var(--ruim);font-weight:600}
+.prox{display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding:8px 12px;border-radius:10px;background:var(--grafite);font-size:14px}
+.prox b{color:var(--ouro-claro)}
+.acoes{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.vazio{text-align:center;padding:30px 10px;color:var(--cinza)}
+.barbeiro{margin-top:26px;padding:20px;border-radius:16px;border:1px dashed var(--ouro);text-align:center}
+.barbeiro h2{font-family:var(--titulo);font-weight:800;font-size:28px;line-height:1.05;margin-bottom:6px}
+.aviso{font-size:13px;color:var(--cinza);margin-top:8px}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);transform:translateX(-50%);background:var(--branco);color:var(--preto);padding:10px 16px;border-radius:10px;font-weight:600;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;text-align:center;z-index:1000}
+@media (min-width:700px){h1{font-size:56px}#mapa{height:380px}}
+</style></head>
+<body>
+<main class="wrap">
+  <a class="marca" href="/buscar" aria-label="DreewSolution"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d4ab5f" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></svg>DREEW<b>SOLUTION</b></a>
+  <h1>Barbearias <span>perto de você</span></h1>
+  <p class="sub">Veja quem está aberto, o próximo horário livre e marque pelo celular.</p>
+
+  <section class="loc" aria-label="Sua localização">
+    <button class="btn ouro" id="gps" type="button"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Usar minha localização</button>
+    <form class="cep" id="fcep"><input id="cep" inputmode="numeric" autocomplete="postal-code" placeholder="ou digite seu CEP" aria-label="CEP" maxlength="9"><button class="btn sec" type="submit">Buscar</button></form>
+    <p class="onde" id="onde">Mostrando todas as barbearias. Use a localização para ver as mais perto.</p>
+  </section>
+
+  <div class="filtros" role="group" aria-label="Filtros">
+    <button class="chip" data-f="aberto" type="button">Aberto agora</button>
+    <button class="chip" data-f="hoje" type="button">Horário hoje</button>
+    <button class="chip" data-f="ate50" type="button">Corte até R$ 50</button>
+    <button class="chip" data-f="perto" type="button">Até 5 km</button>
+  </div>
+
+  <div id="mapa" role="region" aria-label="Mapa das barbearias"></div>
+  <p class="qtd" id="qtd">Carregando barbearias...</p>
+  <div id="lista"></div>
+
+  <section class="barbeiro">
+    <h2>É barbeiro? Coloque sua barbearia aqui</h2>
+    <p class="linha" style="margin-bottom:14px">Clientes da região te acham no mapa e marcam sozinhos. O pedido chega no seu WhatsApp. 15 dias grátis.</p>
+    <a class="btn ouro" href="/painel">Testar grátis</a>
+  </section>
+  <p class="aviso">Sua localização é usada só para calcular a distância, neste aparelho. Ela não fica salva.</p>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const SB_URL='https://yxfhlmgxgyystthnfhfd.supabase.co',SB_KEY='sb_publishable_BrrNsjOH5oRuGHHVCEG1mA_aJeX5mbL';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const brl=v=>'R$ '+Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2});
+const hm=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+const dia=(d=new Date())=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const somaDia=(k,n)=>{const d=new Date(k+'T12:00:00');d.setDate(d.getDate()+n);return dia(d)};
+const DS=['domingo','segunda','terça','quarta','quinta','sexta','sábado'];
+const km=d=>d==null?'':d<1?Math.round(d*1000/10)*10+' m':d.toFixed(1).replace('.',',')+' km';
+let toastT;const toast=t=>{const e=$('#toast');e.textContent=t;e.style.opacity=1;clearTimeout(toastT);toastT=setTimeout(()=>e.style.opacity=0,3200)};
+async function rpc(fn,args){const r=await fetch(SB_URL+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(args||{})});if(!r.ok)throw new Error(await r.text());return r.json()}
+
+const S={pos:null,onde:'',lojas:[],filtros:new Set(),prox:{}};
+const agora=()=>{const d=new Date();return d.getHours()*60+d.getMinutes()};
+const horarioDe=(l,k)=>{const h=l.hours&&l.hours[new Date(k+'T12:00:00').getDay()];return Array.isArray(h)?h:null};
+const fechadoDia=(l,k,b)=>(l.fechados||[]).some(f=>f.d==k&&(f.b=='todos'||(b&&f.b==b)));
+function situacao(l){const k=dia(),h=horarioDe(l,k),n=agora();
+  if(h&&!fechadoDia(l,k)&&n>=h[0]&&n<h[1]){const al=l.lunch&&n>=l.lunch[0]&&n<l.lunch[1];return al?{ab:false,t:'No almoço · volta '+hm(l.lunch[1])}:{ab:true,t:'Aberto agora · fecha '+hm(h[1])}}
+  for(let i=0;i<8;i++){const kk=somaDia(k,i),hh=horarioDe(l,kk);if(!hh||fechadoDia(l,kk))continue;if(i==0&&n>=hh[0])continue;return{ab:false,t:'Fechado · abre '+(i==0?'hoje':i==1?'amanhã':DS[new Date(kk+'T12:00:00').getDay()])+' '+hm(hh[0])}}
+  return{ab:false,t:'Fechado'}}
+async function proximoLivre(l){const k0=dia();let oc=[];try{oc=await rpc('horarios_ocupados',{p_slug:l.slug,p_de:k0,p_ate:somaDia(k0,13)})}catch(e){return null}
+  const n=agora(),st=l.step||40,bs=l.barbers||[];
+  for(let i=0;i<14;i++){const k=somaDia(k0,i),h=horarioDe(l,k);if(!h||fechadoDia(l,k))continue;const dw=new Date(k+'T12:00:00').getDay();
+    for(let s=h[0];s+st<=h[1];s+=st){if(i==0&&s<=n+10)continue;if(l.lunch&&s<l.lunch[1]&&s+st>l.lunch[0])continue;
+      for(const b of bs){if(Array.isArray(b.dias)&&b.dias.length&&!b.dias.includes(dw))continue;if(fechadoDia(l,k,b.id))continue;
+        if(!oc.some(o=>o.barber_id==b.id&&o.day==k&&o.start_min<s+st&&o.start_min+o.dur>s))return{k,s,i,b:b.name}}}}
+  return null}
+const quando=p=>p.i==0?'hoje':p.i==1?'amanhã':DS[new Date(p.k+'T12:00:00').getDay()]+' '+p.k.slice(8)+'/'+p.k.slice(5,7);
+
+const icTes='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#14110a" stroke-width="2.4" stroke-linecap="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></svg>';
+const mapa=L.map('mapa',{zoomControl:true,attributionControl:true}).setView([-23.51,-46.88],12);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'}).addTo(mapa);
+const camada=L.layerGroup().addTo(mapa);let euMk=null;
+
+function visiveis(){const f=S.filtros;return S.lojas.filter(l=>{if(f.has('aberto')&&!situacao(l).ab)return false;if(f.has('ate50')&&!(l.preco_min!=null&&l.preco_min<=50))return false;if(f.has('perto')&&!(l.dist_km!=null&&l.dist_km<=5))return false;if(f.has('hoje')){const p=S.prox[l.slug];if(!p||p.i!=0)return false}return true})}
+function card(l){const sit=situacao(l),p=S.prox[l.slug],ini=esc((l.name||'?').trim()[0]||'?');const dest=`https://www.google.com/maps/dir/?api=1&destination=${l.lat},${l.lng}`;
+  return`<article class="card${l.destaque?' dest':''}"><div class="logo">${l.logo?`<img src="${esc(l.logo)}" alt="">`:ini}</div><div>
+  <div class="nome">${esc(l.name)}${l.destaque?'<span class="tag-d">Destaque</span>':''}</div>
+  <p class="linha">${l.dist_km!=null?`<b style="color:var(--branco)">${km(l.dist_km)}</b> · `:''}${esc(l.address||'')}</p>
+  <p class="linha"><span class="${sit.ab?'st-ab':'st-fe'}">${esc(sit.t)}</span>${l.preco_min!=null?' · corte a partir de '+brl(l.preco_min):''}</p>
+  ${p===undefined?'<span class="prox">Vendo horários...</span>':p?`<span class="prox">Próximo horário livre <b>${quando(p)}, ${hm(p.s)}</b></span>`:'<span class="prox">Sem horário livre nas próximas 2 semanas</span>'}
+  <div class="acoes"><a class="btn ouro peq" href="/${encodeURIComponent(l.slug)}">Ver horários e marcar</a><a class="btn sec peq" href="${dest}" target="_blank" rel="noopener">Como chegar</a></div></div></article>`}
+function desenha(){const v=visiveis();
+  $('#qtd').textContent=S.lojas.length?(v.length?`${v.length} barbearia${v.length>1?'s':''}${S.pos?' perto de você':''}`:'Nenhuma barbearia com esses filtros.'):'';
+  $('#lista').innerHTML=S.lojas.length?v.map(card).join(''):`<div class="vazio">Ainda não tem barbearia cadastrada${S.pos?' perto de você':''}. Conhece uma? Mostra este app pra ela.</div>`;
+  camada.clearLayers();const pts=[];
+  v.forEach(l=>{if(l.lat==null)return;const ic=L.divIcon({className:'',html:`<div class="pino${l.destaque?' top':''}">${icTes}</div>`,iconSize:l.destaque?[46,46]:[38,38],iconAnchor:l.destaque?[6,46]:[5,38],popupAnchor:[14,-36]});
+    const p=S.prox[l.slug];L.marker([l.lat,l.lng],{icon:ic,zIndexOffset:l.destaque?1000:0,title:l.name}).bindPopup(`<b style="font-size:16px">${esc(l.name)}</b><br>${l.dist_km!=null?km(l.dist_km)+' · ':''}${esc(situacao(l).t)}${p?`<br>Próximo: <b>${quando(p)}, ${hm(p.s)}</b>`:''}<br><a class="btn ouro peq" href="/${encodeURIComponent(l.slug)}">Marcar horário</a>`).addTo(camada);pts.push([l.lat,l.lng])});
+  if(S.pos)pts.push([S.pos.lat,S.pos.lng]);
+  if(pts.length>1)mapa.fitBounds(pts,{padding:[40,40],maxZoom:15});else if(pts.length==1)mapa.setView(pts[0],15)}
+async function carrega(){try{S.lojas=await rpc('busca_barbearias',S.pos?{p_lat:S.pos.lat,p_lng:S.pos.lng,p_raio_km:60}:{})}catch(e){$('#qtd').textContent='Não consegui carregar agora. Tente de novo em instantes.';return}
+  desenha();for(const l of S.lojas.slice(0,20)){if(S.prox[l.slug]!==undefined)continue;proximoLivre(l).then(p=>{S.prox[l.slug]=p;desenha()})}}
+function marcaEu(){if(euMk)euMk.remove();if(!S.pos)return;euMk=L.marker([S.pos.lat,S.pos.lng],{icon:L.divIcon({className:'',html:'<div class="eu"></div>',iconSize:[18,18],iconAnchor:[9,9]}),title:'Você',zIndexOffset:2000}).addTo(mapa)}
+function defineOnde(t){S.onde=t;$('#onde').innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d4ab5f" stroke-width="2.2"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Perto de <b>${esc(t)}</b>`}
+$('#gps').onclick=()=>{if(!navigator.geolocation)return toast('Seu navegador não libera localização. Use o CEP.');toast('Pegando sua localização...');
+  navigator.geolocation.getCurrentPosition(p=>{S.pos={lat:p.coords.latitude,lng:p.coords.longitude};defineOnde('você');marcaEu();carrega()},()=>toast('Não consegui sua localização. Libere no navegador ou use o CEP.'),{enableHighAccuracy:true,timeout:15000,maximumAge:120000})};
+$('#cep').addEventListener('input',e=>{const d=e.target.value.replace(/\D/g,'').slice(0,8);e.target.value=d.length>5?d.slice(0,5)+'-'+d.slice(5):d});
+$('#fcep').onsubmit=async e=>{e.preventDefault();const c=$('#cep').value.replace(/\D/g,'');if(c.length!=8)return toast('Digite os 8 números do CEP.');toast('Procurando o CEP...');
+  try{const j=await(await fetch('https://brasilapi.com.br/api/cep/v2/'+c)).json();let lat=null,lng=null;const co=j&&j.location&&j.location.coordinates;if(co&&co.latitude){lat=+co.latitude;lng=+co.longitude}
+    if(lat==null&&j&&j.city){const q=[j.street,j.neighborhood,j.city+' - '+j.state].filter(Boolean).join(', ');let r=await(await fetch('https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&limit=1&q='+encodeURIComponent(q))).json();if(!r[0])r=await(await fetch('https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&limit=1&q='+encodeURIComponent((j.neighborhood?j.neighborhood+', ':'')+j.city+' - '+j.state))).json();if(r[0]){lat=+r[0].lat;lng=+r[0].lon}}
+    if(lat==null)return toast('Não achei esse CEP no mapa. Tente usar a localização.');S.pos={lat,lng};defineOnde([j.neighborhood,j.city].filter(Boolean).join(', ')||c);marcaEu();carrega()}catch(err){toast('Não achei esse CEP. Confira os números.')}};
+document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{const f=b.dataset.f;if(f=='perto'&&!S.pos)return toast('Use a localização ou o CEP para filtrar por distância.');S.filtros.has(f)?S.filtros.delete(f):S.filtros.add(f);b.classList.toggle('on');desenha()});
+carrega();
+</script>
+</body></html>

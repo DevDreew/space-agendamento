@@ -540,6 +540,56 @@ const PADRAO = {
   barbers: [{ id: "rafael", name: "Rafael", spec: "Degrad\xEA e navalhado", active: true }, { id: "diego", name: "Diego", spec: "Barba e corte cl\xE1ssico", active: true }, { id: "vitor", name: "Vitor", spec: "Luzes e platinado", active: true }],
   services: [{ id: "corte", name: "Corte", desc: "M\xE1quina e tesoura, com acabamento", dur: 40, price: 50 }, { id: "barba", name: "Barba", desc: "Toalha quente e navalha", dur: 40, price: 40 }, { id: "combo", name: "Corte e barba", desc: "O combo da casa", dur: 60, price: 80 }, { id: "luzes", name: "Luzes e corte", desc: "Descolora\xE7\xE3o e corte", dur: 80, price: 130 }, { id: "sobrancelha", name: "Sobrancelha", desc: "Limpeza na navalha", dur: 40, price: 20 }]
 };
+const limpaEnd = (a) => String(a || "").replace(/·/g, ",").replace(/\s+/g, " ").trim();
+async function geoEndereco(addr) {
+  const a = limpaEnd(addr);
+  if (!a) return null;
+  const nom = async (q) => {
+    try {
+      const r = await fetch("https://nominatim.openstreetmap.org/search?format=json&countrycodes=br&limit=1&q=" + encodeURIComponent(q), { headers: { "Accept-Language": "pt-BR" } });
+      const j = await r.json();
+      return j && j[0] ? { lat: +(+j[0].lat).toFixed(6), lng: +(+j[0].lon).toFixed(6) } : null;
+    } catch (e) {
+      return null;
+    }
+  };
+  let g = await nom(a);
+  if (g) return Object.assign(g, { fonte: "endereco" });
+  const semCep = a.replace(/\d{5}-?\d{3}/, "").replace(/,\s*,/g, ",");
+  g = await nom(semCep);
+  if (g) return Object.assign(g, { fonte: "endereco" });
+  const cep = (a.match(/\d{5}-?\d{3}/) || [])[0];
+  if (cep) {
+    try {
+      const r = await fetch("https://brasilapi.com.br/api/cep/v2/" + dig(cep));
+      const j = await r.json();
+      const c = j && j.location && j.location.coordinates;
+      if (c && c.latitude) return { lat: +(+c.latitude).toFixed(6), lng: +(+c.longitude).toFixed(6), fonte: "cep" };
+      if (j && j.street) {
+        g = await nom(`${j.street}, ${j.neighborhood || ""}, ${j.city} - ${j.state}`);
+        if (g) return Object.assign(g, { fonte: "cep" });
+      }
+    } catch (e) {
+    }
+  }
+  return null;
+}
+const minhaPosicao = () => new Promise((ok, nao) => {
+  if (!navigator.geolocation) return nao(new Error("sem_gps"));
+  navigator.geolocation.getCurrentPosition((p) => ok({ lat: +p.coords.latitude.toFixed(6), lng: +p.coords.longitude.toFixed(6) }), nao, { enableHighAccuracy: true, timeout: 15e3, maximumAge: 6e4 });
+});
+async function autoGeo() {
+  try {
+    const c = C();
+    if (!REAL || Store.adminVendo || !c.address || c.geo && c.geo.addr == limpaEnd(c.address)) return;
+    if (c.geo && c.geo.fonte == "gps") return;
+    const g = await geoEndereco(c.address);
+    if (!g) return;
+    await Store.salvaCfg(Object.assign({}, C(), { geo: Object.assign(g, { addr: limpaEnd(c.address) }) }));
+    if (U.rota == "ajustes") R(true);
+  } catch (e) {
+  }
+}
 const ATIVOS = ["pendente", "confirmado", "bloqueado", "concluido"];
 const STATUS = { pendente: ["Aguardando", "hourglass"], confirmado: ["Confirmado", "check"], recusado: ["Recusado", "x"], cancelado: ["Cancelado", "ban"], concluido: ["Atendido", "check"], "nao-veio": ["N\xE3o veio", "user-x"], bloqueado: ["Bloqueado", "lock"] };
 const pill = (st) => `<span class="pill ${st}">${I(STATUS[st][1])}${STATUS[st][0]}</span>`;
@@ -1047,6 +1097,7 @@ const StoreSB = {
     this.admin = true;
     this.mode = "painel";
     checaPush();
+    setTimeout(autoGeo, 1500);
     await Promise.all([this.recarregaPainel(), this.carregaAssinantes(), this.carregaAssinatura()]);
     if (!this.canal) {
       this.canal = this.sb.channel("b-" + data.id).on("postgres_changes", { event: "*", schema: "public", table: "bookings", filter: "shop_id=eq." + data.id }, () => {
@@ -1666,7 +1717,10 @@ function viewAjustes() {
   }).join("")}
  <div class="hr-l"><label class="ck"><input type="checkbox" name="alm" ${c.lunch ? "checked" : ""}>Almo\xE7o</label><input type="time" name="alo" aria-label="In\xEDcio do almo\xE7o" value="${c.lunch ? hm(c.lunch[0]) : "12:20"}"><input type="time" name="alc" aria-label="Fim do almo\xE7o" value="${c.lunch ? hm(c.lunch[1]) : "13:20"}"></div>
  <div class="campo" style="margin-top:10px"><label for="a-step">Intervalo entre hor\xE1rios (min)</label><input id="a-step" type="number" name="step" min="10" max="120" step="5" value="${c.step}"></div><button class="btn peq" type="submit">Salvar hor\xE1rios</button></form></section>
- <section class="painel"><h3>Link para os clientes</h3><p class="q">Mande este endere\xE7o no WhatsApp, coloque na bio do Instagram e no QR code do balc\xE3o.</p><p class="num" style="font-weight:600;word-break:break-all;margin-bottom:10px">${esc(location.origin + "/" + SLUG)}</p><button class="btn sec peq" data-a="copiar">Copiar link</button></section>${""}${REAL ? `<section class="painel"><h3>Seu acesso</h3><p class="q">O painel abre s\xF3 com o seu email e senha. Clientes nunca veem esta \xE1rea.</p><p class="num" style="font-weight:600;word-break:break-all;margin-bottom:10px">${esc(location.origin + "/" + SLUG + "/painel")}</p><button class="btn sec peq" data-a="sair">${I("x")}Sair da conta</button></section>` : ""}<section class="painel"><h3>Tablet no balc\xE3o</h3><p class="q">Abra este endere\xE7o no tablet da recep\xE7\xE3o. Cada cliente marca e a tela limpa sozinha para o pr\xF3ximo, sem guardar nomes.</p><a class="btn sec peq" href="${REAL ? "/" + esc(SLUG) + "#balcao" : "#balcao"}" ${REAL ? 'target="_blank" rel="noopener"' : ""}>${I("store")}Abrir modo balc\xE3o aqui</a></section><section class="painel"><h3>Barbearia</h3><p class="q">Nome e contato que o cliente v\xEA.</p><form data-f="casa"><div class="campo"><label for="a-nome">Nome</label><input id="a-nome" name="name" value="${esc(c.name)}" required></div><div class="campo"><label for="a-end">Endere\xE7o</label><input id="a-end" name="address" value="${esc(c.address)}"></div><div class="campo"><label for="a-wa">WhatsApp da barbearia</label><input id="a-wa" name="whatsapp" inputmode="tel" value="${esc(fone(c.whatsapp))}"></div><button class="btn peq" type="submit">Salvar</button></form>
+ ${REAL ? (() => {
+    const g = c.geo, on = c.busca !== false;
+    return `<section class="painel"><h3>Aparecer para clientes perto</h3><p class="q">Clientes que procuram barbearia na regi\xE3o encontram a sua no mapa, com a dist\xE2ncia e o pr\xF3ximo hor\xE1rio livre.</p><label class="ck" style="margin:4px 0 12px"><input type="checkbox" data-a="busca-on" ${on ? "checked" : ""}>Mostrar minha barbearia na busca</label><p class="dica" style="margin:0 0 10px">${I("map-pin")}${g && g.lat ? g.fonte == "gps" ? "No mapa pela localiza\xE7\xE3o marcada na barbearia." : "No mapa pelo endere\xE7o cadastrado." : "Ainda n\xE3o est\xE1 no mapa. Confira o endere\xE7o acima ou use a localiza\xE7\xE3o."}</p><div class="acoes"><button class="btn sec peq" data-a="geo-end">Achar pelo endere\xE7o</button><button class="btn sec peq" data-a="geo-gps">Estou na barbearia: usar minha localiza\xE7\xE3o</button>${g && g.lat ? `<a class="btn sec peq" href="https://www.openstreetmap.org/?mlat=${g.lat}&mlon=${g.lng}#map=18/${g.lat}/${g.lng}" target="_blank" rel="noopener">${I("eye")}Ver no mapa</a>` : ""}</div><p class="dica" style="margin:10px 0 0">Busca dos clientes: <a href="/buscar" target="_blank" rel="noopener">${esc(location.host)}/buscar</a></p></section>`;
+  })() : ""}<section class="painel"><h3>Link para os clientes</h3><p class="q">Mande este endere\xE7o no WhatsApp, coloque na bio do Instagram e no QR code do balc\xE3o.</p><p class="num" style="font-weight:600;word-break:break-all;margin-bottom:10px">${esc(location.origin + "/" + SLUG)}</p><button class="btn sec peq" data-a="copiar">Copiar link</button></section>${""}${REAL ? `<section class="painel"><h3>Seu acesso</h3><p class="q">O painel abre s\xF3 com o seu email e senha. Clientes nunca veem esta \xE1rea.</p><p class="num" style="font-weight:600;word-break:break-all;margin-bottom:10px">${esc(location.origin + "/" + SLUG + "/painel")}</p><button class="btn sec peq" data-a="sair">${I("x")}Sair da conta</button></section>` : ""}<section class="painel"><h3>Tablet no balc\xE3o</h3><p class="q">Abra este endere\xE7o no tablet da recep\xE7\xE3o. Cada cliente marca e a tela limpa sozinha para o pr\xF3ximo, sem guardar nomes.</p><a class="btn sec peq" href="${REAL ? "/" + esc(SLUG) + "#balcao" : "#balcao"}" ${REAL ? 'target="_blank" rel="noopener"' : ""}>${I("store")}Abrir modo balc\xE3o aqui</a></section><section class="painel"><h3>Barbearia</h3><p class="q">Nome e contato que o cliente v\xEA.</p><form data-f="casa"><div class="campo"><label for="a-nome">Nome</label><input id="a-nome" name="name" value="${esc(c.name)}" required></div><div class="campo"><label for="a-end">Endere\xE7o</label><input id="a-end" name="address" value="${esc(c.address)}"></div><div class="campo"><label for="a-wa">WhatsApp da barbearia</label><input id="a-wa" name="whatsapp" inputmode="tel" value="${esc(fone(c.whatsapp))}"></div><button class="btn peq" type="submit">Salvar</button></form>
  ${tem ? `<hr style="border:0;border-top:1px solid var(--linha);margin:16px 0"><p class="q">Os clientes marcados como exemplo s\xE3o fict\xEDcios. Apague antes de usar de verdade.</p><div class="acoes"><button class="btn sec peq" data-a="carregar">Carregar hist\xF3rico de exemplo</button><button class="btn perigo peq" data-a="limpar">${I("trash-2")}Apagar dados de exemplo</button></div>` : `<hr style="border:0;border-top:1px solid var(--linha);margin:16px 0"><p class="q">Quer ver o painel cheio antes de usar? Os exemplos podem ser apagados depois.</p><button class="btn sec peq" data-a="carregar">Carregar hist\xF3rico de exemplo</button>`}</section></div>`);
 }
 const dlg = () => $("#dlg");
@@ -1875,7 +1929,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261120104518";
+const VERSAO = "20261123135548";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
@@ -2116,9 +2170,9 @@ function telaAdmin() {
   const venc = (l) => l.vence < hj, dias = (l) => Math.round((D(hj) - D(l.vence)) / 864e5), mrr = L.filter((l) => l.status != "suspenso").reduce((t, l) => t + +l.mensalidade, 0);
   const pil = (l) => ({ ativo: `<span class="pill confirmado">${I("check")}Ativa</span>`, aviso: `<span class="pill pendente">${I("hourglass")}Em aviso</span>`, suspenso: `<span class="pill cancelado">${I("ban")}Suspensa</span>` })[l.status];
   const card = (l) => `<article class="loja"><div class="loja-topo"><div><h3>${esc(l.name)}</h3><small>${esc(l.email)} \xB7 /${esc(l.slug)}</small></div>${pil(l)}</div>
- <dl class="dl"><dt>Mensalidade</dt><dd class="num">${brl(l.mensalidade)}</dd><dt>Vencimento</dt><dd${venc(l) ? ' style="color:var(--ruim)"' : ""}>${esc(brData(l.vence))}${venc(l) ? ` \xB7 vencida h\xE1 ${dias(l)} dias` : ""}</dd><dt>Pedidos (30 dias)</dt><dd class="num">${l.pedidos_30d}</dd><dt>Faturou (30 dias)</dt><dd class="num">${brl(l.faturado_30d)}</dd><dt>WhatsApp</dt><dd>${l.whatsapp ? esc(fone(l.whatsapp)) : "n\xE3o cadastrado"}</dd><dt>\xDAltimo pagamento</dt><dd>${l.ultimo_pagamento ? esc(new Date(l.ultimo_pagamento).toLocaleDateString("pt-BR")) + " \xB7 " + brl(l.ultimo_valor) : "nenhum pelo app"}</dd><dt>D\xE9bito autom\xE1tico</dt><dd>${l.debito_auto == "authorized" ? "Ativo no cart\xE3o" : l.debito_auto == "pending" ? "Esperando cart\xE3o" : "N\xE3o"}</dd><dt>Avisos no celular</dt><dd>${l.avisos_ativos > 0 ? "Ativados" : "N\xE3o ativou"}</dd></dl>
+ <dl class="dl"><dt>Mensalidade</dt><dd class="num">${brl(l.mensalidade)}</dd><dt>Vencimento</dt><dd${venc(l) ? ' style="color:var(--ruim)"' : ""}>${esc(brData(l.vence))}${venc(l) ? ` \xB7 vencida h\xE1 ${dias(l)} dias` : ""}</dd><dt>Pedidos (30 dias)</dt><dd class="num">${l.pedidos_30d}</dd><dt>Faturou (30 dias)</dt><dd class="num">${brl(l.faturado_30d)}</dd><dt>WhatsApp</dt><dd>${l.whatsapp ? esc(fone(l.whatsapp)) : "n\xE3o cadastrado"}</dd><dt>\xDAltimo pagamento</dt><dd>${l.ultimo_pagamento ? esc(new Date(l.ultimo_pagamento).toLocaleDateString("pt-BR")) + " \xB7 " + brl(l.ultimo_valor) : "nenhum pelo app"}</dd><dt>D\xE9bito autom\xE1tico</dt><dd>${l.debito_auto == "authorized" ? "Ativo no cart\xE3o" : l.debito_auto == "pending" ? "Esperando cart\xE3o" : "N\xE3o"}</dd><dt>Avisos no celular</dt><dd>${l.avisos_ativos > 0 ? "Ativados" : "N\xE3o ativou"}</dd><dt>Busca perto</dt><dd>${!l.na_busca ? "Escondida pelo barbeiro" : l.tem_mapa ? l.destaque_ate && l.destaque_ate >= hoje() ? "No mapa \xB7 destaque at\xE9 " + esc(brData(l.destaque_ate)) : "No mapa" : "Sem endere\xE7o no mapa"}</dd></dl>
  ${l.aviso ? `<p class="dica" style="margin:0 0 10px">Aviso atual: ${esc(l.aviso)}</p>` : ""}
- <div class="acoes"><button class="btn sec peq" data-a="adm-loja" data-v="${l.id}">${I("chart-column")}Ver an\xE1lise</button><button class="btn peq" data-a="adm-pago" data-v="${l.id}">${I("check")}Marcar como pago</button><button class="btn sec peq" data-a="adm-aviso" data-v="${l.id}">${I("bell")}Enviar aviso</button>${l.status == "suspenso" ? `<button class="btn sec peq" data-a="adm-status" data-v="${l.id}|ativo">Reativar</button>` : `<button class="btn perigo peq" data-a="adm-status" data-v="${l.id}|suspenso">Suspender</button>`}<button class="btn sec peq" data-a="adm-editar" data-v="${l.id}">${I("pencil")}Valor e vencimento</button><button class="btn sec peq" data-a="adm-senha" data-v="${l.id}">Nova senha</button>${zapOk(l.whatsapp || "") ? `<a class="btn sec peq" href="${wa(telZap(l.whatsapp), msgCobranca(l))}" target="_blank" rel="noopener">${I("message-circle")}Cobrar no WhatsApp</a>` : ""}<a class="btn sec peq" href="/${esc(l.slug)}/painel" target="_blank" rel="noopener">${I("store")}Abrir painel</a></div></article>`;
+ <div class="acoes"><button class="btn sec peq" data-a="adm-loja" data-v="${l.id}">${I("chart-column")}Ver an\xE1lise</button><button class="btn peq" data-a="adm-pago" data-v="${l.id}">${I("check")}Marcar como pago</button><button class="btn sec peq" data-a="adm-aviso" data-v="${l.id}">${I("bell")}Enviar aviso</button><button class="btn sec peq" data-a="adm-destaque" data-v="${l.id}">${I("crown")}${l.destaque_ate && l.destaque_ate >= hoje() ? "Destaque at\xE9 " + esc(brData(l.destaque_ate)) : "P\xF4r em destaque"}</button>${l.status == "suspenso" ? `<button class="btn sec peq" data-a="adm-status" data-v="${l.id}|ativo">Reativar</button>` : `<button class="btn perigo peq" data-a="adm-status" data-v="${l.id}|suspenso">Suspender</button>`}<button class="btn sec peq" data-a="adm-editar" data-v="${l.id}">${I("pencil")}Valor e vencimento</button><button class="btn sec peq" data-a="adm-senha" data-v="${l.id}">Nova senha</button>${zapOk(l.whatsapp || "") ? `<a class="btn sec peq" href="${wa(telZap(l.whatsapp), msgCobranca(l))}" target="_blank" rel="noopener">${I("message-circle")}Cobrar no WhatsApp</a>` : ""}<a class="btn sec peq" href="/${esc(l.slug)}/painel" target="_blank" rel="noopener">${I("store")}Abrir painel</a></div></article>`;
   const aba = Store.admAba || "analise", abas = [["analise", "chart-column", "An\xE1lise"], ["lojas", "store", "Barbearias"], ["contas", "users", "Contas"], ["financeiro", "wallet", "Mensalidades"], ["ajustes", "settings", "Ajustes"]];
   return `<main class="admin"><header class="topo-pro"><div><small>S\xF3 voc\xEA v\xEA esta \xE1rea</small><h1>Dono do app</h1></div><button class="btn sec" data-a="sair">${I("x")}Sair</button></header>
  <nav class="adm-abas" aria-label="Se\xE7\xF5es do painel">${abas.map(([k, ic, t]) => `<button class="${aba == k ? "on" : ""}" data-a="adm-aba" data-v="${k}"${aba == k ? ' aria-current="page"' : ""}>${I(ic)}<span>${t}</span></button>`).join("")}</nav>
@@ -2318,6 +2372,43 @@ async function mudaStatus(o, id, st) {
   return protege(() => Store.mudar(o, id, { st }));
 }
 const ACOES = {
+  async "busca-on"() {
+    const on = C().busca === false;
+    await protege(() => Store.salvaCfg(Object.assign({}, C(), { busca: on })));
+    toast(on ? "Sua barbearia aparece na busca." : "Sua barbearia saiu da busca. O seu link continua funcionando.");
+    R(true);
+  },
+  async "geo-end"() {
+    const c = C();
+    if (!c.address) return toast("Preencha o endere\xE7o da barbearia primeiro.");
+    toast("Procurando o endere\xE7o no mapa...");
+    const g = await geoEndereco(c.address);
+    if (!g) return toast("N\xE3o achei esse endere\xE7o. Confira rua, n\xFAmero e cidade, ou use a localiza\xE7\xE3o.");
+    await protege(() => Store.salvaCfg(Object.assign({}, C(), { geo: Object.assign(g, { addr: limpaEnd(c.address) }) })));
+    toast("Pronto! Sua barbearia est\xE1 no mapa.");
+    R(true);
+  },
+  async "geo-gps"() {
+    toast("Pegando sua localiza\xE7\xE3o...");
+    try {
+      const g = await minhaPosicao();
+      await protege(() => Store.salvaCfg(Object.assign({}, C(), { geo: Object.assign(g, { fonte: "gps", addr: limpaEnd(C().address) }) })));
+      toast("Pronto! Marquei a barbearia onde voc\xEA est\xE1.");
+      R(true);
+    } catch (e) {
+      toast("N\xE3o consegui a localiza\xE7\xE3o. Libere o acesso no navegador e tente de novo.");
+    }
+  },
+  async "adm-destaque"(id) {
+    const l = Store.lojas.find((x) => x.id == id);
+    const d = prompt(`Destaque no topo da busca para ${l.name}: quantos dias? (0 tira o destaque)`, "30");
+    if (d == null) return;
+    const { data, error } = await Store.sb.rpc("admin_destaque", { p_shop: id, p_dias: +d || 0 });
+    if (error) return toast(erroAmigo(error) || "N\xE3o consegui.");
+    l.destaque_ate = data;
+    toast(data ? "Em destaque at\xE9 " + brData(data) + "." : "Destaque removido.");
+    R(true);
+  },
   "adm-aba"(v) {
     Store.admAba = v;
     R(true);
@@ -3295,6 +3386,7 @@ const FORMS = {
     await protege(() => Store.salvaCfg(c));
     toast("Dados salvos.");
     R(true);
+    if (REAL && c.address && (!c.geo || c.geo.fonte != "gps") && (!c.geo || c.geo.addr != limpaEnd(c.address))) autoGeo();
   }
 };
 const mascaraTel = (d) => d.length >= 10 ? "(" + d.slice(0, 2) + ") " + d.slice(2, d.length - 4) + "-" + d.slice(-4) : d;
