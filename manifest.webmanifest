@@ -1,1 +1,56 @@
-{"name": "DreewSolution · Barbearias", "short_name": "DreewSolution", "start_url": "/buscar", "scope": "/", "display": "standalone", "background_color": "#0b0b0c", "theme_color": "#0b0b0c", "icons": [{"src": "/icon-192.png", "sizes": "192x192", "type": "image/png"}, {"src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}]}
+{
+  "name": "DreewSolution · Barbearias",
+  "short_name": "Dreew",
+  "start_url": "/buscar",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b0b0c",
+  "theme_color": "#0b0b0c",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "/",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "description": "Encontre barbearias perto de você, compare preços e marque horário pelo celular.",
+  "orientation": "portrait",
+  "shortcuts": [
+    {
+      "name": "Encontrar barbearia",
+      "short_name": "Encontrar",
+      "url": "/buscar",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Adicionar minha barbearia",
+      "short_name": "Adicionar",
+      "url": "/buscar#adicionar",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
