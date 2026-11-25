@@ -72,7 +72,7 @@ h1 span{color:var(--ouro)}
 .chip:last-child{margin-right:12px}
 @media (min-width:960px){.filtros-w{margin:14px 0}.filtros{padding:0;-webkit-mask-image:none;mask-image:none;flex-wrap:wrap}}
 .res{display:flex;flex-direction:column;gap:14px}
-.mapa-w{position:relative;height:280px;border-radius:var(--r);border:1px solid var(--linha);overflow:hidden;background:#161616}
+.mapa-w{position:relative;height:clamp(340px,52vh,440px);border-radius:var(--r);border:1px solid var(--linha);overflow:hidden;background:#161616}
 #mapa{position:absolute;inset:0}
 .qtd{display:flex;justify-content:space-between;align-items:baseline;font-size:13px;color:var(--cinza);min-height:20px}
 .qtd b{color:var(--branco);font-weight:600}
@@ -242,6 +242,14 @@ body.nav-on{overflow:hidden}
 @media (min-width:760px){.nav-topo{left:50%;right:auto;transform:translateX(-50%);width:min(560px,calc(100% - 24px))}.nav-depois{left:calc(50% - 268px)}.nav-base,.nav-chegou{left:50%;right:auto;transform:translateX(-50%);width:min(560px,100%);bottom:16px;border-radius:18px;border:1px solid var(--ouro-esc)}.nav-centro{bottom:200px}}
 @media (prefers-reduced-motion:reduce){.nav-seta svg,.nav-eu i{transition:none}}
 #toast{z-index:6000}
+
+/* gestos do mapa */
+.mapa-dica{position:absolute;inset:0;z-index:900;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;background:rgba(8,8,9,.62);color:#fff;font-weight:700;font-size:15px;line-height:1.35;pointer-events:none;opacity:0;transition:opacity .25s ease}
+.mapa-dica.on{opacity:1}.mapa-dica span{display:grid;gap:4px}.mapa-dica b{font-size:16px}.mapa-dica small{font-weight:500;font-size:13px;color:#d9d4c7}
+.mapa-w.segurando{box-shadow:0 0 0 2px var(--ouro)}
+.mapa-w.segurando .leaflet-container{cursor:grabbing}
+.mapa-w .leaflet-container{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+@media (prefers-reduced-motion:reduce){.mapa-dica{transition:none}}
 </style></head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
@@ -352,7 +360,32 @@ const selo=`<span class="selo-v">${svg('<path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 
 const icTes='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#14110a" stroke-width="2.4" stroke-linecap="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></svg>';
 const durTxt=m=>m>=60?Math.floor(m/60)+'h'+(m%60?String(m%60).padStart(2,'0'):''):m+' min';
 
-const mapa=L.map('mapa',{zoomControl:true,attributionControl:true,minZoom:5,maxZoom:19,zoomSnap:.5,scrollWheelZoom:matchMedia('(pointer:fine)').matches}).setView([-23.51,-46.88],12);
+const mapa=L.map('mapa',{zoomControl:true,attributionControl:true,minZoom:5,maxZoom:19,zoomSnap:.5,scrollWheelZoom:false,touchZoom:true,bounceAtZoomLimits:false}).setView([-23.51,-46.88],12);
+/* Gestos do mapa: a página rola normal por cima do mapa.
+   Celular e tablet: segure o mapa por um instante (ou use dois dedos) para mover.
+   Computador: arraste com o mouse; zoom com Ctrl + rolagem (ou pelos botões + e −). */
+(()=>{const box=document.querySelector('.mapa-w'),el=mapa.getContainer(),toque=matchMedia('(pointer:coarse)').matches,mac=/Mac|iPhone|iPad/.test(navigator.platform||'');
+  const dica=document.createElement('div');dica.className='mapa-dica';dica.setAttribute('aria-hidden','true');box.appendChild(dica);
+  let tDica=0;const mostra=(t,u)=>{dica.innerHTML=`<span><b>${t}</b>${u?`<small>${u}</small>`:''}</span>`;dica.classList.add('on');clearTimeout(tDica);tDica=setTimeout(()=>dica.classList.remove('on'),1500)};
+  if(toque){
+    mapa.dragging.disable();
+    let ini=null,arm=false,timer=0,ult=null,aviso=0;
+    el.addEventListener('touchstart',e=>{clearTimeout(timer);if(e.touches.length!=1){ini=null;arm=false;box.classList.remove('segurando');return}
+      const t=e.touches[0];ini={x:t.clientX,y:t.clientY};ult={x:t.clientX,y:t.clientY};arm=false;
+      timer=setTimeout(()=>{if(!ini)return;arm=true;box.classList.add('segurando');dica.classList.remove('on');try{navigator.vibrate&&navigator.vibrate(12)}catch(_){}},260)},{passive:true});
+    el.addEventListener('touchmove',e=>{if(!ini||e.touches.length!=1)return;const t=e.touches[0];
+      if(arm){e.preventDefault();mapa.panBy([ult.x-t.clientX,ult.y-t.clientY],{animate:false});ult={x:t.clientX,y:t.clientY};return}
+      if(Math.hypot(t.clientX-ini.x,t.clientY-ini.y)>10){clearTimeout(timer);ini=null;if(Date.now()-aviso>4000){aviso=Date.now();mostra('Segure o mapa para mover','ou use dois dedos')}}},{passive:false});
+    const fim=()=>{clearTimeout(timer);ini=null;arm=false;box.classList.remove('segurando')};
+    el.addEventListener('touchend',fim,{passive:true});el.addEventListener('touchcancel',fim,{passive:true});
+    el.addEventListener('contextmenu',e=>e.preventDefault());
+  }else{
+    let acum=0,quando=0;
+    el.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();acum+=e.deltaY;if(Math.abs(acum)<40&&Date.now()-quando<120)return;quando=Date.now();const z=mapa.getZoom()+(acum>0?-.5:.5);acum=0;mapa.setZoomAround(mapa.mouseEventToContainerPoint(e),Math.max(mapa.getMinZoom(),Math.min(mapa.getMaxZoom(),z)))}
+      else mostra(`${mac?'⌘':'Ctrl'} + rolagem para dar zoom`,'ou use os botões + e −')},{passive:false});
+  }
+})();
+
 mapa.attributionControl.setPrefix('');
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,detectRetina:true,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(mapa);
 const camada=L.layerGroup().addTo(mapa);let euMk=null;
@@ -383,7 +416,7 @@ function desenha(){const v=visiveis();
   camada.clearLayers();const pts=[];
   v.forEach(l=>{if(l.lat==null)return;const sel=S.sel==l.slug,t=l.destaque?44:36;const ic=L.divIcon({className:'',html:`<div class="pino${l.destaque?' top':''}${sel?' sel':''}">${icTes}</div>`,iconSize:[t,t],iconAnchor:[Math.round(t*.15),t],popupAnchor:[Math.round(t*.35),-t+4]});
     const p=S.prox[l.slug],sit=situacao(l);
-    L.marker([l.lat,l.lng],{icon:ic,zIndexOffset:sel?3000:l.destaque?1000:0,title:l.name,riseOnHover:true}).bindPopup(`<span class="pp-n">${esc(l.name)}</span><span class="pp-l">${l.dist_km!=null?km(l.dist_km)+' · ':''}<span class="${sit.ab?'st-ab':'st-fe'}">${esc(sit.t)}</span>${l.preco_min!=null?'<br>A partir de '+brl(l.preco_min):''}${p?`<br>Próximo livre: <b style="color:var(--ouro-claro)">${quando(p)}, ${hm(p.s)}</b>`:''}</span><div class="pp-bts"><a class="pp-b ouro" href="/${encodeURIComponent(l.slug)}">${IC.cal}Agendar horário</a><button type="button" class="pp-b sec" data-ir="${esc(l.slug)}">${IC.rota}Ir até lá com GPS</button></div>`,{maxWidth:Math.min(250,innerWidth-110),autoPanPadding:[24,24]}).on('click',()=>marca(l.slug)).addTo(camada);pts.push([l.lat,l.lng])});
+    L.marker([l.lat,l.lng],{icon:ic,zIndexOffset:sel?3000:l.destaque?1000:0,title:l.name,riseOnHover:true}).bindPopup(`<span class="pp-n">${esc(l.name)}</span><span class="pp-l">${l.dist_km!=null?km(l.dist_km)+' · ':''}<span class="${sit.ab?'st-ab':'st-fe'}">${esc(sit.t)}</span>${l.preco_min!=null?'<br>A partir de '+brl(l.preco_min):''}${p?`<br>Próximo livre: <b style="color:var(--ouro-claro)">${quando(p)}, ${hm(p.s)}</b>`:''}</span><div class="pp-bts"><a class="pp-b ouro" href="/${encodeURIComponent(l.slug)}">${IC.cal}Agendar horário</a><button type="button" class="pp-b sec" data-ir="${esc(l.slug)}">${IC.rota}Ir até lá com GPS</button></div>`,{maxWidth:Math.min(260,Math.max(200,mapa.getSize().x-56)),autoPanPaddingTopLeft:[12,56],autoPanPaddingBottomRight:[12,28],keepInView:false}).on('click',()=>marca(l.slug)).addTo(camada);pts.push([l.lat,l.lng])});
   if(S.pos)pts.push([S.pos.lat,S.pos.lng]);
   if(!ajustou&&pts.length){ajustou=true;if(pts.length>1)mapa.fitBounds(pts,{padding:[40,40],maxZoom:15});else mapa.setView(pts[0],15)}}
 function marca(slug){S.sel=slug;document.querySelectorAll('.card').forEach(c=>c.classList.toggle('sel',c.dataset.sel==slug))}
