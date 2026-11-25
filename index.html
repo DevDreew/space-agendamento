@@ -683,6 +683,31 @@ input,select,textarea{font-size:16px}
 .bp-anual b{display:block;color:var(--ouro-claro);font-size:14px}
 .bp-anual small{display:block;color:var(--cinza);font-size:13px;margin-top:2px;line-height:1.4}
 @media (max-width:560px){.bp-anual .btn{width:100%}}
+
+/* assinatura em dia: resumo compacto em Ajustes */
+.assin-resumo{border:1px solid var(--linha);border-radius:16px;background:var(--carvao);margin:0 0 18px}
+.assin-resumo>summary{list-style:none;display:flex;align-items:center;gap:12px;padding:14px 16px;cursor:pointer;min-height:56px}
+.assin-resumo>summary::-webkit-details-marker{display:none}
+.assin-resumo .ar-i{flex:none;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(80,200,120,.12);color:#6fd394}
+.assin-resumo .ar-i svg{width:18px;height:18px}
+.assin-resumo .ar-t{flex:1;min-width:0;display:grid;gap:2px}
+.assin-resumo .ar-t b{font-size:15px;overflow-wrap:anywhere}
+.assin-resumo .ar-t small{color:var(--cinza);font-size:13px}
+.assin-resumo .ar-v{flex:none;font-size:13px;font-weight:700;color:var(--ouro)}
+.assin-resumo[open] .ar-v{opacity:.6}
+.assin-resumo>.banner-pag{margin:0;border:0;border-top:1px solid var(--linha);border-radius:0 0 16px 16px;background:transparent}
+.assin-resumo>summary:focus-visible{outline:2px solid var(--ouro);outline-offset:2px;border-radius:16px}
+
+/* cobrança curta no topo das telas */
+.banner-pag.curto .bp-acoes{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:10px}
+.banner-pag.curto .bp-acoes .btn{width:100%}
+.banner-pag.curto p{margin:6px 0 0}
+/* índice de Ajustes */
+.aj-ind{position:sticky;top:0;z-index:30;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:10px 0;margin:0 0 6px;background:linear-gradient(var(--preto) 75%,transparent);-webkit-mask-image:linear-gradient(90deg,#000 90%,transparent)}
+.aj-ind::-webkit-scrollbar{display:none}
+.aj-ind a{flex:none;display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--linha);background:var(--carvao);color:var(--cinza);font-weight:600;font-size:13.5px;text-decoration:none;white-space:nowrap}
+.aj-ind a:hover{color:var(--branco);border-color:var(--ouro)}
+.aj .painel{scroll-margin-top:64px}
 </style></head>
 <body><div id="app"></div><dialog id="dlg"></dialog><div id="toast" role="status" aria-live="polite"></div><div id="tip" role="tooltip" aria-hidden="true"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -717,7 +742,7 @@ const toMin = (t) => {
 };
 const brl = (n) => {
   n = +n || 0;
-  return "R$ " + (Math.abs(n - Math.round(n)) < 5e-3 ? Math.round(n).toLocaleString("pt-BR") : n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+  return "R$\xA0" + (Math.abs(n - Math.round(n)) < 5e-3 ? Math.round(n).toLocaleString("pt-BR") : n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
 };
 const dur = (m) => m < 60 ? m + " min" : Math.floor(m / 60) + "h" + (m % 60 ? String(m % 60).padStart(2, "0") : "");
 const pad = (n) => String(n).padStart(2, "0");
@@ -1498,6 +1523,11 @@ const StoreSB = {
     this.user = user;
     const ad = await this.sb.rpc("eh_admin");
     this.ehAdmin = !ad.error && ad.data === true;
+    if (this.ehAdmin && !ADMIN && (!SLUG || this.vemDoLogin)) {
+      this.vemDoLogin = false;
+      location.replace("/admin");
+      return;
+    }
     if (ADMIN) {
       if (!this.ehAdmin) {
         this.mode = "sem-admin";
@@ -1999,11 +2029,38 @@ function cliente() {
 }
 const pendentes = () => todos().filter((x) => x.st == "pendente" && (x.d > hoje() || x.d == hoje() && x.s + x.dur > agoraMin())).sort((a, b) => a.at - b.at);
 const NAV = [["hoje", "Hoje", "clock"], ["agenda", "Agenda", "calendar-days"], ["clientes", "Clientes", "users"], ["resultados", "Resultados", "chart-column"], ["ajustes", "Ajustes", "settings"]];
+const AJ_CURTO = { "Apar\xEAncia": "Apar\xEAncia", "Clube de assinatura": "Clube", "Dias fechados e folgas": "Folgas", "Lembrete de retorno": "Retorno", "Servi\xE7os e pre\xE7os": "Servi\xE7os", "Barbeiros": "Barbeiros", "Hor\xE1rio da casa": "Hor\xE1rio", "Aparecer para clientes perto": "Mapa", "Avalia\xE7\xF5es dos clientes": "Avalia\xE7\xF5es", "Link para os clientes": "Link", "Seu acesso": "Acesso", "Tablet no balc\xE3o": "Balc\xE3o", "Barbearia": "Dados" };
+function indiceAj(h) {
+  const it = [];
+  let n = 0;
+  h = h.replace(/<section class="painel"([^>]*)><h3>([^<]+)<\/h3>/g, (m, at, t) => {
+    const id = "aj-" + ++n;
+    it.push([id, AJ_CURTO[t.trim()] || t.trim()]);
+    return `<section class="painel" id="${id}"${at}><h3>${t}</h3>`;
+  });
+  if (it.length < 4) return h;
+  return h.replace("</header>", `</header><nav class="aj-ind" aria-label="Ir para">${it.map(([id, t]) => `<a href="#ajustes" data-ir-aj="${id}">${esc(t)}</a>`).join("")}</nav>`);
+}
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("[data-ir-aj]");
+  if (!a) return;
+  e.preventDefault();
+  const el = document.getElementById(a.dataset.irAj);
+  if (el) {
+    el.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion:reduce)").matches ? "auto" : "smooth", block: "start" });
+    const h = el.querySelector("h3");
+    if (h) {
+      h.setAttribute("tabindex", "-1");
+      h.focus({ preventScroll: true });
+    }
+  }
+});
 function shellPro(miolo) {
+  if (U.rota == "ajustes") miolo = indiceAj(miolo);
   miolo = bannerAssin(U.rota == "ajustes") + (REAL && Store.assin && Store.assin.status == "suspenso" && !Store.adminVendo && U.rota != "ajustes" ? bloqueio() : miolo);
   const p = pendentes().length;
   const link = ([r, n, ic]) => `<a href="#${r}" class="${U.rota == r ? "on" : ""}">${I(ic)}${n}${r == "hoje" && p ? `<span class="badge">${p}</span>` : ""}</a>`;
-  return `<div class="pro"><aside class="lado"><h1>${esc(C().name)}</h1>${NAV.map(link).join("")}<div class="esp"></div><a href="${REAL ? "/" + esc(SLUG) : "#agendar"}" target="${REAL ? "_blank" : "_self"}" rel="noopener">${I("scissors")}Ver como cliente</a>${REAL ? `<a href="#" data-a="sair">${I("x")}Sair</a>` : ""}</aside><main id="conteudo">${miolo}</main><nav class="tabbar" aria-label="Painel">${NAV.map(link).join("")}</nav></div>`;
+  return `<div class="pro"><aside class="lado"><h1>${esc(C().name)}</h1>${NAV.map(link).join("")}<div class="esp"></div><a href="${REAL ? "/" + esc(SLUG) : "#agendar"}" target="${REAL ? "_blank" : "_self"}" rel="noopener">${I("scissors")}Ver como cliente</a>${REAL && Store.ehAdmin && !Store.adminVendo ? `<a href="/admin">${I("lock")}Painel do dono</a>` : ""}${REAL ? `<a href="#" data-a="sair">${I("x")}Sair</a>` : ""}</aside><main id="conteudo">${miolo}</main><nav class="tabbar" aria-label="Painel">${NAV.map(link).join("")}</nav></div>`;
 }
 const filtroB = (x) => U.pb == "todos" || x.b == U.pb;
 const chipsB = () => `<div class="filtros" role="group" aria-label="Filtrar por barbeiro">${[{ id: "todos", name: "Todos" }, ...C().barbers].map((b) => `<button class="chip ${U.pb == b.id ? "on" : ""}" data-a="pb" data-v="${esc(b.id)}" aria-pressed="${U.pb == b.id}">${esc(b.name)}</button>`).join("")}</div>`;
@@ -2492,7 +2549,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261125114956";
+const VERSAO = "20261125143007";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
@@ -2628,11 +2685,14 @@ function bannerAssin(sempre) {
   if (Store.adminVendo) return `<p class="banner-admin">${I("lock")}Voc\xEA est\xE1 no painel da <b>${esc(C().name)}</b> como dono do app. <a href="/admin">Voltar para o painel do dono</a></p>`;
   const a = Store.assin;
   if (!a || a.status == "suspenso") return "";
-  const av = a.status == "aviso" || a.vence < hoje();
-  const falta = a.vence ? Math.round((D(a.vence) - D(hoje())) / 864e5) : 99;
-  if (!sempre && !av && falta > 5 && a.debito_auto != "pending") return "";
+  const av = a.status == "aviso" || !!a.aviso || a.vence && a.vence < hoje();
+  if (!av && !sempre) return "";
+  if (av && !sempre) return `<section class="banner-pag curto" role="status"><div class="bp-topo"><b>${I("hourglass")}Mensalidade do app</b><span class="bp-valor">${brl(a.mensalidade)}<small>/m\xEAs</small></span></div><p>${esc(a.aviso || "Sua mensalidade venceu em " + brData(a.vence) + ".")}</p>${a.debito_auto == "pending" ? `<p class="bp-auto pend">${I("hourglass")}D\xE9bito autom\xE1tico esperando o cart\xE3o. Termine em Outras formas.</p>` : ""}<div class="bp-acoes">${a.mp_ativo ? `<button class="btn" data-a="pagar-mp">${I("arrow-right")}Pagar agora</button>` : pagar(a)}<a class="btn sec" href="#ajustes">Outras formas</a></div></section>`;
   const linha = autoOn(a) ? `<p class="bp-auto">${I("check")}D\xE9bito autom\xE1tico ativo no cart\xE3o${a.proxima_cobranca ? ` \xB7 pr\xF3xima cobran\xE7a em ${esc(brData(a.proxima_cobranca))}` : ""}. <button class="link" data-a="cancelar-auto">Cancelar</button></p>` : a.debito_auto == "pending" ? `<p class="bp-auto pend">${I("hourglass")}D\xE9bito autom\xE1tico esperando o cart\xE3o. Toque em D\xE9bito autom\xE1tico no cart\xE3o para terminar.</p>` : "";
-  return `<section class="banner-pag ${av ? "" : "ok"}"><div class="bp-topo"><b>${I(av ? "hourglass" : "check")}${esc(Store.plano && Store.plano.nome || "Mensalidade do app")}</b><span class="bp-valor">${brl(a.mensalidade)}<small>/m\xEAs</small></span></div>${Store.plano && Store.plano.auto ? `<p class="bp-plano">${Store.plano.barbeiros == 1 ? "1 barbeiro. Se cadastrar de 2 a 4 barbeiros, passa para o Plano Barbearia (R$&nbsp;89,90)." : Store.plano.barbeiros + " barbeiros. O Plano Barbearia cobre at\xE9 4; cada barbeiro a mais soma R$&nbsp;15."}</p>` : ""}<p>${av ? esc(a.aviso || "Sua mensalidade vence em " + brData(a.vence) + ".") : `Em dia. Pr\xF3ximo vencimento: ${esc(brData(a.vence))}.`}${a.mp_ativo && !autoOn(a) ? " Pague com Pix, d\xE9bito ou cr\xE9dito, ou deixe no d\xE9bito autom\xE1tico do cart\xE3o." : ""}</p>${linha}${a.mp_ativo && !autoOn(a) && Store.plano && +Store.plano.anual > 0 ? `<div class="bp-anual"><div><b>Plano anual \xB7 2 meses gr\xE1tis</b><small>12 meses por ${brl(Store.plano.anual)}, em at\xE9 12x no cart\xE3o ou \xE0 vista no Pix. Soma 12 meses ao seu vencimento.</small></div><button class="btn sec peq" data-a="pagar-anual">${I("calendar-days")}Pagar o ano</button></div>` : ""}${autoOn(a) && !av ? "" : `<div class="acoes${av ? "" : " peq"}" style="margin:0">${pagar(a)}${av ? suporte(a) : ""}</div>`}</section>`;
+  const html = `<section class="banner-pag ${av ? "" : "ok"}"><div class="bp-topo"><b>${I(av ? "hourglass" : "check")}${esc(Store.plano && Store.plano.nome || "Mensalidade do app")}</b><span class="bp-valor">${+a.mensalidade > 0 ? `${brl(a.mensalidade)}<small>/m\xEAs</small>` : "<small>sem cobran\xE7a</small>"}</span></div>${Store.plano && Store.plano.auto ? `<p class="bp-plano">${Store.plano.barbeiros == 1 ? "1 barbeiro. Se cadastrar de 2 a 4 barbeiros, passa para o Plano Barbearia (R$&nbsp;89,90)." : Store.plano.barbeiros + " barbeiros. O Plano Barbearia cobre at\xE9 4; cada barbeiro a mais soma R$&nbsp;15."}</p>` : ""}<p>${av ? esc(a.aviso || "Sua mensalidade vence em " + brData(a.vence) + ".") : `Em dia. Pr\xF3ximo vencimento: ${esc(brData(a.vence))}.`}${a.mp_ativo && !autoOn(a) ? " Pague com Pix, d\xE9bito ou cr\xE9dito, ou deixe no d\xE9bito autom\xE1tico do cart\xE3o." : ""}</p>${linha}${a.mp_ativo && !autoOn(a) && Store.plano && +Store.plano.anual > 0 ? `<div class="bp-anual"><div><b>Plano anual \xB7 2 meses gr\xE1tis</b><small>12 meses por ${brl(Store.plano.anual)}, em at\xE9 12x no cart\xE3o ou \xE0 vista no Pix. Soma 12 meses ao seu vencimento.</small></div><button class="btn sec peq" data-a="pagar-anual">${I("calendar-days")}Pagar o ano</button></div>` : ""}${autoOn(a) && !av ? "" : `<div class="acoes${av ? "" : " peq"}" style="margin:0">${pagar(a)}${av ? suporte(a) : ""}</div>`}</section>`;
+  if (av) return html;
+  const nome = Store.plano && Store.plano.nome || "Assinatura do app";
+  return `<details class="assin-resumo"><summary><span class="ar-i">${I("check")}</span><span class="ar-t"><b>${esc(nome)}</b><small>${+a.mensalidade > 0 ? brl(a.mensalidade) + "/m\xEAs" : "Sem cobran\xE7a"} \xB7 em dia at\xE9 ${esc(brData(a.vence))}${autoOn(a) ? " \xB7 d\xE9bito autom\xE1tico ativo" : ""}</small></span><span class="ar-v">Ver op\xE7\xF5es</span></summary>${html}</details>`;
 }
 function bloqueio() {
   const a = Store.assin || {};
@@ -4191,6 +4251,7 @@ const FORMS = {
       return R(true);
     }
     U.erroAcesso = "";
+    Store.vemDoLogin = true;
     Store.entrouPainel(data.user);
   },
   async cadastro(f) {
