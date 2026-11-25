@@ -250,6 +250,20 @@ body.nav-on{overflow:hidden}
 .mapa-w.segurando .leaflet-container{cursor:grabbing}
 .mapa-w .leaflet-container{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 @media (prefers-reduced-motion:reduce){.mapa-dica{transition:none}}
+
+/* planos */
+.pl-topo{display:block;color:var(--cinza);font-size:13px}
+.planos{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.plano{border:1px solid var(--linha-2);border-radius:14px;padding:14px;background:var(--carvao-2);display:grid;gap:4px;min-width:0}
+.plano.dest{border-color:var(--ouro-esc);background:linear-gradient(160deg,rgba(212,171,95,.12),transparent)}
+.plano span{font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--ouro)}
+.plano b{font-family:var(--titulo);font-weight:900;font-size:34px;line-height:1;color:var(--ouro-claro);white-space:nowrap}
+.plano b sup{font-size:.5em;vertical-align:super}
+.plano b i{display:block;font-style:normal;font-family:var(--texto);font-size:13px;color:var(--cinza);font-weight:600;margin-top:4px}
+.plano small{color:var(--cinza);font-size:12.5px;line-height:1.35}
+.anual{font-size:14px;color:var(--branco);margin:0 0 6px;line-height:1.4}
+.anual b{color:var(--ouro-claro)}
+@media (max-width:360px){.planos{grid-template-columns:1fr}}
 </style></head>
 <body>
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
@@ -304,7 +318,13 @@ body.nav-on{overflow:hidden}
   <p class="sub">O cliente encontra sua barbearia no mapa, escolhe o serviço e o horário, e o pedido chega no seu WhatsApp. Você confirma pelo painel.</p>
   <div class="add" style="margin-top:20px">
     <div class="pl">
-      <div class="pl-preco"><small>Depois de 15 dias grátis</small><b>R$ 80<span>/mês</span></b><small>Sem fidelidade. Sem limite de clientes.</small></div>
+      <small class="pl-topo">15 dias grátis. Depois, escolha pelo tamanho da equipe.</small>
+      <div class="planos">
+        <div class="plano"><span>Solo</span><b>R$&nbsp;69<sup>,90</sup><i>/mês</i></b><small>1 barbeiro</small></div>
+        <div class="plano dest"><span>Barbearia</span><b>R$&nbsp;89<sup>,90</sup><i>/mês</i></b><small>até 4 barbeiros · R$&nbsp;15 por barbeiro a mais</small></div>
+      </div>
+      <p class="anual"><b>Plano anual: 2 meses grátis.</b> Pague 10 e use 12, em até 12x no cartão ou no Pix.</p>
+      <small class="pl-topo">Sem fidelidade. Sem limite de clientes.</small>
       <a class="btn ouro grande" href="/painel#cadastro">Cadastrar minha barbearia</a>
       <a class="btn sec" href="/painel">Já tenho conta: entrar no painel</a>
     </div>

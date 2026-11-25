@@ -2,6 +2,7 @@
 // acao "link": pagamento avulso da mensalidade (Pix, débito ou crédito) pelo Checkout Pro.
 // acao "assinar": débito automático mensal no cartão de crédito (assinatura do Mercado Pago).
 // acao "cancelar_auto": cancela o débito automático.
+// acao "anual": paga 12 meses de uma vez pelo preço de 10 (Pix, débito ou crédito).
 // acao "destaque": pagamento do destaque no topo da busca (30 dias). Não mexe na mensalidade.
 // acao "sincronizar": confere no Mercado Pago os pagamentos da barbearia (ou de todas, se for o dono do app).
 // acao "testar": o dono do app confere se a chave funciona.
@@ -48,20 +49,25 @@ function maisUmMes(d: string) {
   x.setUTCMonth(x.getUTCMonth() + 1);
   return x.toISOString().slice(0, 10);
 }
+function maisMeses(d: string, n: number) {
+  const x = new Date(d + "T12:00:00Z");
+  x.setUTCMonth(x.getUTCMonth() + n);
+  return x.toISOString().slice(0, 10);
+}
 function maisDias(d: string, n: number) {
   const x = new Date(d + "T12:00:00Z");
   x.setUTCDate(x.getUTCDate() + n);
   return x.toISOString().slice(0, 10);
 }
 
-// Registra um pagamento aprovado uma única vez (o id do Mercado Pago impede repetição) e libera mais um mês.
-async function registrar(shopId: string, pagId: string, valor: number, metodo: string, quando?: string) {
+// Registra um pagamento aprovado uma única vez (o id do Mercado Pago impede repetição) e libera mais um mês (ou 12, no plano anual).
+async function registrar(shopId: string, pagId: string, valor: number, metodo: string, quando?: string, meses = 1) {
   const { data: shop } = await adm.from("shops").select("id,vence").eq("id", shopId).maybeSingle();
   if (!shop) return false;
   const { error } = await adm.from("pagamentos").insert({ id: pagId, shop_id: shop.id, valor, metodo, pago_em: quando || new Date().toISOString() });
   if (error) return false;
   const base = shop.vence > hojeBR() ? shop.vence : hojeBR();
-  await adm.from("shops").update({ vence: maisUmMes(base), status: "ativo", aviso: null }).eq("id", shop.id);
+  await adm.from("shops").update({ vence: meses === 1 ? maisUmMes(base) : maisMeses(base, meses), status: "ativo", aviso: null }).eq("id", shop.id);
   return true;
 }
 
@@ -99,6 +105,11 @@ async function confirmarPagamento(id: string, token: string) {
     const shopId = ref.slice(9);
     if (!/^[0-9a-f-]{36}$/i.test(shopId)) return { ignorado: "referencia_invalida" };
     return { destaque: await ativarDestaque(shopId, String(p.id), Number(p.transaction_amount), p.date_approved) };
+  }
+  if (ref.startsWith("anual:")) {
+    const shopId = ref.slice(6);
+    if (!/^[0-9a-f-]{36}$/i.test(shopId)) return { ignorado: "referencia_invalida" };
+    return { liberado: await registrar(shopId, String(p.id), Number(p.transaction_amount), "anual", p.date_approved, 12) };
   }
   const shop = await lojaDoPagamento(p);
   if (!shop) return { ignorado: "sem_barbearia" };
@@ -151,6 +162,12 @@ async function sincronizar(shop: any, token: string) {
       if (await ativarDestaque(shop.id, String(p.id), Number(p.transaction_amount), p.date_approved)) novos++;
     }
   } catch (e) { console.error("sync destaque", e); }
+  try {
+    const r = await mp(`/v1/payments/search?external_reference=${encodeURIComponent("anual:" + shop.id)}&status=approved&sort=date_created&criteria=desc&limit=30`, token);
+    for (const p of r.results || []) {
+      if (await registrar(shop.id, String(p.id), Number(p.transaction_amount), "anual", p.date_approved, 12)) novos++;
+    }
+  } catch (e) { console.error("sync anual", e); }
   return novos;
 }
 
@@ -232,6 +249,27 @@ Deno.serve(async (req) => {
         }),
       });
       return json({ ok: true, url: pref.init_point, preco: DESTAQUE_PRECO, dias: DESTAQUE_DIAS });
+    }
+    if (body.acao === "anual") {
+      if (shop.mp_assinatura_id && shop.mp_assinatura_status === "authorized") return json({ erro: "tem_debito_automatico" }, 400);
+      const sg = await adm.from("platform_config").select("valor").eq("chave", "anual_meses_pagos").maybeSingle();
+      const pagos = Number((sg.data && sg.data.valor) || 10) || 10;
+      const valor = Math.round(Number(shop.mensalidade) * pagos * 100) / 100;
+      if (!(valor > 0)) return json({ erro: "sem_valor" }, 400);
+      const pref = await mp("/checkout/preferences", token, {
+        method: "POST",
+        body: JSON.stringify({
+          items: [{ id: "anual-dreewsolution", title: `Plano anual DreewSolution (12 meses) · ${shop.name}`, quantity: 1, unit_price: valor, currency_id: "BRL" }],
+          external_reference: `anual:${shop.id}`,
+          payer: { email: user.email },
+          notification_url: AVISO_MP,
+          back_urls: { success: volta, pending: volta, failure: volta },
+          auto_return: "approved",
+          statement_descriptor: "DREEWSOLUTION",
+          payment_methods: { installments: 12 },
+        }),
+      });
+      return json({ ok: true, url: pref.init_point, valor });
     }
     if (body.acao === "link") {
       const pref = await mp("/checkout/preferences", token, {

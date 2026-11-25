@@ -675,6 +675,14 @@ input,select,textarea{font-size:16px}
 .vit-l>div{min-width:0;flex:1 1 200px}
 .vit-l>.btn{flex:none}
 @media (max-width:560px){.vit-l>.btn{width:100%;margin-left:34px;width:calc(100% - 34px)}}
+
+/* plano e anual na mensalidade */
+.bp-plano{font-size:13px;color:var(--cinza);margin:-4px 0 8px}
+.bp-anual{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0;padding:12px 14px;border:1px dashed var(--ouro-esc);border-radius:12px;background:rgba(212,171,95,.06)}
+.bp-anual>div{flex:1 1 220px;min-width:0}
+.bp-anual b{display:block;color:var(--ouro-claro);font-size:14px}
+.bp-anual small{display:block;color:var(--cinza);font-size:13px;margin-top:2px;line-height:1.4}
+@media (max-width:560px){.bp-anual .btn{width:100%}}
 </style></head>
 <body><div id="app"></div><dialog id="dlg"></dialog><div id="toast" role="status" aria-live="polite"></div><div id="tip" role="tooltip" aria-hidden="true"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -707,7 +715,10 @@ const toMin = (t) => {
   const [a, b] = String(t).split(":").map(Number);
   return a * 60 + (b || 0);
 };
-const brl = (n) => "R$ " + Math.round(n).toLocaleString("pt-BR");
+const brl = (n) => {
+  n = +n || 0;
+  return "R$ " + (Math.abs(n - Math.round(n)) < 5e-3 ? Math.round(n).toLocaleString("pt-BR") : n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+};
 const dur = (m) => m < 60 ? m + " min" : Math.floor(m / 60) + "h" + (m % 60 ? String(m % 60).padStart(2, "0") : "");
 const pad = (n) => String(n).padStart(2, "0");
 const K = (d) => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
@@ -1576,6 +1587,12 @@ const StoreSB = {
   async carregaAssinatura() {
     const { data } = await this.sb.rpc("minha_assinatura");
     this.assin = (data || [])[0] || null;
+    try {
+      const pl = await this.sb.rpc("meu_plano");
+      this.plano = pl && pl.data || null;
+    } catch (e) {
+      this.plano = null;
+    }
     if (this.assin && this.assin.mp_ativo && !this._sinc) {
       this._sinc = 1;
       this.sb.functions.invoke("cobranca", { body: { acao: "sincronizar" } }).then(async (r) => {
@@ -2475,7 +2492,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261124215015";
+const VERSAO = "20261125114956";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
@@ -2615,7 +2632,7 @@ function bannerAssin(sempre) {
   const falta = a.vence ? Math.round((D(a.vence) - D(hoje())) / 864e5) : 99;
   if (!sempre && !av && falta > 5 && a.debito_auto != "pending") return "";
   const linha = autoOn(a) ? `<p class="bp-auto">${I("check")}D\xE9bito autom\xE1tico ativo no cart\xE3o${a.proxima_cobranca ? ` \xB7 pr\xF3xima cobran\xE7a em ${esc(brData(a.proxima_cobranca))}` : ""}. <button class="link" data-a="cancelar-auto">Cancelar</button></p>` : a.debito_auto == "pending" ? `<p class="bp-auto pend">${I("hourglass")}D\xE9bito autom\xE1tico esperando o cart\xE3o. Toque em D\xE9bito autom\xE1tico no cart\xE3o para terminar.</p>` : "";
-  return `<section class="banner-pag ${av ? "" : "ok"}"><div class="bp-topo"><b>${I(av ? "hourglass" : "check")}Mensalidade do app</b><span class="bp-valor">${brl(a.mensalidade)}<small>/m\xEAs</small></span></div><p>${av ? esc(a.aviso || "Sua mensalidade vence em " + brData(a.vence) + ".") : `Em dia. Pr\xF3ximo vencimento: ${esc(brData(a.vence))}.`}${a.mp_ativo && !autoOn(a) ? " Pague com Pix, d\xE9bito ou cr\xE9dito, ou deixe no d\xE9bito autom\xE1tico do cart\xE3o." : ""}</p>${linha}${autoOn(a) && !av ? "" : `<div class="acoes${av ? "" : " peq"}" style="margin:0">${pagar(a)}${av ? suporte(a) : ""}</div>`}</section>`;
+  return `<section class="banner-pag ${av ? "" : "ok"}"><div class="bp-topo"><b>${I(av ? "hourglass" : "check")}${esc(Store.plano && Store.plano.nome || "Mensalidade do app")}</b><span class="bp-valor">${brl(a.mensalidade)}<small>/m\xEAs</small></span></div>${Store.plano && Store.plano.auto ? `<p class="bp-plano">${Store.plano.barbeiros == 1 ? "1 barbeiro. Se cadastrar de 2 a 4 barbeiros, passa para o Plano Barbearia (R$&nbsp;89,90)." : Store.plano.barbeiros + " barbeiros. O Plano Barbearia cobre at\xE9 4; cada barbeiro a mais soma R$&nbsp;15."}</p>` : ""}<p>${av ? esc(a.aviso || "Sua mensalidade vence em " + brData(a.vence) + ".") : `Em dia. Pr\xF3ximo vencimento: ${esc(brData(a.vence))}.`}${a.mp_ativo && !autoOn(a) ? " Pague com Pix, d\xE9bito ou cr\xE9dito, ou deixe no d\xE9bito autom\xE1tico do cart\xE3o." : ""}</p>${linha}${a.mp_ativo && !autoOn(a) && Store.plano && +Store.plano.anual > 0 ? `<div class="bp-anual"><div><b>Plano anual \xB7 2 meses gr\xE1tis</b><small>12 meses por ${brl(Store.plano.anual)}, em at\xE9 12x no cart\xE3o ou \xE0 vista no Pix. Soma 12 meses ao seu vencimento.</small></div><button class="btn sec peq" data-a="pagar-anual">${I("calendar-days")}Pagar o ano</button></div>` : ""}${autoOn(a) && !av ? "" : `<div class="acoes${av ? "" : " peq"}" style="margin:0">${pagar(a)}${av ? suporte(a) : ""}</div>`}</section>`;
 }
 function bloqueio() {
   const a = Store.assin || {};
@@ -2747,7 +2764,7 @@ function telaAdmin() {
  <div class="adm-pe"><a class="btn sec peq" href="/" target="_blank" rel="noopener">${I("external-link")}Ver o app</a><button class="btn sec peq" data-a="sair">${I("log-out")}Sair</button></div></aside>
  <main class="admin"><header class="adm-topo"><div><small>${esc((/* @__PURE__ */ new Date()).toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" }))}</small><h1>${tit}</h1></div></header>
  ${aba == "inicio" ? telaAdmInicio(L) : ""}${aba == "analise" ? telaAnalise() : ""}${aba == "contas" ? telaContas() : ""}${aba == "financeiro" ? visaoGeral() : ""}${aba == "ajustes" ? `
- <section class="painel" style="margin-bottom:18px"><h3>Cobran\xE7a</h3><p class="q">Valem para todas as barbearias que n\xE3o tiverem um link pr\xF3prio.</p><form data-f="admconf"><div class="campo"><label for="ac-l">Seu link de pagamento (cr\xE9dito, d\xE9bito, Pix)</label><input id="ac-l" name="link" type="url" placeholder="https://link.mercadopago.com.br/..." value="${esc(c.link_pagamento || "")}"><span class="ajuda">Crie no Mercado Pago, InfinitePay, PagSeguro ou Stripe e cole aqui.</span></div><div class="campo"><label for="ac-m">Mensalidade padr\xE3o para barbearias novas (R$)</label><input id="ac-m" name="mens" type="number" min="0" value="${esc(c.mensalidade || "80")}"></div><div class="campo"><label for="ac-w">Seu WhatsApp de suporte</label><input id="ac-w" name="wa" inputmode="tel" value="${esc(fone(c.contato_suporte || ""))}"><span class="ajuda">O barbeiro toca em "J\xE1 paguei" e fala com voc\xEA.</span></div><div class="campo"><label for="ac-s">Pausar a agenda depois de quantos dias de atraso</label><input id="ac-s" name="susp" type="number" min="0" max="60" value="${esc((_a = c.dias_suspensao) != null ? _a : "5")}"><span class="ajuda">Todo dia ao meio-dia o app avisa quem vence em 3 dias e quem atrasou, e pausa a agenda depois desse prazo. Coloque 0 para nunca pausar sozinho.</span></div><button class="btn peq" type="submit">Salvar</button></form></section>
+ <section class="painel" style="margin-bottom:18px"><h3>Cobran\xE7a</h3><p class="q">Valem para todas as barbearias que n\xE3o tiverem um link pr\xF3prio.</p><form data-f="admconf"><div class="campo"><label for="ac-l">Seu link de pagamento (cr\xE9dito, d\xE9bito, Pix)</label><input id="ac-l" name="link" type="url" placeholder="https://link.mercadopago.com.br/..." value="${esc(c.link_pagamento || "")}"><span class="ajuda">Crie no Mercado Pago, InfinitePay, PagSeguro ou Stripe e cole aqui.</span></div><input type="hidden" name="mens" value="${esc(c.mensalidade || "80")}"><div class="campo"><span class="lbl">Planos das barbearias novas</span><p class="ajuda" style="margin:4px 0 0">Solo, 1 barbeiro: R$&nbsp;69,90 \xB7 Barbearia, at\xE9 4: R$&nbsp;89,90 \xB7 R$&nbsp;15 por barbeiro a mais \xB7 plano anual: 10 mensalidades por 12 meses. O valor muda sozinho com o n\xFAmero de barbeiros. Barbearias que j\xE1 existiam, como a Space, mant\xEAm o valor que pagam. Para dar um pre\xE7o especial a uma barbearia, edite a mensalidade dela: esse valor fica fixo.</p></div><div class="campo"><label for="ac-w">Seu WhatsApp de suporte</label><input id="ac-w" name="wa" inputmode="tel" value="${esc(fone(c.contato_suporte || ""))}"><span class="ajuda">O barbeiro toca em "J\xE1 paguei" e fala com voc\xEA.</span></div><div class="campo"><label for="ac-s">Pausar a agenda depois de quantos dias de atraso</label><input id="ac-s" name="susp" type="number" min="0" max="60" value="${esc((_a = c.dias_suspensao) != null ? _a : "5")}"><span class="ajuda">Todo dia ao meio-dia o app avisa quem vence em 3 dias e quem atrasou, e pausa a agenda depois desse prazo. Coloque 0 para nunca pausar sozinho.</span></div><button class="btn peq" type="submit">Salvar</button></form></section>
  <section class="painel" style="margin-bottom:18px"><h3>WhatsApp autom\xE1tico</h3><p class="q">Um n\xFAmero de WhatsApp do app manda as mensagens sozinho: o pedido chega no WhatsApp do barbeiro na hora em que o cliente toca em Pedir, e a confirma\xE7\xE3o, a recusa e o lembrete do dia chegam no WhatsApp do cliente. Ningu\xE9m precisa abrir o WhatsApp para enviar.</p>
  ${(Store.zap || {}).conectado ? `<p class="push-ok">${I("check")}Ligado (inst\xE2ncia terminando em ${esc(Store.zap.final)}).</p>` : `<p class="dica" style="margin:0 0 12px">Desligado. Hoje o cliente abre o WhatsApp e toca em enviar.</p>`}
  <form data-f="admzap" autocomplete="off"><div class="grade2"><div class="campo"><label for="zp-i">ID da inst\xE2ncia (Z-API)</label><input id="zp-i" name="i" autocomplete="off" placeholder="3E..."></div><div class="campo"><label for="zp-t">Token da inst\xE2ncia</label><input id="zp-t" name="t" type="password" autocomplete="off"></div></div><div class="campo"><label for="zp-c">Token de seguran\xE7a da conta (Client-Token)</label><input id="zp-c" name="c" type="password" autocomplete="off"><span class="ajuda">Na Z-API: crie a inst\xE2ncia, leia o QR code com o WhatsApp do app, copie o ID e o Token da inst\xE2ncia. O Client-Token fica em Seguran\xE7a. As chaves ficam s\xF3 no servidor.</span></div><div class="acoes"><button class="btn peq" type="submit">Salvar e ligar</button>${(Store.zap || {}).conectado || (Store.robo || {}).online ? `<button class="btn sec peq" type="button" data-a="adm-zap-teste">Mandar teste</button><button class="btn perigo peq" type="button" data-a="adm-zap-off">Desligar</button>` : ""}</div></form></section>
@@ -3311,6 +3328,17 @@ const ACOES = {
     await Store.carregaAssinatura();
     R(true);
     toast("D\xE9bito autom\xE1tico cancelado.");
+  },
+  async "pagar-anual"() {
+    toast("Abrindo o pagamento\u2026");
+    try {
+      const { data, error } = await Store.sb.functions.invoke("cobranca", { body: { acao: "anual", origem: location.origin } });
+      if (error || !data || !data.url) throw error || new Error("sem link");
+      location.href = data.url;
+    } catch (e) {
+      console.error(e);
+      toast("N\xE3o consegui abrir o pagamento do ano agora. Tente de novo em instantes.");
+    }
   },
   async "pagar-mp"() {
     toast("Abrindo o pagamento\u2026");
