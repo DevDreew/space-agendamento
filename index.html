@@ -708,6 +708,16 @@ input,select,textarea{font-size:16px}
 .aj-ind a{flex:none;display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--linha);background:var(--carvao);color:var(--cinza);font-weight:600;font-size:13.5px;text-decoration:none;white-space:nowrap}
 .aj-ind a:hover{color:var(--branco);border-color:var(--ouro)}
 .aj .painel{scroll-margin-top:64px}
+
+/* excluir conta */
+.excl-zona{border-top:1px solid var(--linha);margin-top:16px}
+.excl-pedida{margin-top:16px;padding:14px;border:1px solid #7a4039;border-radius:12px;background:rgba(224,90,70,.07)}
+.excl-pedida b{display:flex;align-items:center;gap:8px;color:var(--ruim)}
+.excl-pedida b svg{width:18px;height:18px}
+.excl-pedida p{color:var(--cinza);font-size:14px;margin:6px 0 10px}
+.excl-ok{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.4;cursor:pointer}
+.excl-ok input{width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--ruim)}
+.btn.excl-conf{background:#a3261c;color:#fff;border-color:#a3261c}
 </style></head>
 <body><div id="app"></div><dialog id="dlg"></dialog><div id="toast" role="status" aria-live="polite"></div><div id="tip" role="tooltip" aria-hidden="true"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -1318,7 +1328,7 @@ const StoreDemo = {
     for (const k of Object.keys(this.cli)) if (k.startsWith("ex-")) await this.db.doc("clientes/" + k).delete();
   }
 };
-const ERROS = { chave_zap_invalida: "Confira os c\xF3digos da Z-API: s\xF3 letras e n\xFAmeros, sem espa\xE7os.", telefone_invalido: "Coloque seu WhatsApp com DDD, por exemplo (11) 91234-5678.", horario_ocupado: "Esse hor\xE1rio acabou de ser pedido. Escolha outro.", fora_do_horario: "Esse hor\xE1rio passa do fechamento. Escolha outro.", almoco: "Esse hor\xE1rio cai no almo\xE7o. Escolha outro.", fechado: "A barbearia n\xE3o abre nesse dia.", horario_passou: "Esse hor\xE1rio j\xE1 passou. Escolha outro.", dia_invalido: "Escolha um dia dentro dos pr\xF3ximos 30.", chave_invalida: "Essa chave n\xE3o parece do Mercado Pago. Ela come\xE7a com APP_USR-.", email_sem_conta: "Esse email ainda n\xE3o tem conta.", dono_unico: "S\xF3 o dono do app tem acesso a esta \xE1rea.", sem_chave: "A cobran\xE7a autom\xE1tica ainda n\xE3o foi configurada.", conta_suspensa: "Esta barbearia n\xE3o est\xE1 recebendo agendamentos agora. Fale com ela no WhatsApp.", sem_permissao: "S\xF3 o dono do app pode fazer isso.", link_invalido: "O link precisa come\xE7ar com https://", muitos_pedidos: "Voc\xEA j\xE1 tem 3 pedidos aguardando resposta. Espere o barbeiro responder.", telefone_invalido: "Confira o WhatsApp com DDD.", nome_invalido: "Confira seu nome.", servico_invalido: "Esse servi\xE7o mudou. Atualize a p\xE1gina.", barbeiro_invalido: "Esse barbeiro n\xE3o est\xE1 atendendo agora.", nao_pode_cancelar: "Esse hor\xE1rio n\xE3o pode mais ser cancelado.", endereco_em_uso: "Esse endere\xE7o j\xE1 \xE9 de outra barbearia. Escolha outro.", conflito: "Esse hor\xE1rio j\xE1 est\xE1 ocupado." };
+const ERROS = { chave_zap_invalida: "Confira os c\xF3digos da Z-API: s\xF3 letras e n\xFAmeros, sem espa\xE7os.", telefone_invalido: "Coloque seu WhatsApp com DDD, por exemplo (11) 91234-5678.", horario_ocupado: "Esse hor\xE1rio acabou de ser pedido. Escolha outro.", fora_do_horario: "Esse hor\xE1rio passa do fechamento. Escolha outro.", almoco: "Esse hor\xE1rio cai no almo\xE7o. Escolha outro.", fechado: "A barbearia n\xE3o abre nesse dia.", horario_passou: "Esse hor\xE1rio j\xE1 passou. Escolha outro.", dia_invalido: "Escolha um dia dentro dos pr\xF3ximos 30.", chave_invalida: "Essa chave n\xE3o parece do Mercado Pago. Ela come\xE7a com APP_USR-.", email_sem_conta: "Esse email ainda n\xE3o tem conta.", dono_unico: "S\xF3 o dono do app tem acesso a esta \xE1rea.", sem_pedido_do_dono: "S\xF3 d\xE1 para excluir uma barbearia que pediu a exclus\xE3o.", assinatura_ativa: "Cancele o d\xE9bito autom\xE1tico dessa barbearia antes de excluir.", sem_chave: "A cobran\xE7a autom\xE1tica ainda n\xE3o foi configurada.", conta_suspensa: "Esta barbearia n\xE3o est\xE1 recebendo agendamentos agora. Fale com ela no WhatsApp.", sem_permissao: "S\xF3 o dono do app pode fazer isso.", link_invalido: "O link precisa come\xE7ar com https://", muitos_pedidos: "Voc\xEA j\xE1 tem 3 pedidos aguardando resposta. Espere o barbeiro responder.", telefone_invalido: "Confira o WhatsApp com DDD.", nome_invalido: "Confira seu nome.", servico_invalido: "Esse servi\xE7o mudou. Atualize a p\xE1gina.", barbeiro_invalido: "Esse barbeiro n\xE3o est\xE1 atendendo agora.", nao_pode_cancelar: "Esse hor\xE1rio n\xE3o pode mais ser cancelado.", endereco_em_uso: "Esse endere\xE7o j\xE1 \xE9 de outra barbearia. Escolha outro.", conflito: "Esse hor\xE1rio j\xE1 est\xE1 ocupado." };
 const erroAmigo = (e) => {
   const m = String(e && e.message || e || "");
   for (const k in ERROS) if (m.includes(k)) return ERROS[k];
@@ -1618,8 +1628,9 @@ const StoreSB = {
     const { data } = await this.sb.rpc("minha_assinatura");
     this.assin = (data || [])[0] || null;
     try {
-      const pl = await this.sb.rpc("meu_plano");
+      const [pl, ex] = await Promise.all([this.sb.rpc("meu_plano"), this.sb.rpc("minha_exclusao")]);
       this.plano = pl && pl.data || null;
+      this.exclusao = ex && !ex.error ? ex.data : null;
     } catch (e) {
       this.plano = null;
     }
@@ -1658,6 +1669,12 @@ const StoreSB = {
     }
     try {
       const [g, h, an, ct] = await Promise.all([this.sb.rpc("admin_resumo"), this.sb.rpc("admin_assinaturas"), this.sb.rpc("admin_analise", { p_dias: this.admDias == null ? 30 : this.admDias }), this.sb.rpc("admin_contas")]);
+      try {
+        const ex = await this.sb.rpc("admin_exclusoes");
+        this.exclusoes = ex && ex.data || [];
+      } catch (e) {
+        this.exclusoes = [];
+      }
       this.resumo = g && g.data || null;
       this.assins = h && h.data || null;
       this.analise = an && an.data || null;
@@ -2271,7 +2288,7 @@ function viewAjustes() {
  ${REAL ? (() => {
     const g = c.geo, on = c.busca !== false;
     return `<section class="painel"><h3>Aparecer para clientes perto</h3><p class="q">Quem procura barbearia na p\xE1gina inicial do app encontra a sua no mapa, com a dist\xE2ncia e o pr\xF3ximo hor\xE1rio livre. O seu link continua mostrando s\xF3 a sua barbearia.</p><label class="ck" style="margin:4px 0 12px"><input type="checkbox" data-a="busca-on" ${on ? "checked" : ""}>Mostrar minha barbearia na busca</label><p class="dica" style="margin:0 0 10px">${I("map-pin")}${g && g.lat ? g.fonte == "gps" ? "No mapa pela localiza\xE7\xE3o marcada na barbearia." : g.fonte == "endereco" ? "No mapa pelo endere\xE7o cadastrado." : 'No mapa, mas com ponto aproximado (o mapa n\xE3o achou a rua exata). Na barbearia, toque em "Estou na barbearia" para acertar.' : "Ainda n\xE3o est\xE1 no mapa. Confira o endere\xE7o acima ou use a localiza\xE7\xE3o."}</p><div class="acoes"><button class="btn sec peq" data-a="geo-end">Achar pelo endere\xE7o</button><button class="btn sec peq" data-a="geo-gps">Estou na barbearia: usar minha localiza\xE7\xE3o</button>${g && g.lat ? `<a class="btn sec peq" href="https://www.openstreetmap.org/?mlat=${g.lat}&mlon=${g.lng}#map=18/${g.lat}/${g.lng}" target="_blank" rel="noopener">${I("eye")}Ver no mapa</a>` : ""}</div><p class="dica" style="margin:10px 0 0">Busca dos clientes: <a href="/buscar" target="_blank" rel="noopener">${esc(location.host)}/buscar</a></p>${painelVitrine()}</section>${painelAval()}`;
-  })() : ""}<section class="painel"><h3>Link para os clientes</h3><p class="q">Mande este endere\xE7o no WhatsApp, coloque na bio do Instagram e no QR code do balc\xE3o.</p><p class="num" style="font-weight:600;word-break:break-all;margin-bottom:10px">${esc(location.origin + "/" + SLUG)}</p><button class="btn sec peq" data-a="copiar">Copiar link</button></section>${""}${REAL ? `<section class="painel"><h3>Seu acesso</h3><p class="q">O painel abre s\xF3 com o seu email e senha. Clientes nunca veem esta \xE1rea.</p><p class="num" style="font-weight:600;word-break:break-all;margin-bottom:10px">${esc(location.origin + "/" + SLUG + "/painel")}</p><button class="btn sec peq" data-a="sair">${I("x")}Sair da conta</button></section>` : ""}<section class="painel"><h3>Tablet no balc\xE3o</h3><p class="q">Abra este endere\xE7o no tablet da recep\xE7\xE3o. Cada cliente marca e a tela limpa sozinha para o pr\xF3ximo, sem guardar nomes.</p><a class="btn sec peq" href="${REAL ? "/" + esc(SLUG) + "#balcao" : "#balcao"}" ${REAL ? 'target="_blank" rel="noopener"' : ""}>${I("store")}Abrir modo balc\xE3o aqui</a></section><section class="painel"><h3>Barbearia</h3><p class="q">Nome e contato que o cliente v\xEA.</p><form data-f="casa"><div class="campo"><label for="a-nome">Nome</label><input id="a-nome" name="name" value="${esc(c.name)}" required></div><div class="campo"><label for="a-end">Endere\xE7o</label><input id="a-end" name="address" value="${esc(c.address)}"></div><div class="campo"><label for="a-wa">WhatsApp da barbearia</label><input id="a-wa" name="whatsapp" inputmode="tel" value="${esc(fone(c.whatsapp))}"></div><button class="btn peq" type="submit">Salvar</button></form>
+  })() : ""}<section class="painel"><h3>Link para os clientes</h3><p class="q">Mande este endere\xE7o no WhatsApp, coloque na bio do Instagram e no QR code do balc\xE3o.</p><p class="num" style="font-weight:600;word-break:break-all;margin-bottom:10px">${esc(location.origin + "/" + SLUG)}</p><button class="btn sec peq" data-a="copiar">Copiar link</button></section>${""}${REAL ? `<section class="painel"><h3>Seu acesso</h3><p class="q">O painel abre s\xF3 com o seu email e senha. Clientes nunca veem esta \xE1rea.</p><p class="num" style="font-weight:600;word-break:break-all;margin-bottom:10px">${esc(location.origin + "/" + SLUG + "/painel")}</p><button class="btn sec peq" data-a="sair">${I("x")}Sair da conta</button>${Store.adminVendo ? "" : Store.exclusao ? `<div class="excl-pedida" role="status"><b>${I("hourglass")}Exclus\xE3o pedida em ${esc(new Date(Store.exclusao).toLocaleDateString("pt-BR"))}</b><p>Sua barbearia, a agenda, os clientes, o hist\xF3rico e o seu acesso ser\xE3o apagados em at\xE9 7 dias. At\xE9 l\xE1, tudo continua funcionando.</p><button class="btn sec peq" data-a="cancelar-exclusao">Cancelar o pedido</button></div>` : `<div class="excl-zona"><p class="q" style="margin:16px 0 8px">Quer sair do app de vez? Voc\xEA pode apagar a conta e todos os dados da barbearia.</p><button class="btn perigo peq" data-a="excluir-conta">${I("trash-2")}Excluir minha conta</button></div>`}</section>` : ""}<section class="painel"><h3>Tablet no balc\xE3o</h3><p class="q">Abra este endere\xE7o no tablet da recep\xE7\xE3o. Cada cliente marca e a tela limpa sozinha para o pr\xF3ximo, sem guardar nomes.</p><a class="btn sec peq" href="${REAL ? "/" + esc(SLUG) + "#balcao" : "#balcao"}" ${REAL ? 'target="_blank" rel="noopener"' : ""}>${I("store")}Abrir modo balc\xE3o aqui</a></section><section class="painel"><h3>Barbearia</h3><p class="q">Nome e contato que o cliente v\xEA.</p><form data-f="casa"><div class="campo"><label for="a-nome">Nome</label><input id="a-nome" name="name" value="${esc(c.name)}" required></div><div class="campo"><label for="a-end">Endere\xE7o</label><input id="a-end" name="address" value="${esc(c.address)}"></div><div class="campo"><label for="a-wa">WhatsApp da barbearia</label><input id="a-wa" name="whatsapp" inputmode="tel" value="${esc(fone(c.whatsapp))}"></div><button class="btn peq" type="submit">Salvar</button></form>
  ${tem ? `<hr style="border:0;border-top:1px solid var(--linha);margin:16px 0"><p class="q">Os clientes marcados como exemplo s\xE3o fict\xEDcios. Apague antes de usar de verdade.</p><div class="acoes"><button class="btn sec peq" data-a="carregar">Carregar hist\xF3rico de exemplo</button><button class="btn perigo peq" data-a="limpar">${I("trash-2")}Apagar dados de exemplo</button></div>` : `<hr style="border:0;border-top:1px solid var(--linha);margin:16px 0"><p class="q">Quer ver o painel cheio antes de usar? Os exemplos podem ser apagados depois.</p><button class="btn sec peq" data-a="carregar">Carregar hist\xF3rico de exemplo</button>`}</section></div>`);
 }
 const dlg = () => $("#dlg");
@@ -2549,7 +2566,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261125143007";
+const VERSAO = "20261125144346";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
@@ -2858,6 +2875,11 @@ function telaAdmInicio(L) {
   const hj = hoje(), at = L.filter((l) => l.status != "suspenso"), mrr = at.reduce((t, l) => t + +l.mensalidade, 0), ped = L.reduce((t, l) => t + +l.pedidos_30d, 0), fat = L.reduce((t, l) => t + +l.faturado_30d, 0), av = L.filter((l) => +l.avaliacoes > 0), na = av.reduce((t, l) => t + +l.avaliacoes, 0), nm = na ? av.reduce((t, l) => t + +l.nota * +l.avaliacoes, 0) / na : 0;
   const dd = (l) => Math.round((D(l.vence) - D(hj)) / 864e5);
   const lst = [];
+  (Store.exclusoes || []).forEach((e) => {
+    const l = L.find((x) => x.id == e.shop_id) || { id: e.shop_id, name: e.name, slug: e.slug };
+    const conf = U.confExcl == e.shop_id;
+    lst.push([0, l, `Pediu para excluir a conta em ${new Date(e.pedido_em).toLocaleDateString("pt-BR")}${e.motivo ? `. Motivo: \u201C${esc(e.motivo)}\u201D` : ""}`, `<button class="btn ${conf ? "" : "perigo "}peq${conf ? " excl-conf" : ""}" data-a="adm-excluir" data-v="${e.shop_id}">${I("trash-2")}${conf ? "Toque de novo para apagar tudo" : "Excluir conta e dados"}</button>`]);
+  });
   L.forEach((l) => {
     const pag = `<button class="btn peq" data-a="adm-pago" data-v="${l.id}">${I("check")}Marcar como pago</button>${zapOk(l.whatsapp || "") ? `<a class="btn sec peq" href="${wa(telZap(l.whatsapp), msgCobranca(l))}" target="_blank" rel="noopener">${I("message-circle")}Cobrar</a>` : ""}`, pain = `<a class="btn sec peq" href="/${esc(l.slug)}/painel" target="_blank" rel="noopener">${I("external-link")}Abrir painel</a>`;
     if (l.status != "suspenso" && l.vence < hj) lst.push([0, l, `Mensalidade vencida h\xE1 ${-dd(l)} ${-dd(l) == 1 ? "dia" : "dias"}`, pag]);
@@ -3228,6 +3250,25 @@ const ACOES = {
       toast("N\xE3o consegui a localiza\xE7\xE3o. Libere o acesso no navegador e tente de novo.");
     }
   },
+  async "adm-excluir"(id) {
+    if (U.confExcl != id) {
+      U.confExcl = id;
+      clearTimeout(U.tExcl);
+      U.tExcl = setTimeout(() => {
+        if (U.confExcl == id) {
+          U.confExcl = null;
+          R(true);
+        }
+      }, 6e3);
+      return R(true);
+    }
+    U.confExcl = null;
+    const { error } = await Store.sb.rpc("admin_excluir_loja", { p_shop: id });
+    if (error) return toast(erroAmigo(error) || "N\xE3o consegui excluir.");
+    toast("Conta e dados apagados.");
+    await Store.carregaAdmin();
+    R(true);
+  },
   async "adm-destaque"(id) {
     const l = Store.lojas.find((x) => x.id == id);
     const d = prompt(`Destaque no topo da busca para ${l.name}: quantos dias? (0 tira o destaque)`, "30");
@@ -3388,6 +3429,16 @@ const ACOES = {
     await Store.carregaAssinatura();
     R(true);
     toast("D\xE9bito autom\xE1tico cancelado.");
+  },
+  "excluir-conta"() {
+    abre(`<h2>Excluir minha conta</h2><p class="dica" style="margin:0 0 12px">Vamos apagar a barbearia <b>${esc(C().name)}</b>, a agenda, os clientes, o hist\xF3rico, o clube e o seu acesso. O link da barbearia para de funcionar. Isso n\xE3o d\xE1 para desfazer.</p><form data-f="excluir"><div class="campo"><label for="ex-m">Por que voc\xEA est\xE1 saindo? (opcional)</label><textarea id="ex-m" name="motivo" maxlength="500" rows="3" placeholder="Ajuda a melhorar o app\u2026"></textarea></div><label class="excl-ok"><input type="checkbox" name="ok" required> Entendo que tudo ser\xE1 apagado em at\xE9 7 dias e n\xE3o poder\xE1 ser recuperado.</label>${autoOn(Store.assin || {}) ? '<p class="dica" style="margin:10px 0 0">O d\xE9bito autom\xE1tico no cart\xE3o ser\xE1 cancelado agora.</p>' : ""}<div class="acoes"><button class="btn perigo" type="submit">${I("trash-2")}Pedir exclus\xE3o</button><button class="btn sec" type="button" data-a="fechar">Voltar</button></div></form>`);
+  },
+  async "cancelar-exclusao"() {
+    const { error } = await Store.sb.rpc("cancelar_exclusao_conta");
+    if (error) return toast(erroAmigo(error) || "N\xE3o consegui cancelar. Tente de novo.");
+    Store.exclusao = null;
+    toast("Pedido cancelado. Sua conta continua ativa.");
+    R(true);
   },
   async "pagar-anual"() {
     toast("Abrindo o pagamento\u2026");
@@ -4217,6 +4268,27 @@ const FORMS = {
     if (error) return toast(erroAmigo(error) || "N\xE3o consegui adicionar.");
     f.e.value = "";
     toast(e + " agora \xE9 dono do app.");
+  },
+  async excluir(f) {
+    if (!f.ok.checked) return toast("Marque a confirma\xE7\xE3o para continuar.");
+    const b = f.querySelector("button[type=submit]");
+    b.disabled = true;
+    b.textContent = "Enviando\u2026";
+    try {
+      if (autoOn(Store.assin || {})) await Store.sb.functions.invoke("cobranca", { body: { acao: "cancelar_auto" } });
+      const { error } = await Store.sb.rpc("pedir_exclusao_conta", { p_motivo: f.motivo.value.trim() || null });
+      if (error) throw error;
+      Store.exclusao = (/* @__PURE__ */ new Date()).toISOString();
+      await Store.carregaAssinatura().catch(() => {
+      });
+      fecha();
+      toast("Pedido de exclus\xE3o recebido. Tudo ser\xE1 apagado em at\xE9 7 dias.");
+      R(true);
+    } catch (e) {
+      b.disabled = false;
+      b.textContent = "Pedir exclus\xE3o";
+      toast(erroAmigo(e) || "N\xE3o consegui enviar. Tente de novo.");
+    }
   },
   async admaviso(f) {
     const txt = f.txt.value.trim();
