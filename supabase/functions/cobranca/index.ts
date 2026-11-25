@@ -1,7 +1,8 @@
-// Cobrança da mensalidade do app pelo Mercado Pago.
-// acao "link": pagamento avulso do mês (Pix, débito ou crédito) pelo Checkout Pro.
+// Cobrança do app pelo Mercado Pago.
+// acao "link": pagamento avulso da mensalidade (Pix, débito ou crédito) pelo Checkout Pro.
 // acao "assinar": débito automático mensal no cartão de crédito (assinatura do Mercado Pago).
 // acao "cancelar_auto": cancela o débito automático.
+// acao "destaque": pagamento do destaque no topo da busca (30 dias). Não mexe na mensalidade.
 // acao "sincronizar": confere no Mercado Pago os pagamentos da barbearia (ou de todas, se for o dono do app).
 // acao "testar": o dono do app confere se a chave funciona.
 // ?src=cron: conferência diária de todas as barbearias (chamada pelo agendador do banco).
@@ -15,6 +16,8 @@ const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 const SITE = "https://dreewsolution.vercel.app";
 const AVISO_MP = `${URL_SB}/functions/v1/cobranca?src=mp`;
+const DESTAQUE_PRECO = 29.9;
+const DESTAQUE_DIAS = 30;
 
 async function segredos(): Promise<any> {
   const { data } = await adm.rpc("segredos_notificacao");
@@ -45,6 +48,11 @@ function maisUmMes(d: string) {
   x.setUTCMonth(x.getUTCMonth() + 1);
   return x.toISOString().slice(0, 10);
 }
+function maisDias(d: string, n: number) {
+  const x = new Date(d + "T12:00:00Z");
+  x.setUTCDate(x.getUTCDate() + n);
+  return x.toISOString().slice(0, 10);
+}
 
 // Registra um pagamento aprovado uma única vez (o id do Mercado Pago impede repetição) e libera mais um mês.
 async function registrar(shopId: string, pagId: string, valor: number, metodo: string, quando?: string) {
@@ -54,6 +62,18 @@ async function registrar(shopId: string, pagId: string, valor: number, metodo: s
   if (error) return false;
   const base = shop.vence > hojeBR() ? shop.vence : hojeBR();
   await adm.from("shops").update({ vence: maisUmMes(base), status: "ativo", aviso: null }).eq("id", shop.id);
+  return true;
+}
+
+// Destaque pago: registra uma única vez e soma 30 dias de destaque (se já estiver ativo, soma ao fim).
+async function ativarDestaque(shopId: string, pagId: string, valor: number, quando?: string) {
+  const { data: shop } = await adm.from("shops").select("id,destaque_ate").eq("id", shopId).maybeSingle();
+  if (!shop) return false;
+  const { error } = await adm.from("destaque_pagamentos").insert({ id: pagId, shop_id: shop.id, valor, dias: DESTAQUE_DIAS, pago_em: quando || new Date().toISOString() });
+  if (error) return false;
+  const ontem = maisDias(hojeBR(), -1);
+  const base = shop.destaque_ate && shop.destaque_ate > ontem ? shop.destaque_ate : ontem;
+  await adm.from("shops").update({ destaque_ate: maisDias(base, DESTAQUE_DIAS), destaque_pedido: null }).eq("id", shop.id);
   return true;
 }
 
@@ -74,6 +94,12 @@ async function lojaDoPagamento(p: any): Promise<string | null> {
 async function confirmarPagamento(id: string, token: string) {
   const p = await mp(`/v1/payments/${encodeURIComponent(id)}`, token);
   if (p.status !== "approved") return { status: p.status };
+  const ref = String(p.external_reference || "");
+  if (ref.startsWith("destaque:")) {
+    const shopId = ref.slice(9);
+    if (!/^[0-9a-f-]{36}$/i.test(shopId)) return { ignorado: "referencia_invalida" };
+    return { destaque: await ativarDestaque(shopId, String(p.id), Number(p.transaction_amount), p.date_approved) };
+  }
   const shop = await lojaDoPagamento(p);
   if (!shop) return { ignorado: "sem_barbearia" };
   return { liberado: await registrar(shop, String(p.id), Number(p.transaction_amount), p.payment_type_id || "mp", p.date_approved) };
@@ -119,6 +145,12 @@ async function sincronizar(shop: any, token: string) {
       if (await registrar(shop.id, String(p.id), Number(p.transaction_amount), p.payment_type_id || "mp", p.date_approved)) novos++;
     }
   } catch (e) { console.error("sync pagamentos", e); }
+  try {
+    const r = await mp(`/v1/payments/search?external_reference=${encodeURIComponent("destaque:" + shop.id)}&status=approved&sort=date_created&criteria=desc&limit=30`, token);
+    for (const p of r.results || []) {
+      if (await ativarDestaque(shop.id, String(p.id), Number(p.transaction_amount), p.date_approved)) novos++;
+    }
+  } catch (e) { console.error("sync destaque", e); }
   return novos;
 }
 
@@ -186,6 +218,21 @@ Deno.serve(async (req) => {
     if (!token) return json({ erro: "sem_chave" }, 400);
     const volta = `${origem}/${shop.slug}/painel`;
 
+    if (body.acao === "destaque") {
+      const pref = await mp("/checkout/preferences", token, {
+        method: "POST",
+        body: JSON.stringify({
+          items: [{ id: "destaque-dreewsolution", title: `Destaque no topo por ${DESTAQUE_DIAS} dias · ${shop.name}`, quantity: 1, unit_price: DESTAQUE_PRECO, currency_id: "BRL" }],
+          external_reference: `destaque:${shop.id}`,
+          payer: { email: user.email },
+          notification_url: AVISO_MP,
+          back_urls: { success: volta + "#ajustes", pending: volta + "#ajustes", failure: volta + "#ajustes" },
+          auto_return: "approved",
+          statement_descriptor: "DREEWSOLUTION",
+        }),
+      });
+      return json({ ok: true, url: pref.init_point, preco: DESTAQUE_PRECO, dias: DESTAQUE_DIAS });
+    }
     if (body.acao === "link") {
       const pref = await mp("/checkout/preferences", token, {
         method: "POST",

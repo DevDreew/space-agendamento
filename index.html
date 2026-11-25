@@ -670,6 +670,11 @@ input,select,textarea{font-size:16px}
 
 @media(max-width:1023px){.adm-app .admin{padding-top:8px}}
 @media(max-width:1023px){.adm-lado .adm-abas{justify-content:flex-start}.adm-lado .adm-abas button{flex:0 0 auto;min-width:80px}}
+/* destaque pago: no celular o botão desce para baixo do texto */
+.vit-l{flex-wrap:wrap;align-items:flex-start}
+.vit-l>div{min-width:0;flex:1 1 200px}
+.vit-l>.btn{flex:none}
+@media (max-width:560px){.vit-l>.btn{width:100%;margin-left:34px;width:calc(100% - 34px)}}
 </style></head>
 <body><div id="app"></div><dialog id="dlg"></dialog><div id="toast" role="status" aria-live="polite"></div><div id="tip" role="tooltip" aria-hidden="true"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -2009,6 +2014,14 @@ function viewHoje() {
       return `<div class="cli-l"><div><b>${hm(x.s)} \xB7 ${esc(p.name)}</b><small>${esc(x.n)}${f ? " \xB7 lembrado" : ""}</small></div><a class="btn ${f ? "sec " : ""}peq" href="${wa(p.phone, msgLembrete(x, p))}" target="_blank" rel="noopener" data-lembra="${esc(String(x.id))}">${I(f ? "check" : "message-circle")}${f ? "Lembrado" : "Lembrar"}</a></div>`;
     }).join("")}</div></section>` : "";
   })()}
+ ${(() => {
+    if (k != hoje()) return "";
+    const am = soma(hoje(), 1), lb = lembrados(), v = todos().filter((x) => x.d == am && x.st == "confirmado" && pii(x).phone && filtroB(x)).sort((a, b) => a.s - b.s);
+    return v.length ? `<section class="bloco"><h2>Lembrar os clientes de amanh\xE3 <small>mande hoje \xE0 noite: diminui as faltas</small></h2><div class="fila">${v.map((x) => {
+      const p = pii(x), f = lb.includes(String(x.id));
+      return `<div class="cli-l"><div><b>${hm(x.s)} \xB7 ${esc(p.name)}</b><small>${esc(x.n)} \xB7 ${esc(barbeiro(x.b).name)}${f ? " \xB7 lembrado" : ""}</small></div><a class="btn ${f ? "sec " : ""}peq" href="${wa(p.phone, msgLembrete(x, p))}" target="_blank" rel="noopener" data-lembra="${esc(String(x.id))}">${I(f ? "check" : "message-circle")}${f ? "Lembrado" : "Lembrar"}</a></div>`;
+    }).join("")}</div></section>` : "";
+  })()}
  ${ped.length ? `<section class="bloco"><h2>Pedidos <small>o hor\xE1rio fica reservado at\xE9 voc\xEA responder</small></h2><div class="pedidos">${ped.map(pedido).join("")}</div></section>` : ""}
  ${(() => {
     const v = clientesDados().filter((c) => c.naHora);
@@ -2146,7 +2159,7 @@ function painelVitrine() {
     return "";
   }
   const dest = v.destaque_ate && v.destaque_ate >= hoje();
-  return `<div class="vitrine"><div class="vit-l">${I("crown")}<div><b>Destaque no topo</b><small>${dest ? `Ativo at\xE9 ${esc(brData(v.destaque_ate))}. Sua barbearia aparece primeiro no mapa e na lista.` : v.destaque_pedido ? `Pedido enviado em ${esc(new Date(v.destaque_pedido).toLocaleDateString("pt-BR"))}. A DreewSolution entra em contato para ativar.` : "Apare\xE7a primeiro para os clientes da sua regi\xE3o, com selo de destaque no mapa."}</small></div>${!dest && !v.destaque_pedido ? `<button class="btn peq" data-a="pedir-destaque">Quero destaque</button>` : ""}</div>
+  return `<div class="vitrine"><div class="vit-l">${I("crown")}<div><b>Destaque no topo</b><small>${dest ? `Ativo at\xE9 ${esc(brData(v.destaque_ate))}. Sua barbearia aparece primeiro no mapa e na lista. Renovar soma mais 30 dias ao fim.` : "Apare\xE7a primeiro para os clientes da sua regi\xE3o, com selo de destaque no mapa. R$&nbsp;29,90 por 30 dias, pago por Pix ou cart\xE3o. Liga sozinho assim que o pagamento \xE9 aprovado."}</small></div><button class="btn peq${dest ? " sec" : ""}" data-a="pagar-destaque">${dest ? "Renovar destaque" : "Ativar por R$ 29,90"}</button></div>
  <div class="vit-l">${I("badge-check")}<div><b>${v.verificada ? "Barbearia verificada" : "Selo de verificada"}</b><small>${v.verificada ? "O selo aparece ao lado do nome da sua barbearia para os clientes." : "A DreewSolution confere endere\xE7o, fotos e WhatsApp e libera o selo. Mantenha logo, fachada e endere\xE7o atualizados."}</small></div></div></div>`;
 }
 function painelAval() {
@@ -2263,10 +2276,10 @@ Ol\xE1, ${(p.name || "").split(" ")[0]}! Te espero:
 Se n\xE3o puder vir, \xE9 s\xF3 avisar por aqui.`;
 }
 function msgLembrete(x, p) {
-  const c = C();
+  const c = C(), am = x.d != hoje();
   return `\u23F0 *Lembrete \xB7 ${c.name}*
 
-Bom dia, ${(p.name || "").split(" ")[0]}! Seu hor\xE1rio \xE9 *hoje*:
+${am ? "Oi" : "Bom dia"}, ${(p.name || "").split(" ")[0]}! Seu hor\xE1rio \xE9 *${am ? "amanh\xE3, " + dataCurta(x.d) : "hoje"}*:
 
 \u{1F488} Servi\xE7o: ${x.n}
 \u23F0 Hor\xE1rio: ${hm(x.s)}
@@ -2462,7 +2475,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261124211901";
+const VERSAO = "20261124215015";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
@@ -3019,6 +3032,20 @@ const ACOES = {
   "ver-aval"() {
     const n = Store.nota || {};
     abre(`<h2>Avalia\xE7\xF5es</h2><div class="aval-resumo"><b>${String(n.media || 0).replace(".", ",")}</b>${estrelas(n.media, "grande")}<span>${n.total} ${n.total == 1 ? "avalia\xE7\xE3o" : "avalia\xE7\xF5es"} de clientes que foram atendidos</span></div>${(n.ultimas || []).length ? (n.ultimas || []).map((a) => `<div class="aval-item"><div>${estrelas(a.nota)}<small>${esc(a.nome || "Cliente")} \xB7 ${esc(brData(a.dia))}</small></div><p>${esc(a.comentario)}</p></div>`).join("") : '<p class="dica">Ainda n\xE3o h\xE1 coment\xE1rios escritos.</p>'}<div class="fim"><button class="btn sec" data-a="fecha">Fechar</button></div>`);
+  },
+  async "pagar-destaque"() {
+    const el = document.querySelector('[data-a="pagar-destaque"]') || {};
+    el.disabled = true;
+    el.textContent = "Abrindo pagamento\u2026";
+    try {
+      const { data, error } = await Store.sb.functions.invoke("cobranca", { body: { acao: "destaque", origem: location.origin } });
+      if (error || !data || !data.url) throw 0;
+      location.href = data.url;
+    } catch (e) {
+      el.disabled = false;
+      el.textContent = "Tentar de novo";
+      toast("N\xE3o foi poss\xEDvel abrir o pagamento agora. Tente de novo em instantes.");
+    }
   },
   async "pedir-destaque"() {
     const { error } = await Store.sb.rpc("pedir_destaque");
