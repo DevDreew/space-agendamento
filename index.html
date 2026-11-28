@@ -718,6 +718,31 @@ input,select,textarea{font-size:16px}
 .excl-ok{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.4;cursor:pointer}
 .excl-ok input{width:22px;height:22px;flex:none;margin-top:1px;accent-color:var(--ruim)}
 .btn.excl-conf{background:#a3261c;color:#fff;border-color:#a3261c}
+
+/* horários livres no topo da página do cliente */
+.hl{margin:0 0 26px}
+.hl-t{font:800 26px/1 var(--titulo);text-transform:uppercase;margin:0}
+.hl-sub{color:var(--cinza);font-size:14px;margin:6px 0 12px}
+.hl-grade{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.hl-c{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:78px;padding:10px 4px;border:1px solid var(--ouro-esc,var(--linha));border-radius:14px;background:var(--carvao);color:var(--branco);text-align:center;transition:background .15s ease-out,border-color .15s ease-out}
+.hl-c:hover{background:var(--grafite);border-color:var(--ouro)}
+.hl-c small{font-size:12px;color:var(--cinza);line-height:1.2}
+.hl-c b{font:800 26px/1 var(--titulo);color:var(--ouro-claro)}
+.hl-c em{font-style:normal;font-size:11.5px;color:var(--ouro);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hl-todos{border-style:dashed;border-color:var(--linha)}
+.hl-todos b{color:var(--ouro);display:flex}
+.hl-todos b svg{width:24px;height:24px}
+.hl-todos small{color:var(--branco);font-weight:600}
+.hl-escolhido{display:flex;align-items:center;gap:12px;padding:14px 16px;border:1px solid var(--ouro);border-radius:var(--r);background:var(--carvao);margin:0 0 22px}
+.hl-ic{flex:none;width:40px;height:40px;border-radius:12px;background:var(--ouro);color:#0b0b0c;display:flex;align-items:center;justify-content:center}
+.hl-ic svg{width:20px;height:20px}
+.hl-tx{flex:1;min-width:0;display:grid}
+.hl-tx small{font-size:12.5px;color:var(--cinza)}
+.hl-tx b{font:800 26px/1.05 var(--titulo)}
+.hl-tx em{font-style:normal;color:var(--ouro-claro);font-size:14px}
+.hl-trocar{flex:none;min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--linha);color:var(--branco);font-weight:600;font-size:14px}
+.hl-trocar:hover{border-color:var(--ouro)}
+@media (max-width:340px){.hl-grade{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style></head>
 <body><div id="app"></div><dialog id="dlg"></dialog><div id="toast" role="status" aria-live="polite"></div><div id="tip" role="tooltip" aria-hidden="true"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -1879,6 +1904,21 @@ const grade = (k) => {
   return r;
 };
 const livresEm = (k, s, m, escolha) => (escolha == "any" ? ativos() : ativos().filter((b) => b.id == escolha)).filter((b) => cabe(b.id, k, s, m));
+function proximosLivres(q = 3) {
+  const m = C().step, quem = BARB_LINK && U.barber && U.barber != "any" ? U.barber : "any", o = [];
+  for (let i = 0; i < 21 && o.length < q; i++) {
+    const k = soma(hoje(), i);
+    for (const t of grade(k)) {
+      if (k == hoje() && t < agoraMin() + 10) continue;
+      const l = livresEm(k, t, m, quem);
+      if (l.length) {
+        o.push({ k, s: t, b: l[0] });
+        if (o.length >= q) break;
+      }
+    }
+  }
+  return o;
+}
 function proximoLivre() {
   const m = C().step;
   for (let i = 0; i < 21; i++) {
@@ -1941,12 +1981,20 @@ function trilho() {
   if (U.step >= 3 && U.time != null) o.push(`<button class="pedaco" data-a="ir" data-v="2">${esc(dataCurta(U.date))}, ${hm(U.time)} ${I("pencil")}</button>`);
   return o.length ? `<div class="trilho">${o.join("")}</div>` : "";
 }
+function horariosLivres() {
+  if (!Store.ready) return "";
+  const r = U.rapido;
+  if (r) return `<div class="hl-escolhido" role="status"><span class="hl-ic">${I("clock")}</span><span class="hl-tx"><small>Seu hor\xE1rio</small><b class="num">${esc(dataCurta(r.k))}, ${hm(r.s)}</b>${r.b && U.barber != "any" ? `<em>com ${esc(r.b.name)}</em>` : ""}</span><button class="hl-trocar" data-a="hr-trocar">Trocar</button></div>`;
+  const v = proximosLivres(3);
+  if (!v.length) return "";
+  const varios = ativos().length > 1 && !(BARB_LINK && U.barber != "any");
+  return `<section class="hl" aria-labelledby="hl-t"><h2 id="hl-t" class="hl-t">Hor\xE1rios livres</h2><p class="hl-sub">Toque num hor\xE1rio e depois escolha o servi\xE7o.</p><div class="hl-grade">${v.map((x) => `<button class="hl-c" data-a="rapido" data-v="${x.k}|${x.s}|${esc(x.b.id)}" aria-label="${esc(dataCurta(x.k))}, ${hm(x.s)}${varios ? ", com " + esc(x.b.name) : ""}"><small>${esc(dataCurta(x.k))}</small><b class="num">${hm(x.s)}</b>${varios ? `<em>${esc(x.b.name.split(" ")[0])}</em>` : ""}</button>`).join("")}<button class="hl-c hl-todos" data-a="hr-todos"><b>${I("calendar-days")}</b><small>Ver todos os hor\xE1rios</small></button></div></section>`;
+}
 function passo1() {
-  const n = proximoLivre();
   if (!U.marcados) U.marcados = U.svc ? String(U.svc).split("+").filter((i) => servico(i)) : [];
   const mk = U.marcados, tot = servico(mk.join("+")) || { dur: 0, price: 0, name: "" };
-  return `${n && Store.ready ? `<button class="rapido" data-a="rapido"><span><small>Pr\xF3ximo hor\xE1rio livre</small><b class="num">${esc(dataCurta(n.k))}, ${hm(n.s)}</b><em>com ${esc(n.b.name)}</em></span>${I("arrow-right", "seta")}</button>` : ""}
- <h2 class="h-etapa">O que vai ser?</h2><p class="sub">Escolha um ou mais servi\xE7os. O tempo e o valor somam sozinhos.</p>
+  return `${horariosLivres()}
+ <h2 class="h-etapa" id="h-svc">${U.rapido ? "Agora, o servi\xE7o" : "O que vai ser?"}</h2><p class="sub">Escolha um ou mais servi\xE7os. O tempo e o valor somam sozinhos.</p>
  <div class="tabela">${C().services.map((s) => {
     const q = mk.filter((x) => x == s.id).length, on = q > 0;
     return `<div class="item multi ${on ? "on" : ""}"><button class="item-b" data-a="svc" data-v="${esc(s.id)}" aria-pressed="${on}"><span class="ln"><span class="ck" aria-hidden="true">${on ? I("check") : ""}</span><span class="nm">${esc(s.name)}</span><span class="dots"></span><span class="pr num">${brl(s.price)}</span></span><small>${esc(s.desc)} \xB7 ${dur(s.dur)}</small></button>${on ? `<div class="item-q"><span>Quantidade <small>(ex.: dois cortes, pai e filho)</small></span>${stepper(q, "svc-menos", "svc-mais", s.id, s.name)}</div>` : ""}</div>`;
@@ -1960,7 +2008,8 @@ function clube() {
   return `<section class="clube"><h2 class="h-etapa" style="font-size:32px">Clube ${esc(C().name)}</h2><p class="sub">Pague um valor fixo por m\xEAs e venha quantas vezes quiser.</p><div class="planos">${pl.map((p) => `<article class="plano"><b>${esc(p.name)}</b><span class="num"><strong>${brl(p.price)}</strong>/m\xEAs</span><small>${esc(p.desc || "")}${p.desc ? ". " : ""}Inclui: ${esc(nm(p.svcs))}.</small><a class="btn sec peq" href="${wa(C().whatsapp, `Oi! Quero assinar o ${p.name} (${brl(p.price)} por m\xEAs).`)}" target="_blank" rel="noopener">${I("message-circle")}Quero assinar</a></article>`).join("")}</div></section>`;
 }
 function passo2() {
-  const s = servico(U.svc);
+  const hp = U.horaPrimeiro && !U.svc;
+  const s = servico(U.svc) || { name: "", dur: C().step };
   const k = U.date;
   const dias = [...Array(14)].map((_, i) => soma(hoje(), i));
   const bar = [{ id: "any", name: "Qualquer um" }, ...ativos()].map((b) => `<button class="bb ${U.barber == b.id ? "on" : ""}" data-a="barber" data-v="${esc(b.id)}" aria-pressed="${U.barber == b.id}"><span class="av">${b.id == "any" ? I("users") : esc(b.name[0])}</span>${esc(b.name)}</button>`).join("");
@@ -1974,10 +2023,10 @@ function passo2() {
     }).join("")}</div>` : "";
   }).join("");
   const algum = lista.some((t) => livresEm(k, t, s.dur, U.barber).length);
-  return `${trilho()}<h2 class="h-etapa">Quando?</h2><p class="sub">${esc(s.name)} leva ${dur(s.dur)}.</p>
+  return `${trilho()}<h2 class="h-etapa">Quando?</h2><p class="sub">${hp ? "Escolha o dia e o hor\xE1rio. Depois voc\xEA escolhe o servi\xE7o." : `${esc(s.name)} leva ${dur(s.dur)}.`}</p>
  <p class="rotulo">Com quem</p><div class="barbeiros">${bar}</div>
  <p class="rotulo">Dia</p><div class="dias">${dias.map((d) => `<button class="dia ${d == k ? "on" : ""}" ${horario(d) ? "" : 'disabled title="Fechado"'} data-a="dia" data-v="${d}"><small>${d == hoje() ? "hoje" : semana(d)}</small><b class="num">${D(d).getDate()}</b></button>`).join("")}</div>
- ${!Store.ready ? '<p class="dica">Carregando a agenda\u2026</p>' : algum ? htm + '<p class="dica">Riscado est\xE1 ocupado.</p>' : `<div class="vazio" style="margin-top:16px"><h3>Sem vaga neste dia</h3><p>Todos os hor\xE1rios para ${esc(s.name.toLowerCase())} j\xE1 foram pedidos.</p><button class="btn" data-a="proxdia">Ver pr\xF3ximo dia com vaga</button></div>`}`;
+ ${!Store.ready ? '<p class="dica">Carregando a agenda\u2026</p>' : algum ? htm + '<p class="dica">Riscado est\xE1 ocupado.</p>' : `<div class="vazio" style="margin-top:16px"><h3>Sem vaga neste dia</h3><p>${hp ? "Todos os hor\xE1rios deste dia j\xE1 foram pedidos." : `Todos os hor\xE1rios para ${esc(s.name.toLowerCase())} j\xE1 foram pedidos.`}</p><button class="btn" data-a="proxdia">Ver pr\xF3ximo dia com vaga</button></div>`}`;
 }
 function comanda(o) {
   const b = o.b;
@@ -2566,7 +2615,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261125144346";
+const VERSAO = "20261127225012";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {
@@ -3055,7 +3104,7 @@ function vaPara(s) {
   R(true);
   scrollTo(0, 0);
 }
-const reinicia = () => Object.assign(U, { step: 1, svc: null, marcados: null, barber: BARB_LINK && C().barbers.some((b) => b.id == U.barber) ? U.barber : "any", time: null, rapido: null, obs: "", enviado: null, erros: {} });
+const reinicia = () => Object.assign(U, { step: 1, svc: null, marcados: null, barber: BARB_LINK && C().barbers.some((b) => b.id == U.barber) ? U.barber : "any", time: null, rapido: null, horaPrimeiro: false, obs: "", enviado: null, erros: {} });
 async function protege(f, msg) {
   try {
     return await f();
@@ -3515,15 +3564,51 @@ const ACOES = {
     }
     vaPara(1);
   },
-  rapido() {
-    const n = proximoLivre();
+  rapido(v) {
+    let n;
+    if (v) {
+      const [k, t, b] = String(v).split("|");
+      const bb = barbeiro(b);
+      if (!bb) return;
+      n = { k, s: +t, b: bb };
+    } else n = proximoLivre();
     if (!n) return;
     U.rapido = n;
     U.date = n.k;
     U.time = n.s;
     U.barber = n.b.id;
-    toast("Agora escolha o servi\xE7o para " + dataCurta(n.k) + ", " + hm(n.s));
-    vaPara(1);
+    U.horaPrimeiro = false;
+    R(true);
+    requestAnimationFrame(() => {
+      const c = document.querySelector(".hl-escolhido"), h = document.getElementById("h-svc");
+      if (c) c.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion:reduce)").matches ? "auto" : "smooth", block: "start" });
+      if (h) {
+        h.setAttribute("tabindex", "-1");
+        h.focus({ preventScroll: true });
+      }
+    });
+  },
+  "hr-todos"() {
+    U.horaPrimeiro = true;
+    U.svc = null;
+    U.time = null;
+    U.rapido = null;
+    if (!U.date || U.date < hoje() || !horario(U.date)) {
+      for (let i = 0; i < 21; i++) {
+        const k = soma(hoje(), i);
+        if (horario(k)) {
+          U.date = k;
+          break;
+        }
+      }
+    }
+    vaPara(2);
+  },
+  "hr-trocar"() {
+    U.rapido = null;
+    U.time = null;
+    if (!BARB_LINK) U.barber = "any";
+    R(true);
   },
   svc(v) {
     const m = U.marcados || (U.marcados = []);
@@ -3558,6 +3643,7 @@ const ACOES = {
       U.rapido = null;
       return vaPara(3);
     }
+    if (U.rapido) toast(`${hm(U.time)} n\xE3o tem tempo para ${dur(s.dur)}. Escolha outro hor\xE1rio.`);
     U.rapido = null;
     if (U.time != null && !livresEm(U.date, U.time, s.dur, U.barber).length) U.time = null;
     vaPara(2);
@@ -3574,10 +3660,17 @@ const ACOES = {
   },
   hora(v) {
     U.time = +v;
+    if (U.horaPrimeiro && !U.svc) {
+      const l = livresEm(U.date, +v, C().step, U.barber);
+      if (!l.length) return;
+      U.rapido = { k: U.date, s: +v, b: l[0] };
+      U.horaPrimeiro = false;
+      return vaPara(1);
+    }
     vaPara(3);
   },
   proxdia() {
-    const s = servico(U.svc);
+    const s = servico(U.svc) || { dur: C().step };
     for (let i = 1; i < 21; i++) {
       const k = soma(U.date, i);
       if (grade(k).some((t) => livresEm(k, t, s.dur, U.barber).length)) {

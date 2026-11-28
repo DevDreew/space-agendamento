@@ -1,5 +1,5 @@
 // DreewSolution · notificações no celular e funcionamento com internet fraca
-const CACHE = 'space-v8';
+const CACHE = 'space-v9';
 self.addEventListener('install', e => {
   self.skipWaiting();
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/index.html', '/manifest.webmanifest', '/icon-192.png'])).catch(() => {}));
