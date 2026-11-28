@@ -186,11 +186,12 @@ async function baixa() {
   const agora = new Date(Date.now() - 3 * 3600e3);
   const hoje = agora.toISOString().slice(0, 10);
   const min = agora.getUTCHours() * 60 + agora.getUTCMinutes();
-  const { data: rows } = await sb.from("bookings").select("id,shop_id,barber_id,day,start_min,dur,svc_name,client_name").eq("day", hoje).eq("status", "confirmado").eq("baixa_avisada", false).eq("is_example", false);
+  const { data: rows } = await sb.from("bookings").select("id,shop_id,barber_id,day,start_min,dur,svc_name,price,client_name").eq("day", hoje).eq("status", "confirmado").eq("baixa_avisada", false).eq("is_example", false);
   let avisos = 0;
   for (const r of rows || []) {
     if (r.start_min + (r.dur || 0) + 15 > min) continue;
     const shop = await loja(r.shop_id);
+    await zap(zapDoBarbeiro(shop, r.barber_id), `✂️ *Atendimento terminou · ${shop.name}*\n\n👤 Cliente: ${r.client_name}\n💈 Serviço: ${r.svc_name}${Number(r.price) ? " · " + brl(r.price) : ""}\n⏰ Hoje às ${hm(r.start_min)}\n🧔 Barbeiro: ${nomeBarbeiro(shop, r.barber_id)}\n\nO cliente veio? Marque Atendido ou Não veio aqui: ${SITE}/${shop.slug}/painel`);
     avisos += await enviar(await subsBarbeiro(shop.id), { title: `${String(r.client_name || "O cliente").split(" ")[0]} veio?`, body: `${r.svc_name} às ${hm(r.start_min)} com ${nomeBarbeiro(shop, r.barber_id)}. Toque para marcar Atendido ou Não veio.`, url: `/${shop.slug}/painel#hoje`, tag: "baixa-" + r.id });
     await sb.from("bookings").update({ baixa_avisada: true }).eq("id", r.id);
   }
