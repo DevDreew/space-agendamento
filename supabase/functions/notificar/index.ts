@@ -96,7 +96,7 @@ async function mudanca(tipo: string, r: any, old: any) {
   const quem = nomeBarbeiro(shop, r.barber_id);
   if (tipo === "INSERT" && r.status === "pendente") {
     const tel = String(r.client_phone || "").replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
-    const zapB = await zap(zapDoBarbeiro(shop, r.barber_id), `📌 *Novo agendamento · ${shop.name}*\n\n👤 Cliente: ${r.client_name}\n📱 WhatsApp: ${fone(r.client_phone)}\n${linhas(r, shop, quem)}${r.note ? `\n📝 Recado: ${r.note}` : ""}\n\n✅ Confirme no painel: ${SITE}/${shop.slug}/painel${linkZap(r.client_phone) ? `\n💬 Falar com o cliente: ${linkZap(r.client_phone)}` : ""}`);
+    const zapB = await zap(zapDoBarbeiro(shop, r.barber_id), `📌 *Novo agendamento · ${shop.name}*\n\n👤 Cliente: ${r.client_name}\n📱 WhatsApp: ${fone(r.client_phone)}\n${linhas(r, shop, quem)}${r.note ? `\n📝 Recado: ${r.note}` : ""}`);
     return { zap: zapB, barbeiro: await enviar(await subsBarbeiro(shop.id), { title: `Novo agendamento · ${r.client_name}`, body: `${r.svc_name} · ${q} com ${quem}${tel ? ` · ${tel}` : ""}. Toque para ver.`, url: linkPro, tag: "pedido-" + r.id }) };
   }
   if (tipo === "INSERT" && r.status === "confirmado" && r.client_phone) {
@@ -113,7 +113,7 @@ async function mudanca(tipo: string, r: any, old: any) {
   if (r.status === "recusado")
     res.cliente = await enviar(await subsCliente(r.manage_token), { title: `${shop.name} não conseguiu esse horário`, body: `${quem} não pode ${q}. Toque para escolher outro.`, url: `/${shop.slug}`, tag: "pedido-" + r.id });
   if (r.status === "cancelado" && old.status !== "cancelado" && r.cancelado_por === "cliente")
-    res.zap = await zap(zapDoBarbeiro(shop, r.barber_id), `❌ *Horário cancelado · ${shop.name}*\n\n👤 Cliente: ${r.client_name}\n📱 WhatsApp: ${fone(r.client_phone)}\n${linhas(r, shop, quem)}\n\nO horário já está livre na agenda.${linkZap(r.client_phone) ? `\n💬 Falar com o cliente: ${linkZap(r.client_phone)}` : ""}`);
+    res.zap = await zap(zapDoBarbeiro(shop, r.barber_id), `❌ *Horário cancelado · ${shop.name}*\n\n👤 Cliente: ${r.client_name}\n📱 WhatsApp: ${fone(r.client_phone)}\n${linhas(r, shop, quem)}\n\nO horário já está livre na agenda.`);
   if (r.status === "cancelado" && old.status !== "cancelado" && r.cancelado_por !== "cliente" && old.status !== "pendente")
     res.zapCli = await zapCliente(r.client_phone, `*${shop.name}*\n\nOlá, ${String(r.client_name || "").split(" ")[0]}! ${r.motivo ? r.motivo + ". " : ""}Seu horário de ${q} foi cancelado. Marque outro aqui: ${SITE}/${shop.slug}`);
   if (r.status === "cancelado" && r.cancelado_por === "cliente")
