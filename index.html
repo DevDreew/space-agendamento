@@ -746,6 +746,19 @@ input,select,textarea{font-size:16px}
 
 .h-etapa.h-ok{display:flex;align-items:center;gap:10px;color:#6fd394}
 .h-etapa.h-ok svg{width:.9em;height:.9em;flex:none}
+
+/* horários sem baixa */
+.bloco.baixa{border:1px solid #6b5a2c;border-radius:var(--r);padding:14px 16px;background:rgba(212,171,95,.06);margin:0 0 18px}
+.bloco.baixa h2{display:block}
+.bloco.baixa h2 svg{width:.8em;height:.8em;color:var(--ouro);vertical-align:-.05em;margin-right:8px}
+.bloco.baixa h2 small{display:block;margin-top:6px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--cinza);font-size:13px}
+.bx-l{display:flex;align-items:center;gap:10px 12px;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--linha)}
+.bx-l:first-child{border-top:0}
+.bx-i{flex:1 1 200px;min-width:0;display:grid;gap:2px}
+.bx-i b{font-size:15px;overflow-wrap:anywhere}
+.bx-i small{color:var(--cinza);font-size:13px}
+.bx-b{display:flex;gap:8px;flex:none}
+@media (max-width:480px){.bx-b{width:100%}.bx-b .btn{flex:1}}
 </style></head>
 <body><div id="app"></div><dialog id="dlg"></dialog><div id="toast" role="status" aria-live="polite"></div><div id="tip" role="tooltip" aria-hidden="true"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -2142,12 +2155,17 @@ function viewHoje() {
   const d = ant ? Math.round((vl - ant) / ant * 100) : null;
   const feitos = dia.filter((x) => x.st == "concluido").length, tot = dia.filter((x) => ["confirmado", "concluido"].includes(x.st)).length, ped = pendentes().filter(filtroB);
   const prox = dia.find((x) => x.st == "confirmado" && x.s + x.dur > n);
+  const semBaixa = todos().filter((x) => x.st == "confirmado" && !x.ex && filtroB(x) && x.d >= soma(k, -14) && (x.d < k || x.d == k && x.s + x.dur <= n)).sort((a, b) => (a.d + pad(a.s)).localeCompare(b.d + pad(b.s)));
+  const baixa = semBaixa.length ? `<section class="bloco baixa" aria-labelledby="bx-t"><h2 id="bx-t">${I("triangle-alert")}${semBaixa.length == 1 ? "1 hor\xE1rio sem baixa" : semBaixa.length + " hor\xE1rios sem baixa"} <small>Marque se o cliente veio, para o faturamento ficar certo.</small></h2><div class="fila">${semBaixa.map((x) => {
+    const v = esc(x.o + "|" + x.id);
+    return `<div class="bx-l"><div class="bx-i"><b>${x.d == k ? "Hoje" : esc(dataCurta(x.d))}, ${hm(x.s)} \xB7 ${esc(nomeCli(x))}</b><small>${esc(x.n)} \xB7 ${esc(barbeiro(x.b).name)} \xB7 ${brl(x.p)}</small></div><div class="bx-b"><button class="btn peq" data-a="st" data-v="${v}|concluido">${I("check")}Atendido</button><button class="btn sec peq" data-a="st" data-v="${v}|nao-veio">N\xE3o veio</button></div></div>`;
+  }).join("")}</div></section>` : "";
   const pedido = (x) => {
     const p = pii(x);
     return `<article class="pedido"><div class="qdo">${hm(x.s)}<small>${esc(dataCurta(x.d))}</small></div><p><b>${esc(p.name || "Cliente")}</b> <span>\xB7 ${esc(x.n)} \xB7 ${dur(x.dur)} \xB7 ${brl(x.p)} \xB7 ${esc(barbeiro(x.b).name)}</span></p>${p.phone ? `<p><a class="tel-zap" href="${wa(p.phone, `Oi, ${p.name}!`)}" target="_blank" rel="noopener">${I("message-circle")}${esc(fone(p.phone))}</a></p>` : ""}${p.note ? `<p><span>Recado: ${esc(p.note)}</span></p>` : ""}<div class="acoes"><button class="btn peq" data-a="aceitar" data-v="${esc(x.o + "|" + x.id)}">${I("check")}Aceitar</button><button class="btn sec peq" data-a="recusar" data-v="${esc(x.o + "|" + x.id)}">Recusar</button>${p.phone ? `<a class="btn sec peq" href="${wa(p.phone, `Oi, ${p.name}! Sobre seu pedido de ${x.n} ${dataCurta(x.d)} \xE0s ${hm(x.s)}:`)}" target="_blank" rel="noopener">${I("message-circle")}Chamar</a>` : ""}</div></article>`;
   };
   const linha = (x) => `<button class="linha ${x == prox ? "prox" : ""} ${x.s + x.dur < n && x.st != "confirmado" ? "pass" : ""}" data-a="detalhe" data-v="${esc(x.o + "|" + x.id)}"><b class="t">${hm(x.s)}</b><div><b>${esc(nomeCli(x))}</b><small>${esc(x.n)} \xB7 ${esc(barbeiro(x.b).name)} \xB7 ${brl(x.p)}</small></div>${x == prox ? '<span class="pill confirmado">Pr\xF3ximo</span>' : pill(x.st)}</button>`;
-  return shellPro(`<header class="topo-pro"><div><small>${esc(dataLonga(k))}</small><h1>Hoje</h1></div><button class="btn" data-a="manual">${I("plus")}Novo hor\xE1rio</button></header>${cartaoPush("barbeiro")}${fechado(k) && fechado(k).b == "todos" ? `<p class="leitura">Hoje a barbearia est\xE1 fechada: ${esc(fechado(k).motivo || "")}.</p>` : ""}${chipsB()}
+  return shellPro(`<header class="topo-pro"><div><small>${esc(dataLonga(k))}</small><h1>Hoje</h1></div><button class="btn" data-a="manual">${I("plus")}Novo hor\xE1rio</button></header>${cartaoPush("barbeiro")}${fechado(k) && fechado(k).b == "todos" ? `<p class="leitura">Hoje a barbearia est\xE1 fechada: ${esc(fechado(k).motivo || "")}.</p>` : ""}${chipsB()}${baixa}
  <section class="kpis" aria-label="Resumo do dia"><div class="kpi"><span>Previsto hoje</span><b>${brl(vl)}</b><em class="${d == null ? "" : d >= 0 ? "sobe" : "desce"}">${d == null ? "sem base da semana passada" : `${I(d >= 0 ? "trending-up" : "trending-down")}${d >= 0 ? "+" : ""}${d}% vs. ${semana(k)} passada`}</em></div>
  <div class="kpi"><span>Atendidos</span><b>${feitos} de ${tot}</b><em>${tot - feitos} para atender</em></div>
  <div class="kpi ${ped.length ? "alerta" : ""}"><span>Pedidos para responder</span><b>${ped.length}</b><em>${ped.length ? I("hourglass") + "cliente aguardando" : "tudo respondido"}</em></div></section>
@@ -2619,7 +2637,7 @@ async function checaPush() {
   }
   R();
 }
-const VERSAO = "20261127230531";
+const VERSAO = "20261127232440";
 function confereVersao() {
   if (!REAL || editando() || dlg() && dlg().open || U.step == 3) return;
   fetch("/versao.txt", { cache: "no-store" }).then((r) => r.ok ? r.text() : "").then((v) => {

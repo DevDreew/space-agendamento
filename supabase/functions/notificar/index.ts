@@ -181,13 +181,29 @@ async function lembretesHoje() {
   return { hoje: rows?.length || 0, clientes, barbeiros };
 }
 
+// 15 minutos depois do fim de cada horário confirmado de hoje: pergunta ao barbeiro se o cliente veio.
+async function baixa() {
+  const agora = new Date(Date.now() - 3 * 3600e3);
+  const hoje = agora.toISOString().slice(0, 10);
+  const min = agora.getUTCHours() * 60 + agora.getUTCMinutes();
+  const { data: rows } = await sb.from("bookings").select("id,shop_id,barber_id,day,start_min,dur,svc_name,client_name").eq("day", hoje).eq("status", "confirmado").eq("baixa_avisada", false).eq("is_example", false);
+  let avisos = 0;
+  for (const r of rows || []) {
+    if (r.start_min + (r.dur || 0) + 15 > min) continue;
+    const shop = await loja(r.shop_id);
+    avisos += await enviar(await subsBarbeiro(shop.id), { title: `${String(r.client_name || "O cliente").split(" ")[0]} veio?`, body: `${r.svc_name} às ${hm(r.start_min)} com ${nomeBarbeiro(shop, r.barber_id)}. Toque para marcar Atendido ou Não veio.`, url: `/${shop.slug}/painel#hoje`, tag: "baixa-" + r.id });
+    await sb.from("bookings").update({ baixa_avisada: true }).eq("id", r.id);
+  }
+  return { baixa: avisos };
+}
+
 Deno.serve(async (req) => {
   try {
     const s = await segredos();
     if (req.headers.get("x-space-secret") !== s.webhook) return new Response("nao autorizado", { status: 401 });
     const body = await req.json();
     if (body.type === "TESTE_ZAP") return Response.json({ ok: true, zap: await zap(body.phone, "✅ *DreewSolution*\n\nWhatsApp automático ligado. A partir de agora os agendamentos chegam sozinhos. 💈") });
-    const out = body.type === "LEMBRETES" ? await lembretes() : body.type === "LEMBRETES_HOJE" ? await lembretesHoje() : body.type === "ASSINATURA" ? await assinatura(body) : await mudanca(body.type, body.record, body.old);
+    const out = body.type === "BAIXA" ? await baixa() : body.type === "LEMBRETES" ? await lembretes() : body.type === "LEMBRETES_HOJE" ? await lembretesHoje() : body.type === "ASSINATURA" ? await assinatura(body) : await mudanca(body.type, body.record, body.old);
     return Response.json({ ok: true, ...out });
   } catch (e) {
     console.error(e);
