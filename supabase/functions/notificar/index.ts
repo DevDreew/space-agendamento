@@ -96,7 +96,7 @@ async function mudanca(tipo: string, r: any, old: any) {
   const quem = nomeBarbeiro(shop, r.barber_id);
   if (tipo === "INSERT" && r.status === "pendente") {
     const tel = String(r.client_phone || "").replace(/^(\d{2})(\d{5})(\d{4})$/, "($1) $2-$3");
-    const zapB = await zap(zapDoBarbeiro(shop, r.barber_id), `📌 *Novo agendamento · ${shop.name}*\n\n👤 Cliente: ${r.client_name}\n📱 WhatsApp: ${fone(r.client_phone)}\n${linhas(r, shop, quem)}${r.note ? `\n📝 Recado: ${r.note}` : ""}`);
+    const zapB = await zap(zapDoBarbeiro(shop, r.barber_id), `📌 *Novo agendamento · ${shop.name}*\n\n👤 Cliente: ${r.client_name}\n📱 WhatsApp: ${fone(r.client_phone)}\n${linhas(r, shop, quem)}${r.note ? `\n📝 Recado: ${r.note}` : ""}\n\n✅ Aceite ou recuse aqui: ${SITE}/${shop.slug}/painel`);
     return { zap: zapB, barbeiro: await enviar(await subsBarbeiro(shop.id), { title: `Novo agendamento · ${r.client_name}`, body: `${r.svc_name} · ${q} com ${quem}${tel ? ` · ${tel}` : ""}. Toque para ver.`, url: linkPro, tag: "pedido-" + r.id }) };
   }
   if (tipo === "INSERT" && r.status === "confirmado" && r.client_phone) {
